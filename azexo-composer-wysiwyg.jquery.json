@@ -1,7 +1,7 @@
 {
     "name": "azexo-composer-wysiwyg",
     "title": "jQuery Azexo Composer WYSIWYG",
-    "description": "jQuery plugin - Bootstrap, drag and drop, compile HTML and JS initialization code for third party JS libraries",
+    "description": "jQuery drag and drop HTML editor, compile Bootstrap based HTML and JS initialization code for third party JS libraries",
     "keywords": [
         "form",
         "animation",
