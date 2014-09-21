@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link type="text/css" rel="stylesheet" href="bootstrap/bootstrap.min.css">
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <script type="text/javascript" src="underscore-min.js"></script>
+        <script type="text/javascript" src="bootstrap/bootstrap.min.js"></script>
+
+        <script type="text/javascript" src="azexo_composer/jquery-waypoints/waypoints.min.js"></script>
+        <script type="text/javascript" src="azexo_composer/js/smoothscroll.js"></script>
+        <link type="text/css" rel="stylesheet" href="azexo_composer/azexo_composer.css">
+
+        <!-- vvv ONLY FOR BACKEND vvv -->
+        <script type="text/javascript">
+            window.azexo_prefix = '';
+            window.azexo_editor = true;
+            window.azexo_online = false;
+            $(function() {
+                $('#example').azexo_composer();
+            });
+        </script>        
+        <script type="text/javascript" src="jquery-ui.min.js"></script>
+        <script type="text/javascript" src="azexo_composer/azexo_param_types.min.js"></script>
+        <script type="text/javascript" src="azexo_composer/azexo_elements.min.js"></script>
+        <script type="text/javascript" src="azexo_composer/azexo_composer.min.js"></script>
+        <!-- ^^^ ONLY FOR BACKEND ^^^ -->
+        
+        <style>
+            body > .container > .az-container { margin-top : 34px; margin-bottom : 100px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <textarea id="example" rows="10" cols="45"></textarea>
+        </div>
+    </body>
+</html>
