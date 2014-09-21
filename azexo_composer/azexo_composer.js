@@ -5605,6 +5605,7 @@
         ].concat(ContainerElement.prototype.params),
         show_settings_on_create: true,
         is_container: true,
+        hidden: ! window.azexo_online,
         get_button: function() {
             return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
         },
