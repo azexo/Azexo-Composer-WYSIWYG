@@ -1,0 +1,37 @@
+{
+    "name": "azexo-composer-wysiwyg",
+    "title": "jQuery Azexo Composer WYSIWYG",
+    "description": "jQuery plugin - Bootstrap, drag and drop, compile HTML and JS initialization code for third party JS libraries",
+    "keywords": [
+        "from",
+        "animation",
+        "responsive",
+        "slider",
+        "scroll",
+        "ui",
+        "jquery"
+    ],
+    "version": "1.0.3",
+    "author": {
+        "name": "Andrey Soloduhin",
+        "email": "sandys133@gmail.com",
+        "url": "http://www.azexo.com"
+    },
+    "licenses": [
+        {
+            "type": "GPLv2",
+            "url": "http://www.example.com/licenses/gpl.html"
+        }
+    ],
+    "bugs": "https://github.com/azexo/Azexo-Composer-WYSIWYG/issues",
+    "homepage": "https://github.com/azexo/Azexo-Composer-WYSIWYG",
+    "docs": "https://github.com/azexo/Azexo-Composer-WYSIWYG",
+    "download": "https://github.com/azexo/Azexo-Composer-WYSIWYG",
+    "dependencies": {
+        "jquery": ">=1.10",
+        "jquery-ui": ">=1.10",
+        "underscore": ">=1.0",
+        "waypoints": ">=2.0.0",
+        "bootstrap": ">=3.0"
+    }
+}
