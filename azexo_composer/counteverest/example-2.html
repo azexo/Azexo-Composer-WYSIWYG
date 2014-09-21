@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+
+		<!-- Dont't forget to change the title! -->
+		<title>Example 2 - Count Everest jQuery Plugin</title>
+		
+		<!-- Load Google Fonts -->
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,600italic,600,400' rel='stylesheet' type='text/css'>
+		
+		<!-- Load stylesheets -->
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/main.css">
+	</head>
+	<body class="example--2">
+		
+		<!-- Nothing to change here -->
+		<div class="countdown clearfix">
+			<div class="info clearfix">
+				<div class="bar bar-days"><div class="fill"></div></div> 
+				<span class="ce-days"></span> <span class="ce-days-label"></span>
+
+				<div class="bar bar-hours"><div class="fill"></div></div> 
+				<span class="ce-hours"></span> <span class="ce-hours-label"></span>
+				
+				<div class="bar bar-minutes"><div class="fill"></div></div> 
+				<span class="ce-minutes"></span> <span class="ce-minutes-label"></span>
+				
+				<div class="bar bar-seconds"><div class="fill"></div></div> 
+				<span class="ce-seconds"></span> <span class="ce-seconds-label"></span>
+			</div>
+			<div class="text">
+				<strong>We'll be back soon!</strong>
+				<p>Thank you for your patience.</p>
+			</div>
+		</div>
+
+		<!-- Load all necessary JavaScript files -->
+		<script src="js/vendor/jquery-1.11.1.min.js"></script>
+		<script src="js/vendor/jquery.counteverest.min.js"></script>
+
+		<!-- Init Count Everest plugin -->
+		<script>
+			$(document).ready(function() {
+				var $example = $(".example--2"),
+					$ceDays = $example.find('.ce-days'),
+					$ceHours = $example.find('.ce-hours'),
+					$ceMinutes = $example.find('.ce-minutes'),
+					$ceSeconds = $example.find('.ce-seconds'),
+					$daysFill = $('.bar-days').find('.fill'),
+					$hoursFill = $('.bar-hours').find('.fill'),
+					$minutesFill = $('.bar-minutes').find('.fill'),
+					$secondsFill = $('.bar-seconds').find('.fill'),
+					now = new Date(),
+					then = new Date(now.getTime() + (14 * 24*60*60*1000));
+
+				$example.find(".countdown").countEverest({
+					//Set your target date here!
+					day: 31,
+					month: 12,
+					year: 2014,
+					onChange: function() {
+						setBar($daysFill, this.days, 365);
+						setBar($hoursFill, this.hours, 24);
+						setBar($minutesFill, this.minutes, 60);
+						setBar($secondsFill, this.seconds, 60);
+					}
+				});
+
+				function setBar($el, value, max) {
+					barWidth = 100 - (100/max * value);
+					$el.width( barWidth + '%' );
+				}	
+			});
+		</script>
+
+	</body>
+</html>
