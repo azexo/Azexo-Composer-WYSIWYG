@@ -5894,7 +5894,7 @@
                     javascript += "window.azexo_lang = '" + window.azexo_lang + "';\n";
                 if ('recaptcha_publickey' in window)
                     javascript += "window.recaptcha_publickey = '" + window.recaptcha_publickey + "';\n";
-                javascript += "var window.azexo_online = (window.location.protocol == 'http:' || window.location.protocol == 'https:');\n";
+                javascript += "window.azexo_online = (window.location.protocol == 'http:' || window.location.protocol == 'https:');\n";
                 javascript += "var " + azexo_elements_name + " = new " + AZEXOElements.name + "();\n";
                 javascript += "var " + scroll_magic_name + " = null;\n";
                 javascript += "window.azexo_editor = false;\n";
