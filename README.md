@@ -9,7 +9,7 @@ Demo: http://azexo.com/azexo_composer/
 
 ### List of features
 * Integrated front end content slider visual builder
-* Integrated front end form visual builder
+* Integrated front end grid visual builder
 * Every element can be animated via CSS3 engine (on appear, on hover, on click)
 * Every element can be animated via JS scroll animations engine (with easy to understand visual builder + parallax wizard to make parallax effect by few clicks)
 * Every element have base CSS settings editor
