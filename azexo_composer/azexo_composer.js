@@ -1821,7 +1821,7 @@
                     title = t('Content');
                 menu += '<li><a href="#az-elements-tab-' + i + '" data-toggle="tab">' + title + '</a></li>';
             }
-            if(window.azexo_online)
+            if (window.azexo_online)
                 menu += '<li><a href="#az-elements-tab-templates" data-toggle="tab">' + t("Saved templates") + '</a></li>';
             menu += '</ul>';
             $(elements_tabs).append(menu);
@@ -1835,7 +1835,7 @@
                 }
                 $(tabs_content).append(tab);
             }
-            if(window.azexo_online)
+            if (window.azexo_online)
                 tab = $('<div id="az-elements-tab-templates" class="' + p + 'tab-pane ' + p + 'clearfix"></div>');
             $(tabs_content).append(tab);
             $(elements_tabs).append(tabs_content);
@@ -1878,42 +1878,42 @@
                     alert(t('Element can not be added. Max nested depth reached.'));
                 }
             });
-            if(window.azexo_online)
+            if (window.azexo_online)
                 $(elements_tabs).find('a[href="#az-elements-tab-templates"]').on('shown.' + fp + 'bs.tab', function(e) {
-                //e.target
-                azexo_get_templates(function(templates) {
-                    var tab_templates = $(elements_tabs).find('#az-elements-tab-templates');
-                    $(tab_templates).empty();
-                    for (var i = 0; i < templates.length; i++) {
-                        var name = templates[i];
-                        var button = '<div class="' + p + 'well ' + p + 'text-center ' + p + 'pull-left ' + p + 'text-overflow" data-az-template="' + name + '"><i class="' + p + 'text-primary fa fa-cubes"></i><h4>' + name + '</h4></div>';
-                        button = $(button).appendTo(tab_templates).click(function() {
-                            var key = $(this).attr('data-az-template');
-                            azexo_load_template(key, function(shortcode) {
-                                var length = container.children.length;
-                                BaseElement.prototype.parse_shortcode.call(container, shortcode);
-                                for (var i = length; i < container.children.length; i++) {
-                                    container.children[i].recursive_render();
-                                }
-                                for (var i = length; i < container.children.length; i++) {
-                                    $(container.dom_content_element).append(container.children[i].dom_element);
-                                }
-                                if (window.azexo_editor) {
-                                    container.update_empty();
-                                    container.update_sortable();
-                                }
-                                container.recursive_showed();
-                                $('#az-elements-modal')[fp + 'modal']("hide");
+                    //e.target
+                    azexo_get_templates(function(templates) {
+                        var tab_templates = $(elements_tabs).find('#az-elements-tab-templates');
+                        $(tab_templates).empty();
+                        for (var i = 0; i < templates.length; i++) {
+                            var name = templates[i];
+                            var button = '<div class="' + p + 'well ' + p + 'text-center ' + p + 'pull-left ' + p + 'text-overflow" data-az-template="' + name + '"><i class="' + p + 'text-primary fa fa-cubes"></i><h4>' + name + '</h4></div>';
+                            button = $(button).appendTo(tab_templates).click(function() {
+                                var key = $(this).attr('data-az-template');
+                                azexo_load_template(key, function(shortcode) {
+                                    var length = container.children.length;
+                                    BaseElement.prototype.parse_shortcode.call(container, shortcode);
+                                    for (var i = length; i < container.children.length; i++) {
+                                        container.children[i].recursive_render();
+                                    }
+                                    for (var i = length; i < container.children.length; i++) {
+                                        $(container.dom_content_element).append(container.children[i].dom_element);
+                                    }
+                                    if (window.azexo_editor) {
+                                        container.update_empty();
+                                        container.update_sortable();
+                                    }
+                                    container.recursive_showed();
+                                    $('#az-elements-modal')[fp + 'modal']("hide");
+                                });
                             });
-                        });
-                        $('<span class="fa fa-trash-o" data-az-template="' + name + '"></span>').appendTo(button).click(function() {
-                            var name = $(this).attr('data-az-template');
-                            azexo_delete_template(name);
-                            $(tab_templates).find('[data-az-template="' + name + '"]').remove();
-                        });
-                    }
+                            $('<span class="fa fa-trash-o" data-az-template="' + name + '"></span>').appendTo(button).click(function() {
+                                var name = $(this).attr('data-az-template');
+                                azexo_delete_template(name);
+                                $(tab_templates).find('[data-az-template="' + name + '"]').remove();
+                            });
+                        }
+                    });
                 });
-            });
         },
         show: function(container, pre_render_callback) {
             $('#az-elements-modal').remove();
@@ -2567,11 +2567,11 @@
                 var child = new constructor(column, false);
                 child.attrs['content'] = $(dom_element).html();
                 child.update_dom();
-                if('update_empty' in element)
+                if ('update_empty' in element)
                     element.update_empty();
-                if('update_empty' in column)
+                if ('update_empty' in column)
                     column.update_empty();
-                if('update_empty' in row)
+                if ('update_empty' in row)
                     row.update_empty();
             } else {
                 $(dom_element).children().closest_descendents('[data-azb]').each(function() {
@@ -2827,10 +2827,10 @@
             if ($('script[src*="azexo_composer.min.js"]').length > 0) {
                 var azexo_composer_src = $('script[src*="azexo_composer.min.js"]').attr('src');
                 window.azexo_baseurl = azexo_composer_src.slice(0, azexo_composer_src.indexOf('azexo_composer.min.js'));
-            }            
+            }
         }
     }
-    if(!('azexo_online' in window))
+    if (!('azexo_online' in window))
         window.azexo_online = (window.location.protocol == 'http:' || window.location.protocol == 'https:');
     azexo_elements = new AZEXOElements();
     if (!('azexo_editor' in window))
@@ -2871,7 +2871,7 @@
     }
     function try_login() {
         if (!('ajaxurl' in window))
-            if(!window.azexo_editor || window.azexo_online)
+            if (!window.azexo_editor || window.azexo_online)
                 delete window.azexo_editor;
         azexo_login(function(data) {
             window.azexo_editor = data;
@@ -3029,12 +3029,12 @@
                             container_dom = $('<div class="az-element az-container" data-az-type="textarea" data-az-name="' + Math.random().toString(36).substr(2) + '"></div>').insertAfter(textarea);
                             container_dom.append($(dom).html());
                         }
-                        
+
                         window.azexo_title['Save container'] = t('Generate HTML and JS for all elements which placed in current container element.');
                         var container = connect_container(container_dom);
 
                         $(textarea).data('azexo_composer', container);
-                        
+
                         container.save_container = function() {
                             azexo_add_js({
                                 path: 'js/json2.min.js',
@@ -5605,7 +5605,7 @@
         ].concat(ContainerElement.prototype.params),
         show_settings_on_create: true,
         is_container: true,
-        hidden: ! window.azexo_online,
+        hidden: !window.azexo_online,
         get_button: function() {
             return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
         },
@@ -5777,18 +5777,18 @@
             function check_dinamic(element) {
                 if (element.constructor.prototype.hasOwnProperty('showed')) {
                     var exception = false;
-                    if('is_cms_element' in element)
+                    if ('is_cms_element' in element)
                         exception = true;
-                    switch (element.base) {                        
+                    switch (element.base) {
                         case 'az_container':
-                            if(element.parent == null)
+                            if (element.parent == null)
                                 exception = true;
                             break;
                         case 'az_image':
-                            if (element.attrs['img_link_large'] != 'yes' 
-                                && element.attrs['adipoli_start'] == 'none'
-                                && element.attrs['adipoli_hover'] == 'none'
-                                && element.attrs['splits'] != 'yes')
+                            if (element.attrs['img_link_large'] != 'yes'
+                                    && element.attrs['adipoli_start'] == 'none'
+                                    && element.attrs['adipoli_hover'] == 'none'
+                                    && element.attrs['splits'] != 'yes')
                                 exception = true;
                             break;
                         case 'az_row':
@@ -5798,7 +5798,7 @@
                         default:
                             break;
                     }
-                    if(!exception)
+                    if (!exception)
                         return true;
                 }
                 for (var i = 0; i < element.children.length; i++) {
@@ -5810,7 +5810,7 @@
             }
             function get_hover_styles(element) {
                 var hover_styles = '';
-                if(element.attrs['hover_style'] != '')
+                if (element.attrs['hover_style'] != '')
                     hover_styles = "<style>.hover-style-" + element.id + ":hover { " + element.attrs['hover_style'] + " } </style>";
                 for (var i = 0; i < element.children.length; i++) {
                     hover_styles = hover_styles + get_hover_styles(element.children[i]);
@@ -5871,7 +5871,7 @@
                 javascript += get_class_method_js(BaseElement, 'showed', true);
                 javascript += get_class_method_js(BaseElement, 'render', true);
                 javascript += get_class_method_js(BaseElement, 'recursive_render', true);
-                javascript += get_class_method_js(BaseElement, 'replace_render', true);                
+                javascript += get_class_method_js(BaseElement, 'replace_render', true);
                 javascript += get_class_method_js(BaseElement, 'update_dom', true);
                 javascript += get_class_method_js(BaseElement, 'attach_children', true);
                 javascript += get_class_method_js(BaseElement, 'detach_children', true);
@@ -6021,7 +6021,7 @@
                     javascript += FormElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + FormElement.prototype.base + "', true, " + FormElement.name + ");\n";
                     javascript += get_class_method_js(FormElement, 'showed', true);
-                    javascript += azexo_get_recaptcha_publickey.toString() + "\n";                    
+                    javascript += azexo_get_recaptcha_publickey.toString() + "\n";
                 }
 
                 if ('azexo_elements' in window) {
@@ -6095,9 +6095,9 @@
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
             $(dom).find('.az-element.az-container > .az-ctnr').empty();
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
-            
+
             var javascript = '';
-            if(check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes)
+            if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes)
                 javascript = "<script type=\"text/javascript\">\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
             return get_css(element) + get_hover_styles(element) + get_js(element) + javascript + $(dom).html();
         },
@@ -6694,11 +6694,12 @@
 //
 //
     function create_template_elements() {
-        azexo_get_elements(function(elements) {
-            if (_.isObject(elements)) {
-                azexo_elements.create_template_elements(elements);
-            }
-        });
+        if (!window.azexo_editor || window.azexo_online)
+            azexo_get_elements(function(elements) {
+                if (_.isObject(elements)) {
+                    azexo_elements.create_template_elements(elements);
+                }
+            });
     }
     create_template_elements();
     function create_cms_elements() {
