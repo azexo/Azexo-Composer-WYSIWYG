@@ -2110,7 +2110,8 @@
                 $('<button title="' + title("Copy") + '" type="button" class="control copy ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-briefcase"> </button>').appendTo(this.controls).click({object: this}, this.click_copy);
                 $('<button title="' + title("Clone") + '" type="button" class="control clone ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-repeat"> </button>').appendTo(this.controls).click({object: this}, this.click_clone);
                 $('<button title="' + title("Remove") + '" type="button" class="control remove ' + p + 'btn ' + p + 'btn-danger ' + p + 'glyphicon ' + p + 'glyphicon-remove"> </button>').appendTo(this.controls).click({object: this}, this.click_remove);
-                $('<button title="' + title('Save as template') + '" type="button" class="control save-template ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-floppy-save"> </button>').appendTo(this.controls).click({object: this}, this.click_save_template);
+                if (window.azexo_online)
+                    $('<button title="' + title('Save as template') + '" type="button" class="control save-template ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-floppy-save"> </button>').appendTo(this.controls).click({object: this}, this.click_save_template);
                 this.update_empty();
 
                 var element = this;
@@ -6421,6 +6422,7 @@
             }),
         ].concat(FormElement.prototype.params),
         is_container: true,
+        hidden: !window.azexo_online,
         show_settings_on_create: true,
         get_button: function() {
             return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><p>' + this.name + '</p><p class="' + p + 'text-muted ' + p + 'small">' + this.description + '</p></div>';
