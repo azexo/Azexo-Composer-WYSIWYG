@@ -5,15 +5,15 @@ jQuery drag and drop HTML editor, compile Bootstrap based HTML and JS initializa
 
 Demo: http://azexo.com/azexo_composer/
 
-*How to use in example.html*
+**How to use in example.html**
 
 ### List of features
-*Integrated front end content slider visual builder
-*Integrated front end form visual builder
-*Every element can be animated via CSS3 engine (on appear, on hover, on click)
-*Every element can be animated via JS scroll animations engine (with easy to understand visual builder + parallax wizard to make parallax effect by few clicks)
-*Every element have base CSS settings editor
-*If you have JS skills you can create (via very easy API) any number of your custom elements which will be integrated into Azexo Composer page builder and will support all features listed above
+* Integrated front end content slider visual builder
+* Integrated front end form visual builder
+* Every element can be animated via CSS3 engine (on appear, on hover, on click)
+* Every element can be animated via JS scroll animations engine (with easy to understand visual builder + parallax wizard to make parallax effect by few clicks)
+* Every element have base CSS settings editor
+* If you have JS skills you can create (via very easy API) any number of your custom elements which will be integrated into Azexo Composer page builder and will support all features listed above
 
 
 ### List of elements
