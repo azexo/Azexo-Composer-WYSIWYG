@@ -7,6 +7,15 @@ Demo: http://azexo.com/azexo_composer/
 
 How to use in example.html
 
+<h3>List of features</h3>
+<ul>
+<li>Integrated front end content slider visual builder</li>
+<li>Integrated front end form visual builder</li>
+<li>Every element can be animated via CSS3 engine (on appear, on hover, on click)</li>
+<li>Every element can be animated via JS scroll animations engine (with easy to understand visual builder + parallax wizard to make parallax effect by few clicks)</li>
+<li>Every element have base CSS settings editor</li>
+<li>If you have JS skills you can create (via very easy API) any number of your custom elements which will be integrated into Azexo Composer page builder and will support all features listed above</li>
+</ul>
 
 <h3>List of elements</h3>
 <ul>
