@@ -1,7 +1,7 @@
 Azexo-Composer-WYSIWYG
 ======================
 
-jQuery drag and drop HTML editor - compile Bootstrap based HTML and JS. Editor extract required JS code (about 0% - 20% from original) from itself and provide it with resulting HTML to allow initialization a third party JS libraries on frontend. 
+jQuery drag and drop HTML editor - compile Bootstrap based HTML and JS. Editor extract required JS code (about 0% - 15% from original) from itself and provide it with resulting HTML to allow initialization a third party JS libraries on frontend. 
 
 Demo: http://azexo.com/azexo_composer/
 
