@@ -18,7 +18,7 @@ Demo: http://azexo.com/azexo_composer/
 
 ### List of elements
 * Row - Split content into columns (can have fixed image, parallax image or video as background)
-* Tabs - Bootstrap Tabbed content
+* Tabs - Bootstrap tabbed content
 * Accordion - Bootstrap accordion
 * Carousel - Content carousel (OWL carousel)
 * Layers - Free relative positioning contained elements
