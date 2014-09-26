@@ -256,10 +256,10 @@
                         }});
                 }
                 var adipoli = {};
-                if (element.attrs['adipoli_start'] != 'none') {
+                if (element.attrs['adipoli_start'] != '' && element.attrs['adipoli_start'] != 'none') {
                     adipoli['startEffect'] = element.attrs['adipoli_start'];
                 }
-                if (element.attrs['adipoli_hover'] != 'none') {
+                if (element.attrs['adipoli_hover'] != '' && element.attrs['adipoli_hover'] != 'none') {
                     adipoli['hoverEffect'] = element.attrs['adipoli_hover'];
                 }
                 if (Object.keys(adipoli).length > 0) {
