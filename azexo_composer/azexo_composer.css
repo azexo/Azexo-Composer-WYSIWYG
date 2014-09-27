@@ -19,7 +19,7 @@ div.azexo.az-container > .controls {
     transform: none;
 }
 
-.az-element > .controls {
+.az-element > .controls, .az-presentation > div > .controls, .az-presentation > div > div > .controls {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -36,16 +36,18 @@ div.azexo.az-container > .controls {
 }
 
 .azexo-editor div.az-container,
-.azexo-editor div.az-row,
-.azexo-editor div.az-column, 
+/*.azexo-editor div.az-row,
 .azexo-editor div.az-grid,
-.azexo-editor li.az-item, 
 .azexo-editor div.az-tabs, 
 .azexo-editor div.az-accordion, 
 .azexo-editor div.az-carousel,
+.azexo-editor div.az-presentation,*/
+.azexo-editor div.az-column, 
+.azexo-editor li.az-item, 
 .azexo-editor div.az-tab, 
 .azexo-editor div.az-toggle, 
 .azexo-editor div.az-slide, 
+.azexo-editor div.az-step, 
 .azexo-editor div.az-panel, 
 .azexo-editor div.az-jumbotron , 
 .azexo-editor div.az-layers, 
@@ -55,15 +57,17 @@ div.azexo.az-container > .controls {
 }
 div.az-container > .controls,
 div.az-row > .controls,
-div.az-column > .controls, 
 div.az-grid > .controls,
-li.az-item > .controls, 
 div.az-tabs > .controls, 
 div.az-accordion > .controls, 
 div.az-carousel > .controls,
+div.az-presentation > .controls,
+div.az-column > .controls, 
+li.az-item > .controls, 
 div.az-tab > .controls, 
 div.az-toggle > .controls, 
 div.az-slide > .controls, 
+div.az-step > .controls, 
 div.az-panel > .controls, 
 div.az-jumbotron > .controls, 
 div.az-layers > .controls, 
@@ -91,7 +95,9 @@ div.azexo-editor div.az-accordion.az-element:before {
     visibility: hidden;
 }
 
-.azexo-editor .az-element:hover > .controls, .azexo-editor .az-element.form-group:hover > .controls, .azexo-editor .az-element > .controls:hover, .azexo-editor .az-row:hover > .az-column > .controls {
+.azexo-editor .az-element:hover > .controls,
+.azexo-editor .az-element.form-group:hover > .controls,
+.azexo-editor .az-element > .controls:hover {
     display: block;
 }
 div.az-container:hover > .controls {
@@ -297,6 +303,11 @@ div.controls > .control {
     max-width: 500px;
     min-width: 340px;
 }
+
+.az-row > .controls >  .popover.right, .az-row > .controls >  .ax-popover.ax-right {
+    margin-left: 0px;
+}
+
 
 .az-form > .controls >  .popover, .az-form > .controls >  .ax-popover {
     min-width: 225px;
