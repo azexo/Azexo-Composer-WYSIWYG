@@ -131,7 +131,7 @@ div.controls > .control {
     position: relative;
     margin: auto;
 }
-.azexo-editor div.az-layers:hover > .az-ctnr:after, .azexo-editor .az-layers:hover > .az-ctnr > .az-element:after {
+.azexo-editor div.az-layers:hover > .az-ctnr:after, .azexo-editor .az-layers:hover > .az-ctnr > .az-element:after, .azexo-editor .az-presentation:hover .az-step:after {
     content: '.';
     margin: 0;
     padding: 0;
@@ -596,7 +596,7 @@ div.modal-dialog, div.ax-modal-dialog {
     font-family: FontAwesome;
 }
 
-.az-presentation .pagination {
+.az-presentation .pagination, .az-presentation .ax-pagination {
     position: absolute;
     left: 50%;
     bottom: 0%;
