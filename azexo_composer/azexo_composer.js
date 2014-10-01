@@ -2182,15 +2182,15 @@
                 if (element.show_parent_controls) {
                     _.defer(function() {
                         function update_controls(element) {
-                            if ($(element.parent.controls).find('.btn:not(span)').css('display') == 'none') {
-                                $(element.controls).find('.btn:not(span)').css('display', 'inline-block');
+                            if ($(element.parent.controls).find('.' + p + 'btn:not(span)').css('display') == 'none') {
+                                $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             } else {
-                                $(element.controls).find('.btn:not(span)').css('display', 'none');
+                                $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             }
-                            if ($(element.controls).find('.btn:not(span)').css('display') == 'none') {
-                                $(element.parent.controls).find('.btn:not(span)').css('display', 'inline-block');
+                            if ($(element.controls).find('.' + p + 'btn:not(span)').css('display') == 'none') {
+                                $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             } else {
-                                $(element.parent.controls).find('.btn:not(span)').css('display', 'none');
+                                $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             }
                             $(element.parent.controls).attr('data-az-cid', $(element.dom_element).attr('data-az-id'));
                             var offset = $(element.dom_element).offset();
@@ -2233,14 +2233,14 @@
                             }
                         }, 100);
                         $(element.controls).find('span').off('click').on('click', function() {
-                            $(element.controls).find('.btn:not(span)').css('display', 'inline-block');
-                            $(element.parent.controls).find('.btn:not(span)').css('display', 'none');
+                            $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
+                            $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             update_controls(element);
                         });
                         $(element.parent.controls).find('span').off('click').on('click', function() {
                             var element = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
-                            $(element.parent.controls).find('.btn:not(span)').css('display', 'inline-block');
-                            $(element.controls).find('.btn:not(span)').css('display', 'none');
+                            $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
+                            $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             update_controls(element);
                         });
                         $(element.controls).find('span').trigger('click');
@@ -5858,15 +5858,15 @@
                             }
                         }
                     }, false);
-                    $(element.dom_element).find('> .pagination > li > .prev').click(function() {
+                    $(element.dom_element).find('> .' + p + 'pagination > li > .' + p + 'prev').click(function() {
                         element.impress.prev();
                         return false;
                     });
-                    $(element.dom_element).find('> .pagination > li > .next').click(function() {
+                    $(element.dom_element).find('> .' + p + 'pagination > li > .' + p + 'next').click(function() {
                         element.impress.next();
                         return false;
                     });
-                    $(element.dom_element).find('> .pagination > li > .goto').click(function() {
+                    $(element.dom_element).find('> .' + p + 'pagination > li > .goto').click(function() {
                         element.impress.goto($(this).attr('data-step'));
                         return false;
                     });
@@ -5890,12 +5890,12 @@
             $(this.dom_content_element).attr('data-transition-duration', this.attrs['duration']);
 
             if (_.indexOf(this.attrs['options'].split(','), 'navigation') >= 0) {
-                var pagination = $('<ul class="pagination"></ul>').appendTo(this.dom_element);
-                $('<li><a href="#" class="prev">&laquo;</a></li>').appendTo(pagination);
+                var pagination = $('<ul class="' + p + 'pagination"></ul>').appendTo(this.dom_element);
+                $('<li><a href="#" class="' + p + 'prev">&laquo;</a></li>').appendTo(pagination);
                 for (var i = 1; i <= this.children.length; i++) {
                     $('<li><a href="#" class="goto" data-step="' + this.children[i - 1].id + '">' + i.toString() + '</a></li>').appendTo(pagination);
                 }
-                $('<li><a href="#" class="prev">&raquo;</a></li>').appendTo(pagination);
+                $('<li><a href="#" class="' + p + 'next">&raquo;</a></li>').appendTo(pagination);
             }
 
             PresentationElement.baseclass.prototype.render.apply(this, arguments);
