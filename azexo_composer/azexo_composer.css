@@ -19,6 +19,11 @@ div.azexo.az-container > .controls {
     transform: none;
 }
 
+.az-step.step:not(.active) > .controls{
+    top: 0px !important;
+    left: 0px !important;
+    display:none !important;
+}
 .az-element > .controls, .az-presentation > div > .controls, .az-presentation > div > div > .controls {
     position: absolute;
     left: 50%;
@@ -589,4 +594,23 @@ div.modal-dialog, div.ax-modal-dialog {
 
 .azexo button.fa {
     font-family: FontAwesome;
+}
+
+.az-presentation .pagination {
+    position: absolute;
+    left: 50%;
+    bottom: 0%;
+    z-index: 100;
+    -moz-transform: translate(-50%, 0%);
+    -o-transform: translate(-50%, 0%);
+    -webkit-transform: translate(-50%, 0%);
+    -ms-transform: translate(-50%, 0%);
+    transform: translate(-50%, 0%);    
+}
+
+.az-step.step.active {
+    z-index: 1;
+}
+.az-step.step:not(.active) {
+    z-index: 0;
 }

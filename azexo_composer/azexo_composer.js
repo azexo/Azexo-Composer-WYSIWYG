@@ -2336,19 +2336,19 @@
             this.showed($, p, fp);
         },
         showed: function($, p, fp) {
-            if ('pos_left' in this.attrs)
+            if ('pos_left' in this.attrs && this.attrs['pos_left'] != '')
                 $(this.dom_element).css("left", this.attrs['pos_left']);
-            if ('pos_right' in this.attrs)
+            if ('pos_right' in this.attrs && this.attrs['pos_right'] != '')
                 $(this.dom_element).css("right", this.attrs['pos_right']);
-            if ('pos_top' in this.attrs)
+            if ('pos_top' in this.attrs && this.attrs['pos_top'] != '')
                 $(this.dom_element).css("top", this.attrs['pos_top']);
-            if ('pos_bottom' in this.attrs)
+            if ('pos_bottom' in this.attrs && this.attrs['pos_bottom'] != '')
                 $(this.dom_element).css("bottom", this.attrs['pos_bottom']);
-            if ('pos_width' in this.attrs)
+            if ('pos_width' in this.attrs && this.attrs['pos_width'] != '')
                 $(this.dom_element).css("width", this.attrs['pos_width']);
-            if ('pos_height' in this.attrs)
+            if ('pos_height' in this.attrs && this.attrs['pos_height'] != '')
                 $(this.dom_element).css("height", this.attrs['pos_height']);
-            if ('pos_zindex' in this.attrs)
+            if ('pos_zindex' in this.attrs && this.attrs['pos_zindex'] != '')
                 $(this.dom_element).css("z-index", this.attrs['pos_zindex']);
             if ('hover_style' in this.attrs && this.attrs['hover_style'] != '') {
                 $('head').append("<style>.hover-style-" + this.id + ":hover { " + this.attrs['hover_style'] + " } </style>");
@@ -3477,17 +3477,20 @@
         },
         end_animation: function() {
             this.in_timeout = 0;
-            this.out_timeout = 0;
+            this.out_timeout = 0;            
             if ($(this.dom_element).hasClass(this.attrs['an_in'])) {
+                this.clear_animation();
                 if (this.attrs['an_start'] == 'hover' && !this.hover) {
-                    this.start_out_animation();
+                    if(this.attrs['an_in'] != this.attrs['an_out'])
+                        this.start_out_animation();
                 }
             }
             if ($(this.dom_element).hasClass(this.attrs['an_out'])) {
-                if (this.attrs['an_start'] == 'hover' && this.hover) {
-                    this.start_in_animation();
-                }
                 this.clear_animation();
+                if (this.attrs['an_start'] == 'hover' && this.hover) {
+                    if(this.attrs['an_in'] != this.attrs['an_out'])
+                        this.start_in_animation();
+                }
             }
         },
         trigger_start_in_animation: function() {
@@ -5045,17 +5048,21 @@
                     el.attrs['pos_top'] = parseInt($(dom_element).css("top")) / ($(element.dom_element).height() / 100) + "%";
                     el.attrs['pos_width'] = parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%";
                     el.attrs['pos_height'] = parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%";
+                    to_percents(dom_element);
                     azexo_elements.raiseEvent("update_element", id);
+                }
+                function to_percents(dom_element) {
+                    $(dom_element).css("left", parseInt($(dom_element).css("left")) / ($(element.dom_element).width() / 100) + "%");
+                    $(dom_element).css("top", parseInt($(dom_element).css("top")) / ($(element.dom_element).height() / 100) + "%");
+                    $(dom_element).css("width", parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%");
+                    $(dom_element).css("height", parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%");                    
                 }
                 $(this.dom_content_element).resizable({
 //                    containment: "parent",
                     start: function(event, ui) {
                         for (var i = 0; i < element.children.length; i++) {
                             var dom_element = element.children[i].dom_element;
-                            $(dom_element).css("left", parseInt($(dom_element).css("left")) / ($(element.dom_element).width() / 100) + "%");
-                            $(dom_element).css("top", parseInt($(dom_element).css("top")) / ($(element.dom_element).height() / 100) + "%");
-                            $(dom_element).css("width", parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%");
-                            $(dom_element).css("height", parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%");
+                            to_percents(dom_element);
                         }
                     },
                     stop: function(event, ui) {
@@ -5662,9 +5669,26 @@
     mixin(PresentationElement.prototype, {
         name: t('Presentation'),
         icon: 'fa fa-file-powerpoint-o',
-        description: t('Content 3D-presentation. Every step of presentation can contain any number of any types of elements.'),
+        description: t('Content presentation. Every step of presentation can contain any number of any types of elements.'),
         category: t('Layout'),
         params: [
+            make_param_type({
+                type: 'integer_slider',
+                heading: t('Height'),
+                param_name: 'height',
+                min: '0',
+                max: '2000',
+                value: '900',
+            }),
+            make_param_type({
+                type: 'checkbox',
+                heading: t('Options'),
+                param_name: 'options',
+                value: {
+                    'navigation': t("Navigation"),
+                    'auto_play': t("Auto play"),
+                },
+            }),
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Perspective'),
@@ -5693,6 +5717,25 @@
                 $(this.controls).find('.paste').remove();
                 var element = this;
                 $('<button title="' + title("Add step") + '" class="control add-toggle ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-plus-sign" > </button>').appendTo(this.controls).click({object: this}, this.click_add_step);
+//                $('<button title="' + title("Overview") + '" class="control overview ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-fullscreen" > </button>').appendTo(this.controls).click({object: this}, function(){
+//                    if('impress' in element) {
+//                        element.impress.goto('overview');
+//                    }
+//                });
+            }
+        },
+        update_sortable: function() {
+            if (window.azexo_editor) {
+                var element = this;
+//                $(this.dom_element).resizable({
+//                    handles: 's',
+//                    stop: function(event, ui) {
+//                        element.attrs['height'] = $(element.dom_element).height();
+//                        element.update_dom();
+//                        element.impress = window.impress(element.id);
+//                        element.impress.init();
+//                    }
+//                });
             }
         },
         click_add_step: function(e) {
@@ -5702,7 +5745,34 @@
         add_step: function() {
             var child = new StepElement(this, true);
             child.update_dom();
+//            if (('impress' in this) && (this.children.length > 1)) {
+//                this.impress.newStep(child.dom_element.get(0));
+//            } else {
+//                this.update_dom();
+//            }
             this.update_dom();
+        },
+        attach_children: function() {
+            if (('impress' in this) && ($(this.dom_content_element).find('> div').length > 0)) {
+                for (var i = 0; i < this.children.length; i++) {
+                    $(this.dom_content_element).find('> div').append(this.children[i].dom_element);
+                }
+            } else {
+                PresentationElement.baseclass.prototype.attach_children.apply(this, arguments);
+            }
+        },
+        edited: function() {
+            PresentationElement.baseclass.prototype.edited.apply(this, arguments);
+            this.update_dom();
+        },
+        impress_init: function() {
+            var element = this;
+//            if (window.azexo_editor)
+//                $('<div id="overview" class="step" data-x="1000" data-y="500" data-scale="3"></div>').appendTo(element.dom_content_element);
+            element.impress.setTransformationCallback(function(x) {
+                element.config.visualScaling = x.scale;
+                element.config.rotation = ~~(x.rotate.z);
+            });
         },
         showed: function($, p, fp) {
             PresentationElement.baseclass.prototype.showed.apply(this, arguments);
@@ -5711,7 +5781,61 @@
                 path: 'js/impress.js',
                 loaded: 'impress' in window,
                 callback: function() {
-                    window.impress(element.id).init();
+                    element.state = {
+                        editing: false,
+                        $node: false,
+                        data: {
+                            x: 0,
+                            y: 0,
+                            rotate: 0,
+                            scale: 0
+                        }
+                    };
+                    element.config = {
+                        rotateStep: 0.1,
+                        scaleStep: 0.01,
+                        visualScaling: 10,
+                        setTransformationCallback: false
+                    };
+                    element.defaults = {
+                        x: 0,
+                        y: 0,
+                        rotate: 0,
+                        scale: 1
+                    };
+                    element.mouse = {
+                        prevX: false,
+                        prevY: false,
+                        activeFunction: false
+                    };
+                    element.handlers = {};
+                    function fixVector(x, y) {
+                        var result = {x: 0, y: 0},
+                        angle = (element.config.rotation / 180) * Math.PI,
+                                cs = Math.cos(angle),
+                                sn = Math.sin(angle);
+                        result.x = (x * cs - y * sn) * element.config.visualScaling;
+                        result.y = (x * sn + y * cs) * element.config.visualScaling;
+                        return result;
+                    }
+                    element.handlers.move = function(x, y) {
+                        var v = fixVector(x, y);
+                        element.state.data.x = (element.state.data.x) ? (element.state.data.x) + v.x : v.x;
+                        element.state.data.y = (element.state.data.y) ? (element.state.data.y) + v.y : v.y;
+                    };
+                    element.handlers.scale = function(x) {
+                        element.state.data.scale -= -x * element.config.scaleStep * element.config.visualScaling / 10;
+                    };
+                    element.handlers.rotate = function(x) {
+                        element.state.data.rotate -= -x * element.config.rotateStep;
+                    };
+                    if (!('impress' in element)) {
+                        element.impress = window.impress(element.id);
+                    }
+                    element.impress.init();                
+                    element.impress_init();
+                    element.impress.goto(element.children[0].id);
+
                     element.dom_element.get(0).addEventListener("impress:stepenter", function(event) {
                         var id = $(event.target).attr('data-az-id');
                         var el = azexo_elements.get_element(id);
@@ -5734,11 +5858,46 @@
                             }
                         }
                     }, false);
+                    $(element.dom_element).find('> .pagination > li > .prev').click(function() {
+                        element.impress.prev();
+                        return false;
+                    });
+                    $(element.dom_element).find('> .pagination > li > .next').click(function() {
+                        element.impress.next();
+                        return false;
+                    });
+                    $(element.dom_element).find('> .pagination > li > .goto').click(function() {
+                        element.impress.goto($(this).attr('data-step'));
+                        return false;
+                    });
+                    if ('auto_play' in element) {
+                        clearInterval(element.auto_play);
+                    }
+                    if (_.indexOf(element.attrs['options'].split(','), 'auto_play') >= 0) {
+                        element.auto_play = setInterval(function() {
+                            element.impress.next();
+                        }, 5000);
+                    }
                 }});
         },
         render: function($, p, fp) {
-            this.dom_element = $('<div id="' + this.id + '" class="az-element az-presentation ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
-            this.dom_content_element = this.dom_element;
+            delete this['impress'];
+            this.dom_element = $('<div class="az-element az-presentation ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+            $(this.dom_element).css('height', this.attrs['height'] + 'px');
+            $(this.dom_element).css('overflow', 'hidden');
+            this.dom_content_element = $('<div id="' + this.id + '"></div>').appendTo(this.dom_element);
+            $(this.dom_content_element).attr('data-perspective', this.attrs['perspective']);
+            $(this.dom_content_element).attr('data-transition-duration', this.attrs['duration']);
+
+            if (_.indexOf(this.attrs['options'].split(','), 'navigation') >= 0) {
+                var pagination = $('<ul class="pagination"></ul>').appendTo(this.dom_element);
+                $('<li><a href="#" class="prev">&laquo;</a></li>').appendTo(pagination);
+                for (var i = 1; i <= this.children.length; i++) {
+                    $('<li><a href="#" class="goto" data-step="' + this.children[i - 1].id + '">' + i.toString() + '</a></li>').appendTo(pagination);
+                }
+                $('<li><a href="#" class="prev">&raquo;</a></li>').appendTo(pagination);
+            }
+
             PresentationElement.baseclass.prototype.render.apply(this, arguments);
         },
     });
@@ -5771,7 +5930,7 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('X coordinate'),
-                param_name: 'data_x',
+                param_name: 'x',
                 min: '0',
                 max: '10000',
                 value: '0',
@@ -5779,7 +5938,7 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Y coordinate'),
-                param_name: 'data_y',
+                param_name: 'y',
                 min: '0',
                 max: '10000',
                 value: '0',
@@ -5787,7 +5946,7 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Z coordinate'),
-                param_name: 'data_z',
+                param_name: 'z',
                 min: '0',
                 max: '10000',
                 value: '0',
@@ -5795,7 +5954,7 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('X rotate'),
-                param_name: 'data_rotate_x',
+                param_name: 'rotate_x',
                 min: '-180',
                 max: '180',
                 value: '0',
@@ -5803,7 +5962,7 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Y rotate'),
-                param_name: 'data_rotate_y',
+                param_name: 'rotate_y',
                 min: '-180',
                 max: '180',
                 value: '0',
@@ -5811,7 +5970,7 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Z rotate'),
-                param_name: 'data_rotate_z',
+                param_name: 'rotate_z',
                 min: '-180',
                 max: '180',
                 value: '0',
@@ -5819,10 +5978,11 @@
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Scale'),
-                param_name: 'data_scale',
-                min: '1',
-                max: '100',
+                param_name: 'scale',
+                min: '0',
+                max: '10',
                 value: '1',
+                step: '0.01',
             }),
         ].concat(StepElement.prototype.params),
         hidden: true,
@@ -5832,37 +5992,136 @@
         get_empty: function() {
             return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this presentation element and for current step. ') + '<span class="' + p + 'glyphicon ' + p + 'glyphicon-plus-sign"></span>' + t(' - add a new step.') + '</div></div>';
         },
-        show_controls: function() {
-            if (window.azexo_editor) {
-                StepElement.baseclass.prototype.show_controls.apply(this, arguments);
-                $(this.controls).find('.drag-and-drop').remove();
-                $('<span class="control ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon">' + this.name + '</span>').prependTo(this.controls);
-            }
-        },
         get_my_shortcode: function() {
             return this.get_children_shortcode();
         },
+        show_controls: function() {
+            StepElement.baseclass.prototype.show_controls.apply(this, arguments);
+            if (window.azexo_editor) {
+                var element = this;
+
+                $('<button title="' + title("Scale") + '" class="control scale action ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').appendTo(this.controls);
+                $('<button title="' + title("Rotate") + '" class="control rotate action ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').appendTo(this.controls);
+                $(element.controls).find('.drag-and-drop').addClass('action');
+
+                var parent = element.parent;
+                var showTimer = null;
+                var redrawTimeout = null;
+                function saveData() {
+                    var el = azexo_elements.get_element($(parent.state.$node[0]).closest('[data-az-id]').attr('data-az-id'));
+                    el.attrs['x'] = parent.state.data.x.toString();
+                    el.attrs['y'] = parent.state.data.y.toString();
+                    el.attrs['rotate_z'] = parent.state.data.rotate.toString();
+                    el.attrs['scale'] = parent.state.data.scale.toString();                    
+                }
+                function loadData() {
+                    parent.state.data.x = parseFloat(parent.state.$node[0].dataset.x) || parent.defaults.x;
+                    parent.state.data.y = parseFloat(parent.state.$node[0].dataset.y) || parent.defaults.y;
+                    parent.state.data.scale = parseFloat(parent.state.$node[0].dataset.scale) || parent.defaults.scale;
+                    parent.state.data.rotate = parseFloat(parent.state.$node[0].dataset.rotate) || parent.defaults.rotate;
+                    saveData();
+                }
+                function redraw() {
+                    clearTimeout(redrawTimeout);
+                    redrawTimeout = setTimeout(function() {
+                        parent.state.$node[0].dataset.scale = parent.state.data.scale;
+                        parent.state.$node[0].dataset.rotate = parent.state.data.rotate;
+                        parent.state.$node[0].dataset.x = parent.state.data.x;
+                        parent.state.$node[0].dataset.y = parent.state.data.y;
+                        parent.impress.initStep(parent.state.$node[0]);
+                        saveData();
+                    }, 20);
+                }
+                function handleMouseMove(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var x = e.pageX - parent.mouse.prevX,
+                            y = e.pageY - parent.mouse.prevY;
+                    parent.mouse.prevX = e.pageX;
+                    parent.mouse.prevY = e.pageY;
+                    if (parent.mouse.activeFunction) {
+                        parent.mouse.activeFunction(x, y);
+                        redraw();
+                    }
+                    return false;
+                }
+                $(element.controls).on('mousedown', '.action', function(e) {
+                    parent.state.$node = $(element.dom_element);
+                    e.preventDefault();
+                    if ($(this).hasClass('drag-and-drop'))
+                        parent.mouse.activeFunction = parent.handlers['move'];
+                    if ($(this).hasClass('scale'))
+                        parent.mouse.activeFunction = parent.handlers['scale'];
+                    if ($(this).hasClass('rotate'))
+                        parent.mouse.activeFunction = parent.handlers['rotate'];
+                    loadData();
+                    parent.mouse.prevX = e.pageX;
+                    parent.mouse.prevY = e.pageY;
+                    $(document).on('mousemove.handler1', handleMouseMove);
+                    return false;
+                });
+                $(document).on('mouseup', function() {
+                    parent.mouse.activeFunction = false;
+                    $(document).off('mousemove.handler1');
+                });
+            }
+        },
+        update_sortable: function() {
+            if (window.azexo_editor) {
+                var element = this;
+                $(this.dom_element).resizable({
+//                    containment: "parent",
+                    stop: function(event, ui) {
+                        element.attrs['width'] = $(element.dom_element).width();
+                        element.attrs['height'] = $(element.dom_element).height();
+                        if ('impress' in element.parent) {
+                            element.impress.initStep(element.dom_element.get(0));
+                        }
+                    }
+                });
+            }
+        },
         clone: function() {
             var shortcode = StepElement.baseclass.prototype.get_my_shortcode.apply(this, arguments);
-            $('#azexo-clipboard').html(btoa(encodeURIComponent(shortcode)));
-            this.parent.paste(this.parent.children.length);
+            $('#azexo-clipboard').html(btoa(encodeURIComponent(shortcode)));            
+            for (var i = 0; i < this.parent.children.length; i++) {
+                if (this.parent.children[i].id == this.id) {
+                    this.parent.paste(i);
+                    break;
+                }
+            }
+//            if ('impress' in this.parent) {
+//                var child = this.parent.children[this.parent.children.length - 1];
+//                this.parent.impress.newStep(child.dom_element.get(0));
+//            } else {
+//                this.parent.update_dom();
+//            }
             this.parent.update_dom();
         },
         edited: function() {
             StepElement.baseclass.prototype.edited.apply(this, arguments);
+            var element = this;
+            //this.parent.update_dom();
+            if ('impress' in element.parent) {
+                element.parent.impress.initStep(element.dom_element.get(0));
+            }
+        },
+        remove: function() {
+            StepElement.baseclass.prototype.remove.apply(this, arguments);
             this.parent.update_dom();
         },
         render: function($, p, fp) {
-            this.dom_element = $('<div class="az-element az-step step ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+            this.dom_element = $('<div id="' + this.id + '" class="az-element az-step step ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
             $(this.dom_element).css('width', this.attrs['width']);
             $(this.dom_element).css('height', this.attrs['height']);
-            $(this.dom_element).attr('data-x', this.attrs['data_x']);
-            $(this.dom_element).attr('data-y', this.attrs['data_y']);
-            $(this.dom_element).attr('data-z', this.attrs['data_z']);
-            $(this.dom_element).attr('data-rotate-x', this.attrs['data_rotate_x']);
-            $(this.dom_element).attr('data-rotate-y', this.attrs['data_rotate_y']);
-            $(this.dom_element).attr('data-rotate-z', this.attrs['data_rotate_z']);
-            $(this.dom_element).attr('data-scale', this.attrs['data_scale']);
+            $(this.dom_element).attr('data-x', this.attrs['x']);
+            $(this.dom_element).attr('data-y', this.attrs['y']);
+            $(this.dom_element).attr('data-z', this.attrs['z']);
+            $(this.dom_element).attr('data-rotate-x', this.attrs['rotate_x']);
+            $(this.dom_element).attr('data-rotate-y', this.attrs['rotate_y']);
+            //$(this.dom_element).attr('data-rotate-z', this.attrs['rotate_z']);
+            $(this.dom_element).attr('data-rotate', this.attrs['rotate_z']);
+            $(this.dom_element).attr('data-scale', this.attrs['scale']);
             this.dom_content_element = this.dom_element;
             StepElement.baseclass.prototype.render.apply(this, arguments);
         },
@@ -6286,6 +6545,18 @@
                     javascript += SlideElement.name + ".prototype.frontend_render = true;\n";
                     javascript += get_class_method_js(SlideElement, 'showed', true);
                     javascript += get_class_method_js(SlideElement, 'render', true);
+                }
+
+                if (PresentationElement.prototype.base in bases) {
+                    javascript += PresentationElement.toString() + "\n";
+                    javascript += register_animated_element.name + "('" + PresentationElement.prototype.base + "', true, " + PresentationElement.name + ");\n";
+                    javascript += get_element_params_js(PresentationElement);
+                    javascript += PresentationElement.name + ".prototype.frontend_render = true;\n";
+                    javascript += get_class_method_js(PresentationElement, 'impress_init', true);
+                    javascript += get_class_method_js(PresentationElement, 'showed', true);
+                    javascript += get_class_method_js(PresentationElement, 'render', true);
+                    javascript += StepElement.toString() + "\n";
+                    javascript += register_element.name + "('" + StepElement.prototype.base + "', true, " + StepElement.name + ");\n";
                 }
 
                 if (ContainerElement.prototype.base in bases) {

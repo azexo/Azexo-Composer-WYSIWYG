@@ -164,30 +164,44 @@
         return scale;
     };
     
-    // CHECK SUPPORT
-    var body = document.body;
-    
-    var ua = navigator.userAgent.toLowerCase();
-    var impressSupported = 
-                          // browser should support CSS 3D transtorms 
-                           ( pfx("perspective") !== null ) &&
-                           
-                          // and `classList` and `dataset` APIs
-                           ( body.classList ) &&
-                           ( body.dataset ) &&
-                           
-                          // but some mobile devices need to be blacklisted,
-                          // because their CSS 3D support or hardware is not
-                          // good enough to run impress.js properly, sorry...
-                           ( ua.search(/(iphone)|(ipod)|(android)/) === -1 );
-    
-    if (!impressSupported) {
-        // we can't be sure that `classList` is supported
-        body.className += " impress-not-supported ";
-    } else {
-        body.classList.remove("impress-not-supported");
-        body.classList.add("impress-supported");
+    function on_ready(completed) {
+        if (document.readyState === "complete") {
+            setTimeout(completed);
+        } else if (document.addEventListener) {
+            document.addEventListener("DOMContentLoaded", completed, false);
+            window.addEventListener("load", completed, false);
+        } else {
+            document.attachEvent("onreadystatechange", completed);
+            window.attachEvent("onload", completed);
+        }
     }
+    var body = null;
+    var impressSupported = true;
+    on_ready(function(){
+        // CHECK SUPPORT
+        body = document.body;
+        var ua = navigator.userAgent.toLowerCase();
+        impressSupported = 
+                              // browser should support CSS 3D transtorms 
+                               ( pfx("perspective") !== null ) &&
+
+                              // and `classList` and `dataset` APIs
+                               ( body.classList ) &&
+                               ( body.dataset ) &&
+
+                              // but some mobile devices need to be blacklisted,
+                              // because their CSS 3D support or hardware is not
+                              // good enough to run impress.js properly, sorry...
+                               ( ua.search(/(iphone)|(ipod)|(android)/) === -1 );
+
+        if (!impressSupported) {
+            // we can't be sure ua.that `classList` is supported
+            body.className += " impress-not-supported ";
+        } else {
+            body.classList.remove("impress-not-supported");
+            body.classList.add("impress-supported");
+        }        
+    });
     
     // GLOBALS AND DEFAULTS
     
@@ -234,9 +248,9 @@
         rootId = rootId || "impress";
         
         // if given root is already initialized just return the API
-        if (roots["impress-root-" + rootId]) {
-            //return roots["impress-root-" + rootId];
-        }
+//        if (roots["impress-root-" + rootId]) {
+//            return roots["impress-root-" + rootId];
+//        }
         
         // data of all presentation steps
         var stepsData = {};
@@ -328,6 +342,11 @@
             });
         };
         
+        var newStep = function ( el ) {
+            initStep(el);
+            steps.push(el);
+            }
+        
         // `init` API function that initializes (and runs) the presentation.
         var init = function () {
             if (initialized) { return; }
@@ -361,12 +380,12 @@
             root.appendChild(canvas);
             
             // set initial styles
-            document.documentElement.style.height = "100%";
-            
-            css(body, {
-                height: "100%",
-                overflow: "hidden"
-            });
+//            document.documentElement.style.height = "100%";
+//            
+//            css(body, {
+//                height: "100%",
+//                overflow: "hidden"
+//            });
             
             var rootStyles = {
                 position: "absolute",
@@ -383,8 +402,8 @@
             });
             css(canvas, rootStyles);
             
-            body.classList.remove("impress-disabled");
-            body.classList.add("impress-enabled");
+            //body.classList.remove("impress-disabled");
+            //body.classList.add("impress-enabled");
             
             // get and init steps
             steps = $$(".step", root);
@@ -418,6 +437,13 @@
         // used to reset timeout for `impress:stepenter` event
         var stepEnterTimeout = null;
         
+        // naugtur:
+        // `setTransformationCallback` API function - sets a callback that allows passing the current transformations outside, to the editing tool
+        var transformationCallback = null;
+        var setTransformationCallback = function(callback){
+          transformationCallback=callback;
+        }
+        
         // `goto` API function that moves to step given with `el` parameter (by index, id or element),
         // with a transition `duration` optionally given as second parameter.
         var goto = function ( el, duration ) {
@@ -435,17 +461,17 @@
             // whenever slide is selected
             //
             // If you are reading this and know any better way to handle it, I'll be glad to hear about it!
-            window.scrollTo(0, 0);
+            //window.scrollTo(0, 0);
             
             var step = stepsData["impress-" + el.id];
             
             if ( activeStep ) {
                 activeStep.classList.remove("active");
-                body.classList.remove("impress-on-" + activeStep.id);
+                //body.classList.remove("impress-on-" + activeStep.id);
             }
             el.classList.add("active");
             
-            body.classList.add("impress-on-" + el.id);
+            //body.classList.add("impress-on-" + el.id);
             
             // compute target state of the canvas based on given step
             var target = {
@@ -461,6 +487,16 @@
                 },
                 scale: 1 / step.scale
             };
+            
+            // naugtur:
+            // Running the callback if was registered.
+            if(transformationCallback) { 
+                transformationCallback({
+                  scale:step.scale,
+                  rotate:step.rotate,
+                  translate:step.translate
+                });
+            }
             
             // Check if the transition is zooming in or not.
             //
@@ -596,46 +632,49 @@
             
         }, false);
         
-        // Adding hash change support.
-        root.addEventListener("impress:init", function(){
-            
-            // last hash detected
-            var lastHash = "";
-            
-            // `#/step-id` is used instead of `#step-id` to prevent default browser
-            // scrolling to element in hash.
-            //
-            // And it has to be set after animation finishes, because in Chrome it
-            // makes transtion laggy.
-            // BUG: http://code.google.com/p/chromium/issues/detail?id=62820
-            root.addEventListener("impress:stepenter", function (event) {
-                window.location.hash = lastHash = "#/" + event.target.id;
-            }, false);
-            
-            window.addEventListener("hashchange", function () {
-                // When the step is entered hash in the location is updated
-                // (just few lines above from here), so the hash change is 
-                // triggered and we would call `goto` again on the same element.
-                //
-                // To avoid this we store last entered hash and compare.
-                if (window.location.hash !== lastHash) {
-                    goto( getElementFromHash() );
-                }
-            }, false);
-            
-            // START 
-            // by selecting step defined in url or first step of the presentation
-            goto(getElementFromHash() || steps[0], 0);
-        }, false);
+//        // Adding hash change support.
+//        root.addEventListener("impress:init", function(){
+//            
+//            // last hash detected
+//            var lastHash = "";
+//            
+//            // `#/step-id` is used instead of `#step-id` to prevent default browser
+//            // scrolling to element in hash.
+//            //
+//            // And it has to be set after animation finishes, because in Chrome it
+//            // makes transtion laggy.
+//            // BUG: http://code.google.com/p/chromium/issues/detail?id=62820
+//            root.addEventListener("impress:stepenter", function (event) {
+//                window.location.hash = lastHash = "#/" + event.target.id;
+//            }, false);
+//            
+//            window.addEventListener("hashchange", function () {
+//                // When the step is entered hash in the location is updated
+//                // (just few lines above from here), so the hash change is 
+//                // triggered and we would call `goto` again on the same element.
+//                //
+//                // To avoid this we store last entered hash and compare.
+//                if (window.location.hash !== lastHash) {
+//                    goto( getElementFromHash() );
+//                }
+//            }, false);
+//            
+//            // START 
+//            // by selecting step defined in url or first step of the presentation
+//            goto(getElementFromHash() || steps[0], 0);
+//        }, false);
         
-        body.classList.add("impress-disabled");
+        //body.classList.add("impress-disabled");
         
         // store and return API for given impress.js root element
         return (roots[ "impress-root-" + rootId ] = {
             init: init,
             goto: goto,
             next: next,
-            prev: prev
+            prev: prev,
+            initStep: initStep,
+            newStep:newStep,
+            setTransformationCallback:setTransformationCallback
         });
 
     };
