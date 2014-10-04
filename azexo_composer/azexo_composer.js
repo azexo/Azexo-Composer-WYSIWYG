@@ -3160,7 +3160,8 @@
 //
 //
     var azexo_animations = {
-        "none": t('No animation'),
+        "": t('No animation'),
+        "js": t('JS animation'),
         "bounce": t('bounce'),
         "flash": t('flash'),
         "pulse": t('pulse'),
@@ -3235,8 +3236,6 @@
         "zoomOutLeft": t('zoomOutLeft'),
         "zoomOutRight": t('zoomOutRight'),
         "zoomOutUp": t('zoomOutUp'),
-//        "move-right-in": t('move-right-in'),
-//        "move-right-out": t('move-right-out'),
     };
     function AnimatedElement(parent, parse) {
         AnimatedElement.baseclass.apply(this, arguments);
@@ -3267,11 +3266,27 @@
             }),
             make_param_type({
                 type: 'dropdown',
+                heading: t('JS animation in'),
+                param_name: 'an_js_in',
+                tab: t('Animation'),
+                value: {},
+                dependency: {'element': 'an_in', 'value': ['js']},
+            }),
+            make_param_type({
+                type: 'dropdown',
                 heading: t('Animation out'),
                 param_name: 'an_out',
                 tab: t('Animation'),
                 value: azexo_animations,
                 dependency: {'element': 'an_start', 'value': ['hover', 'trigger']},
+            }),
+            make_param_type({
+                type: 'dropdown',
+                heading: t('JS animation out'),
+                param_name: 'an_js_out',
+                tab: t('Animation'),
+                value: {},
+                dependency: {'element': 'an_out', 'value': ['js']},
             }),
             make_param_type({
                 type: 'checkbox',
@@ -3291,6 +3306,20 @@
                 tab: t('Animation'),
                 value: {
                     'yes': t("Yes, please"),
+                },
+                dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
+            }),
+            make_param_type({
+                type: 'dropdown',
+                heading: t('By letters?'),
+                param_name: 'an_letters',
+                tab: t('Animation'),
+                value: {
+                    '': t("No"),
+                    'sequence': t("Sequence"),
+                    'reverse': t("Reverse"),
+                    'sync': t("Sync"),
+                    'shuffle': t("Shuffle"),
                 },
                 dependency: {'element': 'an_start', 'value': ['appear', 'hover', 'click', 'trigger']},
             }),
@@ -3366,27 +3395,41 @@
         set_in_timeout: function() {
             var element = this;
             element.in_timeout = setTimeout(function() {
-                $(element.dom_element).css('opacity', '');
-                $(element.dom_element).removeClass('animated');
-                $(element.dom_element).removeClass(element.attrs['an_in']);
-                $(element.dom_element).removeClass(element.attrs['an_out']);
-                $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
-                $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
-                $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
-                $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
-                $(element.dom_element).addClass('animated');
-                if (element.attrs['an_infinite'] == 'yes') {
-                    $(element.dom_element).addClass('infinite');
+                if (element.attrs['an_letters'] == '') {
+                    $(element.dom_element).css('opacity', '');
+                    $(element.dom_element).removeClass('animated');
+                    $(element.dom_element).removeClass(element.attrs['an_in']);
+                    $(element.dom_element).removeClass(element.attrs['an_out']);
+                    element.animation_in = false;
+                    element.animation_out = false;
+                    $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
+                    $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
+                    $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
+                    $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
+                    $(element.dom_element).addClass('animated');
+                    element.animated = true;
+                    if (element.attrs['an_infinite'] == 'yes') {
+                        $(element.dom_element).addClass('infinite');
+                    }
+                    $(element.dom_element).addClass(element.attrs['an_in']);
+                    element.animation_in = true;
+                } else {
+                    element.animation_letters();
+                    $(element.dom_element).css('opacity', '');
+                    for (var i = 0; i < element.textillate_elements.length; i++) {
+                        $(element.textillate_elements[i]).textillate('in');
+                    }
+                    element.animation_in = true;
+                    element.animated = true;
                 }
-                $(element.dom_element).addClass(element.attrs['an_in']);
             }, Math.round(element.attrs['an_in_delay']));
         },
         start_in_animation: function() {
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
-                if (element.attrs['an_in'] != 'none' && element.attrs['an_in'] != '') {
+                if (element.attrs['an_in'] != '') {
                     if (element.out_timeout > 0) {
-                        if ($(element.dom_element).hasClass('animated')) {
+                        if (element.animated) {
                             //still in-animate
                             element.clear_animation();
                             element.set_in_timeout();
@@ -3407,27 +3450,41 @@
         set_out_timeout: function() {
             var element = this;
             element.out_timeout = setTimeout(function() {
-                $(element.dom_element).css('opacity', '');
-                $(element.dom_element).removeClass('animated');
-                $(element.dom_element).removeClass(element.attrs['an_in']);
-                $(element.dom_element).removeClass(element.attrs['an_out']);
-                $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
-                $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
-                $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
-                $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
-                $(element.dom_element).addClass('animated');
-                if (element.attrs['an_infinite'] == 'yes') {
-                    $(element.dom_element).addClass('infinite');
+                if (element.attrs['an_letters'] == '') {
+                    $(element.dom_element).css('opacity', '');
+                    $(element.dom_element).removeClass('animated');
+                    $(element.dom_element).removeClass(element.attrs['an_in']);
+                    $(element.dom_element).removeClass(element.attrs['an_out']);
+                    element.animation_in = false;
+                    element.animation_out = false;
+                    $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
+                    $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
+                    $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
+                    $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
+                    $(element.dom_element).addClass('animated');
+                    element.animated = true;
+                    if (element.attrs['an_infinite'] == 'yes') {
+                        $(element.dom_element).addClass('infinite');
+                    }
+                    $(element.dom_element).addClass(element.attrs['an_out']);
+                    element.animation_out = true;
+                } else {
+                    element.animation_letters();
+                    $(element.dom_element).css('opacity', '');
+                    for (var i = 0; i < element.textillate_elements.length; i++) {
+                        $(element.textillate_elements[i]).textillate('out');
+                    }
+                    element.animation_out = true;
+                    element.animated = true;
                 }
-                $(element.dom_element).addClass(element.attrs['an_out']);
             }, Math.round(element.attrs['an_out_delay']));
         },
         start_out_animation: function() {
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
-                if (element.attrs['an_out'] != 'none' && element.attrs['an_out'] != '') {
+                if (element.attrs['an_out'] != '') {
                     if (element.in_timeout > 0) {
-                        if ($(element.dom_element).hasClass('animated')) {
+                        if (element.animated) {
                             //still in-animate
                             element.clear_animation();
                             element.set_out_timeout();
@@ -3446,8 +3503,7 @@
             }
         },
         clear_animation: function() {
-            if ($(this.dom_element).hasClass(this.attrs['an_in'])) {
-                this.inned = true;
+            if (this.animation_in) {
                 if (this.hidden_before_in) {
                     $(this.dom_element).css('opacity', '1');
                 }
@@ -3455,8 +3511,7 @@
                     $(this.dom_element).css('opacity', '0');
                 }
             }
-            if ($(this.dom_element).hasClass(this.attrs['an_out'])) {
-                this.inned = false;
+            if (this.animation_out) {
                 if (this.hidden_before_in) {
                     $(this.dom_element).css('opacity', '0');
                 }
@@ -3464,31 +3519,49 @@
                     $(this.dom_element).css('opacity', '1');
                 }
             }
-            $(this.dom_element).css('animation-duration', '');
-            $(this.dom_element).css('-webkit-animation-duration', '');
-            $(this.dom_element).css('animation-fill-mode', '');
-            $(this.dom_element).css('-webkit-animation-fill-mode', '');
-            $(this.dom_element).removeClass('animated');
-            $(this.dom_element).removeClass('infinite');
-            if (this.attrs['an_fill_mode'] == '') {
-                $(this.dom_element).removeClass(this.attrs['an_in']);
-                $(this.dom_element).removeClass(this.attrs['an_out']);
+            if (this.attrs['an_letters'] == '') {
+                $(this.dom_element).css('animation-duration', '');
+                $(this.dom_element).css('-webkit-animation-duration', '');
+                $(this.dom_element).css('animation-fill-mode', '');
+                $(this.dom_element).css('-webkit-animation-fill-mode', '');
+                $(this.dom_element).removeClass('animated');
+                this.animated = false;
+                $(this.dom_element).removeClass('infinite');
+                if (this.attrs['an_fill_mode'] == '') {
+                    $(this.dom_element).removeClass(this.attrs['an_in']);
+                    $(this.dom_element).removeClass(this.attrs['an_out']);
+                    this.animation_in = false;
+                    this.animation_out = false;
+                }
+            } else {
+                if ('textillate_elements' in this) {
+                    for (var i = 0; i < this.textillate_elements.length; i++) {
+                        $(this.textillate_elements[i]).data('textillate', false);
+                        $(this.textillate_elements[i]).find('> span').remove();
+                        var text = $(this.textillate_elements[i]).find('> ul > li').text();
+                        $(this.textillate_elements[i]).find('> ul').remove();
+                        $(this.textillate_elements[i]).text(text);
+                    }
+                }
+                this.animation_in = false;
+                this.animation_out = false;
+                this.animated = false;
             }
         },
         end_animation: function() {
             this.in_timeout = 0;
-            this.out_timeout = 0;            
-            if ($(this.dom_element).hasClass(this.attrs['an_in'])) {
+            this.out_timeout = 0;
+            if (this.animation_in) {
                 this.clear_animation();
                 if (this.attrs['an_start'] == 'hover' && !this.hover) {
-                    if(this.attrs['an_in'] != this.attrs['an_out'])
+                    if (this.attrs['an_in'] != this.attrs['an_out'])
                         this.start_out_animation();
                 }
             }
-            if ($(this.dom_element).hasClass(this.attrs['an_out'])) {
+            if (this.animation_out) {
                 this.clear_animation();
                 if (this.attrs['an_start'] == 'hover' && this.hover) {
-                    if(this.attrs['an_in'] != this.attrs['an_out'])
+                    if (this.attrs['an_in'] != this.attrs['an_out'])
                         this.start_in_animation();
                 }
             }
@@ -3515,20 +3588,82 @@
                 }
             }
         },
-        css_animation: function() {
+        animation_letters: function() {
             var element = this;
-            $(element.dom_element).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-                element.end_animation();
+            element.textillate_elements = [];
+            var c = 0;
+            var n = 0;
+            $(element.dom_element).find(':not(:has(*)):not(.control)').each(function() {
+                var text = $(this).text().trim();
+                if (text != '') {
+                    c++;
+                    var sync = false;
+                    var shuffle = false;
+                    var reverse = false;
+                    switch (element.attrs['an_letters']) {
+                        case 'sequence':
+                            break;
+                        case 'reverse':
+                            reverse = true;
+                            break;
+                        case 'sync':
+                            sync = true;
+                            break;
+                        case 'shuffle':
+                            shuffle = true;
+                            break;
+                    }
+                    element.textillate_elements.push(this);
+                    $(this).textillate();
+                    $(this).textillate({
+                        loop: false,
+                        autoStart: false,
+                        in: {
+                            effect: element.attrs['an_in'],
+                            delayScale: 1.5,
+                            delay: parseInt(element.attrs['an_duration']) / text.length,
+                            sync: sync,
+                            shuffle: shuffle,
+                            reverse: reverse,
+                            callback: function() {
+                                n++;
+                                if (c >= n) {
+                                    element.end_animation();
+                                }
+                            }
+                        },
+                        out: {
+                            effect: element.attrs['an_out'],
+                            delayScale: 1.5,
+                            delay: parseInt(element.attrs['an_duration']) / text.length,
+                            sync: sync,
+                            shuffle: shuffle,
+                            reverse: reverse,
+                            callback: function() {
+                                n++;
+                                if (c >= n) {
+                                    element.end_animation();
+                                }
+                            }
+                        },
+                    }).on('inAnimationBegin.tlt outAnimationBegin.tlt', function() {
+                        n = 0;
+                    });
+                    $(this).data('textillate').currentIndex = 0;
+                }
             });
+        },
+        animation: function() {
+            var element = this;
             element.hidden_before_in = _.indexOf(element.attrs['an_hidden'].split(','), 'before_in') >= 0;
             element.hidden_after_in = _.indexOf(element.attrs['an_hidden'].split(','), 'after_in') >= 0;
-
             if (element.hidden_before_in) {
                 $(element.dom_element).css('opacity', '0');
             }
             if (element.hidden_after_in) {
                 $(element.dom_element).css('opacity', '1');
             }
+
             var parent_number = element.attrs['an_parent'];
             if (parent_number == '') {
                 parent_number = 1;
@@ -3540,69 +3675,108 @@
                 parent = $(parent).parent().closest('[data-az-id]');
                 i++;
             }
-
-            this.add_css('animate.css/animate.min.css', false, function() {
-                switch (element.attrs['an_start']) {
-                    case 'click':
-                        $(parent).click(function() {
-                            if (!$(element.dom_element).hasClass('animated')) {
-                                element.start_in_animation();
-                            }
-                        });
-                        break;
-                    case 'appear':
-                        element.add_js({
-                            path: 'jquery-waypoints/waypoints.min.js',
-                            loaded: 'waypoint' in $.fn,
-                            callback: function() {
-                                $(element.dom_element).waypoint(function(direction) {
-                                    if (!$(element.dom_element).hasClass('animated')) {
+            if (element.attrs['an_start'] != '') {
+                element.in_timeout = 0;
+                element.out_timeout = 0;
+                element.animated = false;
+                element.animation_in = false;
+                element.animation_out = false;
+                if (element.attrs['an_letters'] != '') {
+                    //element.animation_letters();
+                } else {
+                    $(element.dom_element).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                        element.end_animation();
+                    });
+                }
+                this.add_css('animate.css/animate.min.css', false, function() {
+                    var callback = function() {
+                        $(parent).off('click.animation');
+                        $(parent).off('mouseenter.animation');
+                        $(parent).off('mouseleave.animation');
+                        switch (element.attrs['an_start']) {
+                            case 'click':
+                                $(parent).on('click.animation', function() {
+                                    if (!element.animated) {
                                         element.start_in_animation();
                                     }
-                                }, {offset: '100%', triggerOnce: true});
-                                $(document).trigger('scroll');
-                            }});
-                        break;
-                    case 'hover':
-                        element.inned = false;
-                        $(parent).on('mouseenter', function() {
-                            element.hover = true;
-//                                if (!$(element.dom_element).hasClass('animated'))
-//                                    if (!element.inned)
-                            element.start_in_animation();
+                                });
+                                break;
+                            case 'appear':
+                                element.add_js({
+                                    path: 'jquery-waypoints/waypoints.min.js',
+                                    loaded: 'waypoint' in $.fn,
+                                    callback: function() {
+                                        $(element.dom_element).waypoint(function(direction) {
+                                            if (!element.animated) {
+                                                element.start_in_animation();
+                                            }
+                                        }, {offset: '100%', triggerOnce: true});
+                                        $(document).trigger('scroll');
+                                    }});
+                                break;
+                            case 'hover':
+                                $(parent).on('mouseenter.animation', function() {
+                                    element.hover = true;
+                                    element.start_in_animation();
+                                });
+                                $(parent).on('mouseleave.animation', function() {
+                                    element.hover = false;
+                                    element.start_out_animation();
+                                });
+                                break;
+                            case 'trigger':
+                                break;
+                            default:
+                                break;
+                        }
+                    };
+                    if (element.attrs['an_letters'] == '') {
+                        callback();
+                    } else {
+                        element.add_js_list({
+                            paths: ['textillate/assets/jquery.lettering.js', 'js/textillate.js'],
+                            loaded: 'textillate' in $.fn,
+                            callback: callback
                         });
-                        $(parent).on('mouseleave', function() {
-                            element.hover = false;
-//                                if (!$(element.dom_element).hasClass('animated'))
-//                                    if (element.inned)
-                            element.start_out_animation();
-                        });
-                        break;
-                    case 'trigger':
-                        break;
-                    default:
-                        break;
+                    }
+                });
+            }
+        },
+        update_js_animations_list: function() {
+            var animations = {};
+            for (var name in azexo_elements.elements_instances_by_an_name) {
+                for (var i = 0; i < azexo_elements.elements_instances_by_an_name[name].an_scenes.length; i++) {
+                    animations[name + '-' + i] = name + '-' + i;
                 }
-            });
+            }
+            for (var i = 0; i < AnimatedElement.prototype.params.length; i++) {
+                if (AnimatedElement.prototype.params[i].param_name == 'an_js_in' || AnimatedElement.prototype.params[i].param_name == 'an_js_out') {
+                    AnimatedElement.prototype.params[i].value = animations;
+                }
+            }
+        },
+        edit: function() {
+            this.update_js_animations_list();
+            AnimatedElement.baseclass.prototype.edit.apply(this, arguments);
         },
         show_controls: function() {
             var element = this;
             if (window.azexo_editor) {
                 AnimatedElement.baseclass.prototype.show_controls.apply(this, arguments);
-                $('<button title="' + title("Scroll animation") + '" class="control scroll-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
-                    $('#az-scroll-animation-modal').remove();
-                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Scroll animation settings") + '</h4></div>';
+                $('<button title="' + title("JS animation") + '" class="control js-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
+                    $('#az-js-animation-modal').remove();
+                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("JS animation settings") + '</h4></div>';
                     var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
-                    var modal = $('<div id="az-scroll-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
-                    var tabs = $('<div id="az-scroll-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
+                    var modal = $('<div id="az-js-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
+                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
                     $(modal).find('.' + p + 'modal-body').append(tabs);
-                    var form = $('<div id="az-scroll-animation-form" class="' + p + 'clearfix"><div class="tree ' + p + 'col-sm-5"></div><div class="options ' + p + 'col-sm-7"></div></div>');
+                    var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"><div class="tree ' + p + 'col-sm-5"></div><div class="options ' + p + 'col-sm-7"></div></div>');
                     $(tabs).find('#script').append(form);
-                    $('#az-scroll-animation-tabs a[href="#script"]')[fp + 'tab']('show');
+                    $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
 
                     azexo_add_css('jstree/dist/themes/default/style.min.css', function() {
                     });
-                    $(form).find('.tree').append('<div class="' + p + 'form-group an-name"><label>' + t("Name") + '</label><div><input class="' + p + 'form-control" name="an_name" type="text" value="' + element.an_name + '" required ></div><p class="' + p + 'help-block">' + t("Name to identify this element in scroll animations") + '</p></div>');
+                    $(form).find('.tree').append('<div class="' + p + 'form-group an-name"><label>' + t("Name") + '</label><div><input class="' + p + 'form-control" name="an_name" type="text" value="' + element.an_name + '" required ></div><p class="' + p + 'help-block">' + t("Name to identify this element in JS animations") + '</p></div>');
                     azexo_add_js({
                         path: 'jstree/dist/jstree.min.js',
                         loaded: 'jstree' in $.fn,
@@ -3613,25 +3787,42 @@
                             function get_scene(id) {
                                 $(form).find('.options').empty();
 
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Time line") + '</label><div class="' + p + 'radio"><label><input type="radio" name="time" value="scroll">' + t("Scroll position") + '</label></div><div class="' + p + 'radio"><label><input type="radio" name="time" value="real">' + t("Real time") + '</label></div></div>');
-                                $(form).find('.options [name="time"]').on('change', function() {
-                                    if ($(this).val() == 'scroll') {
-                                        $(form).find('.options .' + p + 'form-group.duration').css('display', 'block');
-                                        $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'none');
+                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Type") + '</label><div class="' + p + 'radio"><label><input type="radio" name="type" value="library">' + t("Real time, store in library") + '</label></div><div class="' + p + 'radio"><label><input type="radio" name="type" value="scroll">' + t("Scroll position as time line") + '</label></div><div class="' + p + 'radio"><label><input type="radio" name="type" value="real">' + t("Real time fired by scroll position") + '</label></div></div>');
+                                $(form).find('.options [name="type"]').on('change', function() {
+                                    if ($(this).is(':checked')) {
+                                        switch ($(this).val()) {
+                                            case 'library':
+                                                $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'block');
+                                                $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'none');
+                                                index[id].duration = '-1';
+                                                tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                break;
+                                            case 'scroll':
+                                                $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
+                                                $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'none');
 
-                                        index[id].duration = $(form).find('.options [name="duration"]').val();
-                                        tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
-                                    } else {
-                                        $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
-                                        $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'block');
-                                        index[id].duration = '0';
-                                        tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                index[id].duration = $(form).find('.options [name="duration"]').val();
+                                                tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                break;
+                                            case 'real':
+                                                $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
+                                                $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
+                                                index[id].duration = '0';
+                                                tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                break;
+                                        }
                                     }
                                 });
-                                if (index[id].duration == '0') {
-                                    $(form).find('.options [name="time"][value="real"]').attr('checked', 'checked');
-                                } else {
-                                    $(form).find('.options [name="time"][value="scroll"]').attr('checked', 'checked');
+                                switch (index[id].duration) {
+                                    case '-1':
+                                        $(form).find('.options [name="type"][value="library"]').attr('checked', 'checked');
+                                        break;
+                                    case '0':
+                                        $(form).find('.options [name="type"][value="real"]').attr('checked', 'checked');
+                                        break;
+                                    default:
+                                        $(form).find('.options [name="type"][value="scroll"]').attr('checked', 'checked');
+                                        break;
                                 }
 
                                 $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("The duration of the scene in pixels") + '</p></div>');
@@ -3645,9 +3836,6 @@
                                     index[id].offset = $(this).val();
                                     tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
                                 });
-                                if (index[id].duration == '0') {
-                                    $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
-                                }
 
                                 $(form).find('.options').append('<div class="' + p + 'form-group repeat"><label>' + t("Repeat") + '</label><div class="' + p + 'checkbox"><label><input type="checkbox" name="indefinite"> ' + t("repeat indefinitely") + '</label></div><div><input class="' + p + 'form-control" name="repeat" type="text" value="' + index[id].repeat + '"></div><p class="' + p + 'help-block">' + t("Number of times that the timeline should repeat after its first iteration") + '</p></div>');
                                 $(form).find('.options [name="repeat"]').on('change', function() {
@@ -3676,26 +3864,23 @@
                                 $(form).find('.options [name="repeatDelay"]').on('change', function() {
                                     index[id].repeatDelay = $(this).val();
                                 });
-                                if (index[id].duration != '0') {
-                                    $(form).find('.options .' + p + 'form-group.repeat').css('display', 'none');
-                                    $(form).find('.options .' + p + 'form-group.repeatdelay').css('display', 'none');
-                                }
 
                                 var hook = ["onEnter", "onCenter", "onLeave"];
                                 hook = _.object(hook, hook);
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Trigger hook") + '</label><div>' + get_select(hook, 'trigger-hook', index[id].triggerHook) + '</div><p class="' + p + 'help-block">' + t("Trigger hook") + '</p></div>');
+                                $(form).find('.options').append('<div class="' + p + 'form-group trigger"><label>' + t("Trigger hook") + '</label><div>' + get_select(hook, 'trigger-hook', index[id].triggerHook) + '</div><p class="' + p + 'help-block">' + t("Trigger hook") + '</p></div>');
                                 $(form).find('.options [name="trigger-hook"]').on('change', function() {
                                     index[id].triggerHook = $(this).val();
                                     tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
                                 });
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Pin") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'pin', index[id].pin) + '</div><p class="' + p + 'help-block">' + t("Pin element") + '</p></div>');
+                                $(form).find('.options').append('<div class="' + p + 'form-group pin"><label>' + t("Pin") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'pin', index[id].pin) + '</div><p class="' + p + 'help-block">' + t("Pin element") + '</p></div>');
                                 $(form).find('.options [name="pin"]').on('change', function() {
                                     index[id].pin = $(this).val();
                                 });
+                                $(form).find('.options [name="type"]').trigger('change');
                             }
                             function add_scene(duration) {
-                                var id = tree.jstree('create_node', '#', {type: 'scene', text: t("Scene") + ':' + duration + '|0|0.5', state: {opened: true}}, 'last');
-                                element.an_scenes.push({duration: duration, offset: 0, triggerHook: 'onCenter', timeline: [], repeat: '0', repeatDelay: '0'});
+                                var id = tree.jstree('create_node', '#', {type: 'scene', text: t("Scene") + ':' + duration.toString() + '|0|0.5', state: {opened: true}}, 'last');
+                                element.an_scenes.push({duration: duration.toString(), offset: 0, triggerHook: 'onCenter', timeline: [], repeat: '0', repeatDelay: '0'});
                                 index[id] = element.an_scenes[element.an_scenes.length - 1];
                                 index_type[id] = 'scene';
                                 add_step(id);
@@ -3765,9 +3950,6 @@
                                         });
                                         n++;
                                         return row;
-                                    }
-                                    function delete_property(dom_element) {
-
                                     }
                                     var group = $('<div><div class="' + p + 'form-group properties"></div><div class="add-property"></div></div>').appendTo(container);
                                     for (var pr in obj[name]) {
@@ -3868,9 +4050,7 @@
                             }
                             var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo($(form).find('.tree'));
                             $('<button title="' + title("Add scene") + '" class="add-scene ' + p + 'btn ' + p + 'btn-default">' + t("Add scene") + '</button>').appendTo(buttons).click(function() {
-                                var duration = window.prompt(t('Enter duration of new scene:'), 100);
-                                if (duration != '' && duration != null)
-                                    add_scene(duration)
+                                add_scene(-1);
                             });
                             $('<button title="' + title("Add timeline step") + '" class="add-step ' + p + 'btn ' + p + 'btn-default" disabled>' + t("Add step") + '</button>').appendTo(buttons).click(function() {
                                 var ids = tree.jstree('get_selected');
@@ -4051,7 +4231,7 @@
                                                 });
                                                 element.an_scenes = an_scenes;
                                                 fill_tree();
-                                                $('#az-scroll-animation-tabs a[href="#script"]')[fp + 'tab']('show');
+                                                $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
                                             } else {
                                                 $(tabs).find('#wizard-form').prepend(get_alert(t('Animated target element must be child of the current element.')));
                                             }
@@ -4063,7 +4243,7 @@
                             });
                         }
                     });
-                    $('#az-scroll-animation-modal').find('.save').click(function() {
+                    $('#az-js-animation-modal').find('.save').click(function() {
                         $(form).find('.tree [name="an_name"]')
                         if ($(form).find('.tree [name="an_name"]').val() == '') {
                             $(form).find('.tree .an-name').addClass('has-error');
@@ -4083,14 +4263,53 @@
                                 element.update_scroll_animation();
                             }
                         });
-                        $('#az-scroll-animation-modal')[fp + 'modal']('hide');
+                        $('#az-js-animation-modal')[fp + 'modal']('hide');
                         azexo_elements.raiseEvent("edited_element", element.id);
                         return false;
                     });
-                    $('#az-scroll-animation-modal')[fp + 'modal']('show');
+                    $('#az-js-animation-modal')[fp + 'modal']('show');
                     return false;
                 });
             }
+        },
+        make_timeline: function(scene) {
+            var options = {};
+            if (scene.duration == '0' || scene.duration == '-1') {
+                options = {repeat: parseInt(scene.repeat), repeatDelay: parseFloat(scene.repeatDelay)};
+            }
+            //onComplete play()
+            var timeline = new TimelineMax(options);
+            for (var j = 0; j < scene.timeline.length; j++) {
+                var step = [];
+                for (var k = 0; k < scene.timeline[j].tweens.length; k++) {
+                    var target = '[data-an-name="' + scene.timeline[j].tweens[k].target + '"]';
+                    var f = _.keys(scene.timeline[j].tweens[k].from);
+                    var t = _.keys(scene.timeline[j].tweens[k].to);
+                    if (f.length == 0 && t.length > 0) {
+                        var to = scene.timeline[j].tweens[k].to;
+                        to.ease = scene.timeline[j].tweens[k].ease;
+                        to.delay = parseFloat(scene.timeline[j].tweens[k].delay);
+                        step.push(TweenMax.to(target, scene.timeline[j].tweens[k].duration, to));
+                    }
+                    if (f.length > 0 && t.length == 0) {
+                        var from = scene.timeline[j].tweens[k].from;
+                        from.ease = scene.timeline[j].tweens[k].ease;
+                        from.delay = parseFloat(scene.timeline[j].tweens[k].delay);
+                        step.push(TweenMax.from(target, scene.timeline[j].tweens[k].duration, from));
+                    }
+                    if (f.length > 0 && t.length > 0) {
+                        var from = scene.timeline[j].tweens[k].from;
+                        from.ease = scene.timeline[j].tweens[k].ease;
+                        from.delay = scene.timeline[j].tweens[k].delay;
+                        var to = scene.timeline[j].tweens[k].to;
+                        to.ease = scene.timeline[j].tweens[k].ease;
+                        to.delay = parseFloat(scene.timeline[j].tweens[k].delay);
+                        step.push(TweenMax.fromTo(target, scene.timeline[j].tweens[k].duration, from, to));
+                    }
+                }
+                timeline.add(step);
+            }
+            return timeline;
         },
         update_scroll_animation: function() {
             var element = this;
@@ -4116,67 +4335,35 @@
                     element.scroll_magic_scenes = [];
                     if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
                         for (var i = 0; i < element.an_scenes.length; i++) {
-                            var options = {
-                                triggerElement: '[data-az-id="' + element.id + '"]',
-                                duration: element.an_scenes[i].duration,
-                                offset: element.an_scenes[i].offset,
-                                triggerHook: element.an_scenes[i].triggerHook,
-                            };
-                            var scene = new ScrollScene(options).addTo(scroll_magic);
-                            element.scroll_magic_scenes.push(scene);
+                            if (element.an_scenes[i].duration != '-1') {
+                                var options = {
+                                    triggerElement: '[data-az-id="' + element.id + '"]',
+                                    duration: element.an_scenes[i].duration,
+                                    offset: element.an_scenes[i].offset,
+                                    triggerHook: element.an_scenes[i].triggerHook,
+                                };
+                                var scene = new ScrollScene(options).addTo(scroll_magic);
+                                element.scroll_magic_scenes.push(scene);
 
-                            if (window.azexo_editor) {
-                                (function(scene) {
-                                    element.add_js({
-                                        path: 'ScrollMagic/js/jquery.scrollmagic.debug.js',
-                                        callback: function() {
-                                            scene.addIndicators({
-                                                suffix: element.an_name,
-                                            });
-                                        },
-                                    });
-                                })(scene);
-                            }
-
-                            if ('pin' in element.an_scenes[i] && element.an_scenes[i].pin != '') {
-                                scene.setPin('[data-an-name="' + element.an_scenes[i].pin + '"]');
-                            }
-                            var options = {};
-                            if (element.an_scenes[i].duration == '0') {
-                                options = {repeat: parseInt(element.an_scenes[i].repeat), repeatDelay: parseFloat(element.an_scenes[i].repeatDelay)};
-                            }
-                            var timeline = new TimelineMax(options);
-                            for (var j = 0; j < element.an_scenes[i].timeline.length; j++) {
-                                var step = [];
-                                for (var k = 0; k < element.an_scenes[i].timeline[j].tweens.length; k++) {
-                                    var target = '[data-an-name="' + element.an_scenes[i].timeline[j].tweens[k].target + '"]';
-                                    var f = _.keys(element.an_scenes[i].timeline[j].tweens[k].from);
-                                    var t = _.keys(element.an_scenes[i].timeline[j].tweens[k].to);
-                                    if (f.length == 0 && t.length > 0) {
-                                        var to = element.an_scenes[i].timeline[j].tweens[k].to;
-                                        to.ease = element.an_scenes[i].timeline[j].tweens[k].ease;
-                                        to.delay = parseFloat(element.an_scenes[i].timeline[j].tweens[k].delay);
-                                        step.push(TweenMax.to(target, element.an_scenes[i].timeline[j].tweens[k].duration, to));
-                                    }
-                                    if (f.length > 0 && t.length == 0) {
-                                        var from = element.an_scenes[i].timeline[j].tweens[k].from;
-                                        from.ease = element.an_scenes[i].timeline[j].tweens[k].ease;
-                                        from.delay = parseFloat(element.an_scenes[i].timeline[j].tweens[k].delay);
-                                        step.push(TweenMax.from(target, element.an_scenes[i].timeline[j].tweens[k].duration, from));
-                                    }
-                                    if (f.length > 0 && t.length > 0) {
-                                        var from = element.an_scenes[i].timeline[j].tweens[k].from;
-                                        from.ease = element.an_scenes[i].timeline[j].tweens[k].ease;
-                                        from.delay = element.an_scenes[i].timeline[j].tweens[k].delay;
-                                        var to = element.an_scenes[i].timeline[j].tweens[k].to;
-                                        to.ease = element.an_scenes[i].timeline[j].tweens[k].ease;
-                                        to.delay = parseFloat(element.an_scenes[i].timeline[j].tweens[k].delay);
-                                        step.push(TweenMax.fromTo(target, element.an_scenes[i].timeline[j].tweens[k].duration, from, to));
-                                    }
+                                if (window.azexo_editor) {
+                                    (function(scene) {
+                                        element.add_js({
+                                            path: 'ScrollMagic/js/jquery.scrollmagic.debug.js',
+                                            callback: function() {
+                                                scene.addIndicators({
+                                                    suffix: element.an_name,
+                                                });
+                                            },
+                                        });
+                                    })(scene);
                                 }
-                                timeline.add(step);
+
+                                if ('pin' in element.an_scenes[i] && element.an_scenes[i].pin != '') {
+                                    scene.setPin('[data-an-name="' + element.an_scenes[i].pin + '"]');
+                                }
+                                var timeline = element.make_timeline(element.an_scenes[i]);
+                                scene.setTween(timeline);
                             }
-                            scene.setTween(timeline);
                         }
                     }
                 }
@@ -4190,7 +4377,7 @@
                 this.update_scroll_animation();
             }
             if ('an_start' in this.attrs && this.attrs['an_start'] != '' && this.attrs['an_start'] != 'no') {
-                this.css_animation();
+                this.animation();
             }
         },
         render: function($, p, fp) {
@@ -5055,7 +5242,7 @@
                     $(dom_element).css("left", parseInt($(dom_element).css("left")) / ($(element.dom_element).width() / 100) + "%");
                     $(dom_element).css("top", parseInt($(dom_element).css("top")) / ($(element.dom_element).height() / 100) + "%");
                     $(dom_element).css("width", parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%");
-                    $(dom_element).css("height", parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%");                    
+                    $(dom_element).css("height", parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%");
                 }
                 $(this.dom_content_element).resizable({
 //                    containment: "parent",
@@ -5832,9 +6019,10 @@
                     if (!('impress' in element)) {
                         element.impress = window.impress(element.id);
                     }
-                    element.impress.init();                
+                    element.impress.init();
                     element.impress_init();
-                    element.impress.goto(element.children[0].id);
+                    if (element.children.length > 0)
+                        element.impress.goto(element.children[0].id);
 
                     element.dom_element.get(0).addEventListener("impress:stepenter", function(event) {
                         var id = $(event.target).attr('data-az-id');
@@ -6012,7 +6200,7 @@
                     el.attrs['x'] = parent.state.data.x.toString();
                     el.attrs['y'] = parent.state.data.y.toString();
                     el.attrs['rotate_z'] = parent.state.data.rotate.toString();
-                    el.attrs['scale'] = parent.state.data.scale.toString();                    
+                    el.attrs['scale'] = parent.state.data.scale.toString();
                 }
                 function loadData() {
                     parent.state.data.x = parseFloat(parent.state.$node[0].dataset.x) || parent.defaults.x;
@@ -6083,7 +6271,7 @@
         },
         clone: function() {
             var shortcode = StepElement.baseclass.prototype.get_my_shortcode.apply(this, arguments);
-            $('#azexo-clipboard').html(btoa(encodeURIComponent(shortcode)));            
+            $('#azexo-clipboard').html(btoa(encodeURIComponent(shortcode)));
             for (var i = 0; i < this.parent.children.length; i++) {
                 if (this.parent.children[i].id == this.id) {
                     this.parent.paste(i);
@@ -6178,7 +6366,7 @@
                     $(this.controls).find('.copy').remove();
                     $(this.controls).find('.clone').remove();
                     $(this.controls).find('.remove').remove();
-                    $(this.controls).find('.scroll-animation').remove();
+                    $(this.controls).find('.js-animation').remove();
                     $(this.controls).find('.drag-and-drop').attr('title', '');
                     $(this.controls).find('.drag-and-drop').removeClass(p + 'glyphicon');
                     $(this.controls).find('.drag-and-drop').removeClass(p + 'glyphicon-move');
@@ -6465,10 +6653,12 @@
                     javascript += get_class_method_js(AnimatedElement, 'end_animation', true);
                     javascript += get_class_method_js(AnimatedElement, 'trigger_start_in_animation', true);
                     javascript += get_class_method_js(AnimatedElement, 'trigger_start_out_animation', true);
-                    javascript += get_class_method_js(AnimatedElement, 'css_animation', true);
+                    javascript += get_class_method_js(AnimatedElement, 'animation', true);
                 }
-                if ('an_scenes' in attributes)
+                if ('an_scenes' in attributes) {
+                    javascript += get_class_method_js(AnimatedElement, 'make_timeline', true);
                     javascript += get_class_method_js(AnimatedElement, 'update_scroll_animation', true);
+                }
                 if ('an_start' in attributes || 'an_scenes' in attributes)
                     javascript += get_class_method_js(AnimatedElement, 'showed', true);
                 javascript += register_animated_element.toString() + "\n";
