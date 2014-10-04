@@ -41,3 +41,10 @@ Demo: http://azexo.com/azexo_composer/
 * Countdown Timer
 * Circle counter
 * Counter
+
+LICENSE
+---------
+
+Copyright 2014 Andrey Soloduhin
+
+Released under the MIT and GPL (version 2 or later) Licenses.
