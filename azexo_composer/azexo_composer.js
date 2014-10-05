@@ -1543,66 +1543,11 @@
         };
         head.appendChild(script);
     }
-    EventObject = function() {
-    };
-    EventObject.prototype = {
-        _eventList: {},
-        _getEvent: function(eventName, create) {
-            if (!this._eventList[eventName]) {
-                if (!create) {
-                    return null;
-                }
-                this._eventList[eventName] = [];
-            }
-            return this._eventList[eventName];
-        },
-        attachEvent: function(eventName, handler) {
-            var evt = this._getEvent(eventName, true);
-            evt.push(handler);
-        },
-        detachEvent: function(eventName, handler) {
-            var evt = this._getEvent(eventName);
-            if (!evt) {
-                return;
-            }
-            var getArrayIndex = function(array, item) {
-                for (var i = array.length; i < array.length; i++) {
-                    if (array[i] && array[i] === item) {
-                        return i;
-                    }
-                }
-                return -1;
-            };
-            var index = getArrayIndex(evt, handler);
-            if (index > -1) {
-                evt.splice(index, 1);
-            }
-        },
-        raiseEvent: function(eventName, eventArgs) {
-            var handler = this._getEventHandler(eventName);
-            if (handler) {
-                handler(this, eventArgs);
-            }
-        },
-        _getEventHandler: function(eventName) {
-            var evt = this._getEvent(eventName, false);
-            if (!evt || evt.length === 0) {
-                return null;
-            }
-            var h = function(sender, args) {
-                for (var i = 0; i < evt.length; i++) {
-                    evt[i](sender, args);
-                }
-            };
-            return h;
-        }
-    };
 //
 //
 //
     function AZEXOElements() {
     }
-    AZEXOElements.prototype = new EventObject;
     mixin(AZEXOElements.prototype, {
         elements_instances: {},
         elements_instances_by_an_name: {},
@@ -1924,13 +1869,13 @@
         get_element: function(id) {
             return this.elements_instances[id];
         },
-        delete_element: function(id) {
-            this.raiseEvent("delete_element", id);
+        delete_element: function(id) {            
+            $(document).trigger("azexo_delete_element", id);
             delete this.elements_instances[id];
         },
         add_element: function(id, element, parse) {
             this.elements_instances[id] = element;
-            this.raiseEvent("add_element", {id: id, parse: parse});
+            $(document).trigger("azexo_add_element", {id: id, parse: parse});
         },
     });
 //
@@ -2440,7 +2385,7 @@
 //                    sender.children[i].parent = sender;
 //                sender.update_empty();
 //            }
-            azexo_elements.raiseEvent("update_sorting", ui);
+            $(document).trigger("azexo_update_sorting", ui);
         },
         click_edit: function(e) {
             e.data.object.edit();
@@ -2455,7 +2400,7 @@
                 this.attrs[name] = unescapeParam(attrs[name]);
             }
             this.update_dom();
-            azexo_elements.raiseEvent("edited_element", this.id);
+            $(document).trigger("azexo_edited_element", this.id);
         },
         attrs2string: function() {
             var attrs = '';
@@ -2520,7 +2465,7 @@
                     this.attrs[name] = attrs[name];
                 }
             }
-            azexo_elements.raiseEvent("edited_element", this.id);
+            $(document).trigger("azexo_edited_element", this.id);
         },
         get_nested_depth: function(base) {
             var depth = 0;
@@ -3118,12 +3063,12 @@
                                     });
                                 }
                             });
-                        };
-                        azexo_elements.attachEvent("add_element", container.save_container);
-                        azexo_elements.attachEvent("edited_element", container.save_container);
-                        azexo_elements.attachEvent("update_element", container.save_container);
-                        azexo_elements.attachEvent("delete_element", container.save_container);
-                        azexo_elements.attachEvent("update_sorting", container.save_container);
+                        };                        
+                        $(document).on("azexo_add_element", container.save_container);
+                        $(document).on("azexo_edited_element", container.save_container);
+                        $(document).on("azexo_update_element", container.save_container);
+                        $(document).on("azexo_delete_element", container.save_container);
+                        $(document).on("azexo_update_sorting", container.save_container);
                     }
                 });
             },
@@ -3396,23 +3341,33 @@
             var element = this;
             element.in_timeout = setTimeout(function() {
                 if (element.attrs['an_letters'] == '') {
-                    $(element.dom_element).css('opacity', '');
-                    $(element.dom_element).removeClass('animated');
-                    $(element.dom_element).removeClass(element.attrs['an_in']);
-                    $(element.dom_element).removeClass(element.attrs['an_out']);
-                    element.animation_in = false;
-                    element.animation_out = false;
-                    $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
-                    $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
-                    $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
-                    $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
-                    $(element.dom_element).addClass('animated');
-                    element.animated = true;
-                    if (element.attrs['an_infinite'] == 'yes') {
-                        $(element.dom_element).addClass('infinite');
+                    if (element.attrs['an_in'] == 'js') {
+                        var name_i = element.attrs['an_js_in'].split('-');
+                        var e = azexo_elements.elements_instances_by_an_name[name_i[0]];
+                        var scene = e.an_scenes[parseInt(name_i[1])];
+                        element.timeline_in = element.make_timeline(scene, function() {
+                            element.end_animation();
+                        });
+                        element.timeline_in.play();
+                    } else {
+                        $(element.dom_element).css('opacity', '');
+                        $(element.dom_element).removeClass('animated');
+                        $(element.dom_element).removeClass(element.attrs['an_in']);
+                        $(element.dom_element).removeClass(element.attrs['an_out']);
+                        element.animation_in = false;
+                        element.animation_out = false;
+                        $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
+                        $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
+                        $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
+                        $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
+                        $(element.dom_element).addClass('animated');
+                        element.animated = true;
+                        if (element.attrs['an_infinite'] == 'yes') {
+                            $(element.dom_element).addClass('infinite');
+                        }
+                        $(element.dom_element).addClass(element.attrs['an_in']);
+                        element.animation_in = true;
                     }
-                    $(element.dom_element).addClass(element.attrs['an_in']);
-                    element.animation_in = true;
                 } else {
                     element.animation_letters();
                     $(element.dom_element).css('opacity', '');
@@ -3427,7 +3382,7 @@
         start_in_animation: function() {
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
-                if (element.attrs['an_in'] != '') {
+                if (element.attrs['an_in'] != '' || element.attrs['an_js_in'] != '') {
                     if (element.out_timeout > 0) {
                         if (element.animated) {
                             //still in-animate
@@ -3451,23 +3406,33 @@
             var element = this;
             element.out_timeout = setTimeout(function() {
                 if (element.attrs['an_letters'] == '') {
-                    $(element.dom_element).css('opacity', '');
-                    $(element.dom_element).removeClass('animated');
-                    $(element.dom_element).removeClass(element.attrs['an_in']);
-                    $(element.dom_element).removeClass(element.attrs['an_out']);
-                    element.animation_in = false;
-                    element.animation_out = false;
-                    $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
-                    $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
-                    $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
-                    $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
-                    $(element.dom_element).addClass('animated');
-                    element.animated = true;
-                    if (element.attrs['an_infinite'] == 'yes') {
-                        $(element.dom_element).addClass('infinite');
+                    if (element.attrs['an_out'] == 'js') {
+                        var name_i = element.attrs['an_js_out'].split('-');
+                        var e = azexo_elements.elements_instances_by_an_name[name_i[0]];
+                        var scene = e.an_scenes[parseInt(name_i[1])];
+                        element.timeline_out = element.make_timeline(scene, function() {
+                            element.end_animation();
+                        });
+                        element.timeline_out.play();
+                    } else {
+                        $(element.dom_element).css('opacity', '');
+                        $(element.dom_element).removeClass('animated');
+                        $(element.dom_element).removeClass(element.attrs['an_in']);
+                        $(element.dom_element).removeClass(element.attrs['an_out']);
+                        element.animation_in = false;
+                        element.animation_out = false;
+                        $(element.dom_element).css('animation-duration', element.attrs['an_duration'] + 'ms');
+                        $(element.dom_element).css('-webkit-animation-duration', element.attrs['an_duration'] + 'ms');
+                        $(element.dom_element).css('animation-fill-mode', element.attrs['an_fill_mode']);
+                        $(element.dom_element).css('-webkit-animation-fill-mode', element.attrs['an_fill_mode']);
+                        $(element.dom_element).addClass('animated');
+                        element.animated = true;
+                        if (element.attrs['an_infinite'] == 'yes') {
+                            $(element.dom_element).addClass('infinite');
+                        }
+                        $(element.dom_element).addClass(element.attrs['an_out']);
+                        element.animation_out = true;
                     }
-                    $(element.dom_element).addClass(element.attrs['an_out']);
-                    element.animation_out = true;
                 } else {
                     element.animation_letters();
                     $(element.dom_element).css('opacity', '');
@@ -3482,7 +3447,7 @@
         start_out_animation: function() {
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
-                if (element.attrs['an_out'] != '') {
+                if (element.attrs['an_out'] != '' || element.attrs['an_js_out'] != '') {
                     if (element.in_timeout > 0) {
                         if (element.animated) {
                             //still in-animate
@@ -3520,18 +3485,34 @@
                 }
             }
             if (this.attrs['an_letters'] == '') {
-                $(this.dom_element).css('animation-duration', '');
-                $(this.dom_element).css('-webkit-animation-duration', '');
-                $(this.dom_element).css('animation-fill-mode', '');
-                $(this.dom_element).css('-webkit-animation-fill-mode', '');
-                $(this.dom_element).removeClass('animated');
-                this.animated = false;
-                $(this.dom_element).removeClass('infinite');
-                if (this.attrs['an_fill_mode'] == '') {
-                    $(this.dom_element).removeClass(this.attrs['an_in']);
-                    $(this.dom_element).removeClass(this.attrs['an_out']);
+                if ($(this.dom_element).hasClass('animated')) {
+                    $(this.dom_element).css('animation-duration', '');
+                    $(this.dom_element).css('-webkit-animation-duration', '');
+                    $(this.dom_element).css('animation-fill-mode', '');
+                    $(this.dom_element).css('-webkit-animation-fill-mode', '');
+                    $(this.dom_element).removeClass('animated');
+                    this.animated = false;
+                    $(this.dom_element).removeClass('infinite');
+                    if (this.attrs['an_fill_mode'] == '') {
+                        $(this.dom_element).removeClass(this.attrs['an_in']);
+                        $(this.dom_element).removeClass(this.attrs['an_out']);
+                        this.animation_in = false;
+                        this.animation_out = false;
+                    }
+                } else {
+                    if ('timeline_in' in this) {
+                        this.timeline_in.resume();
+                        this.timeline_in.kill();
+                        delete this['timeline_in'];
+                    }
+                    if ('timeline_out' in this) {
+                        this.timeline_out.resume();
+                        this.timeline_out.kill();
+                        delete this['timeline_out'];
+                    }
                     this.animation_in = false;
                     this.animation_out = false;
+                    this.animated = false;
                 }
             } else {
                 if ('textillate_elements' in this) {
@@ -3554,15 +3535,29 @@
             if (this.animation_in) {
                 this.clear_animation();
                 if (this.attrs['an_start'] == 'hover' && !this.hover) {
-                    if (this.attrs['an_in'] != this.attrs['an_out'])
+                    if (this.attrs['an_in'] != this.attrs['an_out']) {
                         this.start_out_animation();
+                    } else {
+                        if (this.attrs['an_in'] == 'js') {
+                            if (this.attrs['an_js_in'] != this.attrs['an_js_out']) {
+                                this.start_out_animation();
+                            }
+                        }
+                    }
                 }
             }
             if (this.animation_out) {
                 this.clear_animation();
                 if (this.attrs['an_start'] == 'hover' && this.hover) {
-                    if (this.attrs['an_in'] != this.attrs['an_out'])
+                    if (this.attrs['an_in'] != this.attrs['an_out']) {
                         this.start_in_animation();
+                    } else {
+                        if (this.attrs['an_in'] == 'js') {
+                            if (this.attrs['an_js_in'] != this.attrs['an_js_out']) {
+                                this.start_in_animation();
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -3684,58 +3679,67 @@
                 if (element.attrs['an_letters'] != '') {
                     //element.animation_letters();
                 } else {
-                    $(element.dom_element).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                    $(element.dom_element).off('webkitAnimationEnd.animation mozAnimationEnd.animation MSAnimationEnd.animation oanimationend.animation animationend.animation');
+                    $(element.dom_element).on('webkitAnimationEnd.animation mozAnimationEnd.animation MSAnimationEnd.animation oanimationend.animation animationend.animation', function() {
                         element.end_animation();
                     });
                 }
-                this.add_css('animate.css/animate.min.css', false, function() {
-                    var callback = function() {
-                        $(parent).off('click.animation');
-                        $(parent).off('mouseenter.animation');
-                        $(parent).off('mouseleave.animation');
-                        switch (element.attrs['an_start']) {
-                            case 'click':
-                                $(parent).on('click.animation', function() {
-                                    if (!element.animated) {
-                                        element.start_in_animation();
-                                    }
-                                });
-                                break;
-                            case 'appear':
-                                element.add_js({
-                                    path: 'jquery-waypoints/waypoints.min.js',
-                                    loaded: 'waypoint' in $.fn,
-                                    callback: function() {
-                                        $(element.dom_element).waypoint(function(direction) {
-                                            if (!element.animated) {
-                                                element.start_in_animation();
-                                            }
-                                        }, {offset: '100%', triggerOnce: true});
-                                        $(document).trigger('scroll');
-                                    }});
-                                break;
-                            case 'hover':
-                                $(parent).on('mouseenter.animation', function() {
-                                    element.hover = true;
+                var callback = function() {
+                    $(parent).off('click.animation');
+                    $(parent).off('mouseenter.animation');
+                    $(parent).off('mouseleave.animation');
+                    switch (element.attrs['an_start']) {
+                        case 'click':
+                            $(parent).on('click.animation', function() {
+                                if (!element.animated) {
                                     element.start_in_animation();
-                                });
-                                $(parent).on('mouseleave.animation', function() {
-                                    element.hover = false;
-                                    element.start_out_animation();
-                                });
-                                break;
-                            case 'trigger':
-                                break;
-                            default:
-                                break;
-                        }
-                    };
+                                }
+                            });
+                            break;
+                        case 'appear':
+                            element.add_js({
+                                path: 'jquery-waypoints/waypoints.min.js',
+                                loaded: 'waypoint' in $.fn,
+                                callback: function() {
+                                    $(element.dom_element).waypoint(function(direction) {
+                                        if (!element.animated) {
+                                            element.start_in_animation();
+                                        }
+                                    }, {offset: '100%', triggerOnce: true});
+                                    $(document).trigger('scroll');
+                                }});
+                            break;
+                        case 'hover':
+                            $(parent).on('mouseenter.animation', function() {
+                                element.hover = true;
+                                element.start_in_animation();
+                            });
+                            $(parent).on('mouseleave.animation', function() {
+                                element.hover = false;
+                                element.start_out_animation();
+                            });
+                            break;
+                        case 'trigger':
+                            break;
+                        default:
+                            break;
+                    }
+                };
+                element.add_css('animate.css/animate.min.css', false, function() {
                     if (element.attrs['an_letters'] == '') {
-                        callback();
+                        if (element.attrs['an_js_in'] != '' || element.attrs['an_js_out'] != '') {
+                            element.add_js_list({
+                                paths: ['ScrollMagic/js/_dependent/greensock/TweenMax.min.js', 'ScrollMagic/js/_dependent/greensock/TimelineMax.min.js'],
+                                loaded: ('TimelineMax' in window) && ('TweenMax' in window),
+                                callback: callback
+                            });
+                        } else {
+                            callback();
+                        }
                     } else {
                         element.add_js_list({
                             paths: ['textillate/assets/jquery.lettering.js', 'js/textillate.js'],
-                            loaded: 'textillate' in $.fn,
+                            loaded: ('textillate' in $.fn) && ('lettering' in $.fn),
                             callback: callback
                         });
                     }
@@ -3746,12 +3750,13 @@
             var animations = {};
             for (var name in azexo_elements.elements_instances_by_an_name) {
                 for (var i = 0; i < azexo_elements.elements_instances_by_an_name[name].an_scenes.length; i++) {
-                    animations[name + '-' + i] = name + '-' + i;
+                    if (azexo_elements.elements_instances_by_an_name[name].an_scenes[i].duration == '-1')
+                        animations[name + '-' + i] = i + ' ' + t('scene in') + ' ' + name + ' ' + t('element');
                 }
             }
-            for (var i = 0; i < AnimatedElement.prototype.params.length; i++) {
-                if (AnimatedElement.prototype.params[i].param_name == 'an_js_in' || AnimatedElement.prototype.params[i].param_name == 'an_js_out') {
-                    AnimatedElement.prototype.params[i].value = animations;
+            for (var i = 0; i < this.params.length; i++) {
+                if (this.params[i].param_name == 'an_js_in' || this.params[i].param_name == 'an_js_out') {
+                    this.params[i].value = animations;
                 }
             }
         },
@@ -3784,6 +3789,22 @@
                             var index = {};
                             var index_type = {};
                             var index_parents = {};
+                            function scene_title(scene) {
+                                switch (scene.duration) {
+                                    case '-1':
+                                        return t("Real time library scene");
+                                        break;
+                                    case '0':
+                                        return t("Scroll real time scene") + ':' + scene.offset + '|' + scene.triggerHook;
+                                        break;
+                                    default:
+                                        return t("Scroll scene") + ':' + scene.duration + '|' + scene.offset + '|' + scene.triggerHook;
+                                        break;
+                                }
+                            }
+                            function tween_title(tween) {
+                                return t("Tween") + ':' + tween.target + '|' + tween.duration;
+                            }
                             function get_scene(id) {
                                 $(form).find('.options').empty();
 
@@ -3795,20 +3816,20 @@
                                                 $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'block');
                                                 $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'none');
                                                 index[id].duration = '-1';
-                                                tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                tree.jstree('edit', id, scene_title(index[id]));
                                                 break;
                                             case 'scroll':
                                                 $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
                                                 $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'none');
-
+                                                $(form).find('.options [name="duration"]').val('1000');
                                                 index[id].duration = $(form).find('.options [name="duration"]').val();
-                                                tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                tree.jstree('edit', id, scene_title(index[id]));
                                                 break;
                                             case 'real':
                                                 $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
                                                 $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
                                                 index[id].duration = '0';
-                                                tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                                tree.jstree('edit', id, scene_title(index[id]));
                                                 break;
                                         }
                                     }
@@ -3828,13 +3849,13 @@
                                 $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("The duration of the scene in pixels") + '</p></div>');
                                 $(form).find('.options [name="duration"]').on('change', function() {
                                     index[id].duration = $(this).val();
-                                    tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                    tree.jstree('edit', id, scene_title(index[id]));
                                 });
 
                                 $(form).find('.options').append('<div class="' + p + 'form-group offset"><label>' + t("Offset") + '</label><div><input class="' + p + 'form-control" name="offset" type="text" value="' + index[id].offset + '"></div><p class="' + p + 'help-block">' + t("Offset Value (in pixels) for the Trigger Position.") + '</p></div>');
                                 $(form).find('.options [name="offset"]').on('change', function() {
                                     index[id].offset = $(this).val();
-                                    tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                    tree.jstree('edit', id, scene_title(index[id]));
                                 });
 
                                 $(form).find('.options').append('<div class="' + p + 'form-group repeat"><label>' + t("Repeat") + '</label><div class="' + p + 'checkbox"><label><input type="checkbox" name="indefinite"> ' + t("repeat indefinitely") + '</label></div><div><input class="' + p + 'form-control" name="repeat" type="text" value="' + index[id].repeat + '"></div><p class="' + p + 'help-block">' + t("Number of times that the timeline should repeat after its first iteration") + '</p></div>');
@@ -3870,7 +3891,7 @@
                                 $(form).find('.options').append('<div class="' + p + 'form-group trigger"><label>' + t("Trigger hook") + '</label><div>' + get_select(hook, 'trigger-hook', index[id].triggerHook) + '</div><p class="' + p + 'help-block">' + t("Trigger hook") + '</p></div>');
                                 $(form).find('.options [name="trigger-hook"]').on('change', function() {
                                     index[id].triggerHook = $(this).val();
-                                    tree.jstree('edit', id, t("Scene") + ':' + index[id].duration + '|' + index[id].offset + '|' + index[id].triggerHook);
+                                    tree.jstree('edit', id, scene_title(index[id]));
                                 });
                                 $(form).find('.options').append('<div class="' + p + 'form-group pin"><label>' + t("Pin") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'pin', index[id].pin) + '</div><p class="' + p + 'help-block">' + t("Pin element") + '</p></div>');
                                 $(form).find('.options [name="pin"]').on('change', function() {
@@ -3879,8 +3900,8 @@
                                 $(form).find('.options [name="type"]').trigger('change');
                             }
                             function add_scene(duration) {
-                                var id = tree.jstree('create_node', '#', {type: 'scene', text: t("Scene") + ':' + duration.toString() + '|0|0.5', state: {opened: true}}, 'last');
                                 element.an_scenes.push({duration: duration.toString(), offset: 0, triggerHook: 'onCenter', timeline: [], repeat: '0', repeatDelay: '0'});
+                                var id = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[element.an_scenes.length - 1]), state: {opened: true}}, 'last');
                                 index[id] = element.an_scenes[element.an_scenes.length - 1];
                                 index_type[id] = 'scene';
                                 add_step(id);
@@ -3900,15 +3921,17 @@
                             function get_tween(id) {
                                 var scene = index_parents[index_parents[id]];
                                 $(form).find('.options').empty();
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', index[id].target) + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
-                                $(form).find('.options [name="target"]').on('change', function() {
-                                    index[id].target = $(this).val();
-                                    tree.jstree('edit', id, t("Tween") + ':' + index[id].target + '|' + index[id].duration);
-                                });
+                                if (index[scene].duration != '-1') {
+                                    $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', index[id].target) + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
+                                    $(form).find('.options [name="target"]').on('change', function() {
+                                        index[id].target = $(this).val();
+                                        tree.jstree('edit', id, tween_title(index[id]));
+                                    });
+                                }
                                 $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("Duration of the tween in seconds.") + '</p></div>');
                                 $(form).find('.options [name="duration"]').on('change', function() {
                                     index[id].duration = $(this).val();
-                                    tree.jstree('edit', id, t("Tween") + ':' + index[id].target + '|' + index[id].duration);
+                                    tree.jstree('edit', id, tween_title(index[id]));
                                 });
                                 function css_plugin_settings(container, obj, name) {
                                     var n = 0;
@@ -3983,14 +4006,14 @@
                                 $(form).find('.options [name="delay"]').on('change', function() {
                                     index[id].delay = $(this).val();
                                 });
-                                if (index[scene].duration != '0') {
+                                if (index[scene].duration != '0' && index[scene].duration != '-1') {
                                     $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
                                     $(form).find('.options .' + p + 'form-group.delay').css('display', 'none');
                                 }
                             }
                             function add_tween(step) {
-                                var id = tree.jstree('create_node', step, {type: 'tween', text: t("Tween") + ':' + '|1', state: {opened: true}}, 'last');
                                 index[step].tweens.push({target: '', duration: 1, from: {}, to: {}, ease: 'Linear.easeNone', delay: '0'});
+                                var id = tree.jstree('create_node', step, {type: 'tween', text: tween_title(index[step].tweens[index[step].tweens.length - 1]), state: {opened: true}}, 'last');
                                 index[id] = index[step].tweens[index[step].tweens.length - 1];
                                 index_type[id] = 'tween';
                                 index_parents[id] = step;
@@ -4031,7 +4054,7 @@
                             }
                             function fill_tree() {
                                 for (var i = 0; i < element.an_scenes.length; i++) {
-                                    var scene = tree.jstree('create_node', '#', {type: 'scene', text: t("Scene") + ':' + element.an_scenes[i].duration + '|' + element.an_scenes[i].offset + '|' + element.an_scenes[i].triggerHook, state: {opened: true}}, 'last');
+                                    var scene = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[i]), state: {opened: true}}, 'last');
                                     index[scene] = element.an_scenes[i];
                                     index_type[scene] = 'scene';
                                     for (var j = 0; j < element.an_scenes[i].timeline.length; j++) {
@@ -4040,7 +4063,7 @@
                                         index_type[step] = 'step';
                                         index_parents[step] = scene;
                                         for (var k = 0; k < element.an_scenes[i].timeline[j].tweens.length; k++) {
-                                            var tween = tree.jstree('create_node', step, {type: 'tween', text: t("Tween") + ':' + element.an_scenes[i].timeline[j].tweens[k].target + '|' + element.an_scenes[i].timeline[j].tweens[k].duration, state: {opened: true}}, 'last');
+                                            var tween = tree.jstree('create_node', step, {type: 'tween', text: tween_title(element.an_scenes[i].timeline[j].tweens[k]), state: {opened: true}}, 'last');
                                             index[tween] = element.an_scenes[i].timeline[j].tweens[k];
                                             index_type[tween] = 'tween';
                                             index_parents[tween] = step;
@@ -4050,7 +4073,7 @@
                             }
                             var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo($(form).find('.tree'));
                             $('<button title="' + title("Add scene") + '" class="add-scene ' + p + 'btn ' + p + 'btn-default">' + t("Add scene") + '</button>').appendTo(buttons).click(function() {
-                                add_scene(-1);
+                                add_scene('-1');
                             });
                             $('<button title="' + title("Add timeline step") + '" class="add-step ' + p + 'btn ' + p + 'btn-default" disabled>' + t("Add step") + '</button>').appendTo(buttons).click(function() {
                                 var ids = tree.jstree('get_selected');
@@ -4264,7 +4287,7 @@
                             }
                         });
                         $('#az-js-animation-modal')[fp + 'modal']('hide');
-                        azexo_elements.raiseEvent("edited_element", element.id);
+                        $(document).trigger("azexo_edited_element", element.id);
                         return false;
                     });
                     $('#az-js-animation-modal')[fp + 'modal']('show');
@@ -4272,17 +4295,20 @@
                 });
             }
         },
-        make_timeline: function(scene) {
+        make_timeline: function(scene, complete) {
             var options = {};
             if (scene.duration == '0' || scene.duration == '-1') {
                 options = {repeat: parseInt(scene.repeat), repeatDelay: parseFloat(scene.repeatDelay)};
             }
-            //onComplete play()
+            if (complete != null)
+                options.onComplete = complete;
             var timeline = new TimelineMax(options);
             for (var j = 0; j < scene.timeline.length; j++) {
                 var step = [];
                 for (var k = 0; k < scene.timeline[j].tweens.length; k++) {
-                    var target = '[data-an-name="' + scene.timeline[j].tweens[k].target + '"]';
+                    var target = '[data-az-id="' + this.id + '"]';
+                    if (scene.timeline[j].tweens[k].target != '')
+                        target = '[data-an-name="' + scene.timeline[j].tweens[k].target + '"]';
                     var f = _.keys(scene.timeline[j].tweens[k].from);
                     var t = _.keys(scene.timeline[j].tweens[k].to);
                     if (f.length == 0 && t.length > 0) {
@@ -4361,7 +4387,7 @@
                                 if ('pin' in element.an_scenes[i] && element.an_scenes[i].pin != '') {
                                     scene.setPin('[data-an-name="' + element.an_scenes[i].pin + '"]');
                                 }
-                                var timeline = element.make_timeline(element.an_scenes[i]);
+                                var timeline = element.make_timeline(element.an_scenes[i], null);
                                 scene.setTween(timeline);
                             }
                         }
@@ -4371,6 +4397,11 @@
         },
         showed: function($, p, fp) {
             AnimatedElement.baseclass.prototype.showed.apply(this, arguments);
+            this.an_name = '';
+            if ('an_name' in this.attrs && this.attrs['an_name'] != '') {
+                this.an_name = this.attrs['an_name'];
+                azexo_elements.elements_instances_by_an_name[this.an_name] = this;
+            }
             this.an_scenes = [];
             if ('an_scenes' in this.attrs && this.attrs['an_scenes'] != '') {
                 this.an_scenes = $.parseJSON(decodeURIComponent(atob(this.attrs['an_scenes'])));
@@ -4381,11 +4412,8 @@
             }
         },
         render: function($, p, fp) {
-            this.an_name = '';
             if ('an_name' in this.attrs && this.attrs['an_name'] != '') {
-                this.an_name = this.attrs['an_name'];
-                azexo_elements.elements_instances_by_an_name[this.an_name] = this;
-                $(this.dom_element).attr('data-an-name', this.an_name);
+                $(this.dom_element).attr('data-an-name', this.attrs['an_name']);
             }
             AnimatedElement.baseclass.prototype.render.apply(this, arguments);
         }
@@ -4722,7 +4750,7 @@
             $(this.dom_element).removeClass(width2span(this.attrs['width'], this.parent.attrs['device']));
             this.attrs['width'] = width;
             $(this.dom_element).addClass(width2span(this.attrs['width'], this.parent.attrs['device']));
-            azexo_elements.raiseEvent("update_element", this.id);
+            $(document).trigger("azexo_update_element", this.id);
         },
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-ctnr az-column ' + this.attrs['el_class'] + ' ' + width2span(this.attrs['width'], this.parent.attrs['device']) + '" style="' + this.attrs['style'] + '"></div>');
@@ -4826,7 +4854,7 @@
             if (window.azexo_editor) {
                 var grid_element = this;
 
-                azexo_elements.attachEvent("add_element",
+                $(document).on("azexo_add_element",
                         function(sender, data) {
                             var el = azexo_elements.get_element(data.id);
                             var item = grid_element.get_item(el);
@@ -4862,17 +4890,17 @@
                         }
                     }
                 }
-                azexo_elements.attachEvent("edited_element",
+                $(document).on("azexo_edited_element",
                         function(sender, id) {
                             update_element(true, id);
                         }
                 );
-                azexo_elements.attachEvent("update_element",
+                $(document).on("azexo_update_element",
                         function(sender, id) {
                             update_element(false, id);
                         }
                 );
-                azexo_elements.attachEvent("delete_element",
+                $(document).on("azexo_delete_element",
                         function(sender, id) {
                             var el = azexo_elements.get_element(id);
                             var item = grid_element.get_item(el);
@@ -4893,7 +4921,7 @@
                             }
                         }
                 );
-                azexo_elements.attachEvent("update_sorting",
+                $(document).on("azexo_update_sorting",
                         function(sender, ui) {
                             var id = $(ui.item).closest('[data-az-id]').attr('data-az-id');
                             if (id in grid_element.linked_elements_index) {
@@ -5236,7 +5264,7 @@
                     el.attrs['pos_width'] = parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%";
                     el.attrs['pos_height'] = parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%";
                     to_percents(dom_element);
-                    azexo_elements.raiseEvent("update_element", id);
+                    $(document).trigger("azexo_update_element", id);
                 }
                 function to_percents(dom_element) {
                     $(dom_element).css("left", parseInt($(dom_element).css("left")) / ($(element.dom_element).width() / 100) + "%");
@@ -5419,7 +5447,7 @@
             for (var i = 0; i < element.children.length; i++)
                 element.children[i].parent = element;
             element.update_dom();
-            azexo_elements.raiseEvent("update_sorting", ui);
+            $(document).trigger("azexo_update_sorting", ui);
         },
         click_add_tab: function(e) {
             e.data.object.add_tab();
@@ -6502,8 +6530,17 @@
                 if ('an_scenes' in element.attrs && element.attrs['an_scenes'] != '') {
                     attributes['an_scenes'] = true;
                 }
-                if ('an_start' in element.attrs && element.attrs['an_start'] != '' && element.attrs['an_start'] != 'no') {
+                if ('an_start' in element.attrs && element.attrs['an_start'] != '') {
                     attributes['an_start'] = true;
+                }
+                if ('an_letters' in element.attrs && element.attrs['an_letters'] != '') {
+                    attributes['an_letters'] = true;
+                }
+                if ('an_js_in' in element.attrs && element.attrs['an_js_in'] != '') {
+                    attributes['an_js'] = true;
+                }
+                if ('an_js_out' in element.attrs && element.attrs['an_js_out'] != '') {
+                    attributes['an_js'] = true;
                 }
                 for (var i = 0; i < element.children.length; i++) {
                     $.extend(attributes, check_attributes(element.children[i]));
@@ -6590,13 +6627,7 @@
                 javascript += AZEXOElements.name + ".prototype.elements_instances_by_an_name = {};\n";
                 javascript += get_class_method_js(AZEXOElements, 'get_element', true);
                 javascript += get_class_method_js(AZEXOElements, 'delete_element', true);
-                javascript += get_class_method_js(AZEXOElements, 'add_element', true);
-                javascript += AZEXOElements.name + ".prototype._eventList = {};\n";
-                javascript += get_class_method_js(AZEXOElements, '_getEvent', false);
-                javascript += get_class_method_js(AZEXOElements, 'attachEvent', false);
-                javascript += get_class_method_js(AZEXOElements, 'detachEvent', false);
-                javascript += get_class_method_js(AZEXOElements, 'raiseEvent', false);
-                javascript += get_class_method_js(AZEXOElements, '_getEventHandler', false);
+                javascript += get_class_method_js(AZEXOElements, 'add_element', true);                
 
                 javascript += BaseElement.toString() + "\n";
                 javascript += BaseElement.name + ".prototype.p = '" + p + "';\n";
@@ -6637,9 +6668,7 @@
                 javascript += "var " + azexo_containers_name + " = [];\n";
                 javascript += "var " + azexo_containers_loaded_name + " = {};\n";
                 javascript += connect_container.toString() + "\n";
-                var type = element.attrs['container'].split('/')[0];
-                var name = element.attrs['container'].split('/')[1];
-                javascript += jquery_name + "(document).ready(function(){" + connect_container.name + "(" + jquery_name + "('[data-az-type=\"" + type + "\"][data-az-name=\"" + name + "\"]'));});\n";
+                javascript += jquery_name + "(document).ready(function(){" + connect_container.name + "(" + jquery_name + "('[data-az-type=\"'+window.azexo_type+'\"][data-az-name=\"'+window.azexo_name+'\"]'));});\n";
 
                 javascript += AnimatedElement.toString() + "\n";
                 javascript += extend.name + "(" + AnimatedElement.name + ", " + BaseElement.name + ");\n";
@@ -6655,9 +6684,14 @@
                     javascript += get_class_method_js(AnimatedElement, 'trigger_start_out_animation', true);
                     javascript += get_class_method_js(AnimatedElement, 'animation', true);
                 }
-                if ('an_scenes' in attributes) {
+                if ('an_scenes' in attributes || 'an_js' in attributes) {
                     javascript += get_class_method_js(AnimatedElement, 'make_timeline', true);
+                }
+                if ('an_scenes' in attributes) {
                     javascript += get_class_method_js(AnimatedElement, 'update_scroll_animation', true);
+                }
+                if ('an_letters' in attributes) {
+                    javascript += get_class_method_js(AnimatedElement, 'animation_letters', true);
                 }
                 if ('an_start' in attributes || 'an_scenes' in attributes)
                     javascript += get_class_method_js(AnimatedElement, 'showed', true);
@@ -6847,8 +6881,12 @@
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
 
             var javascript = '';
-            if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes)
-                javascript = "<script type=\"text/javascript\">\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
+            if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes) {
+                var type = element.attrs['container'].split('/')[0];
+                var name = element.attrs['container'].split('/')[1];
+                var type_data = 'window.azexo_type="' + type + '";window.azexo_name="' + name + '";';
+                javascript = "<script type=\"text/javascript\">" + type_data + "\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
+            }
             return get_css(element) + get_hover_styles(element) + get_js(element) + javascript + $(dom).html();
         },
         click_save_container: function(e) {
@@ -7014,11 +7052,11 @@
                 }
             }
         };
-        azexo_elements.attachEvent("add_element", function(sender, data) {
+        $(document).on("azexo_add_element", function(sender, data) {
             add_update_element(sender, data.id)
         });
-        azexo_elements.attachEvent("edited_element", add_update_element);
-        azexo_elements.attachEvent("delete_element",
+        $(document).on("azexo_edited_element", add_update_element);
+        $(document).on("azexo_delete_element",
                 function(sender, id) {
                     $('body')[fp + 'scrollspy']({
                         target: '#' + element.id + '.navbar-collapse',
@@ -7033,7 +7071,7 @@
                     }
                 }
         );
-        azexo_elements.attachEvent("update_sorting",
+        $(document).on("azexo_update_sorting",
                 function(sender, ui) {
                     $('body')[fp + 'scrollspy']({
                         target: '#' + element.id + '.navbar-collapse',
