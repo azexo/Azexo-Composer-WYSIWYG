@@ -3342,6 +3342,7 @@
             element.in_timeout = setTimeout(function() {
                 if (element.attrs['an_letters'] == '') {
                     if (element.attrs['an_in'] == 'js') {
+                        $(element.dom_element).css('opacity', '');
                         var name_i = element.attrs['an_js_in'].split('-');
                         var e = azexo_elements.elements_instances_by_an_name[name_i[0]];
                         var scene = e.an_scenes[parseInt(name_i[1])];
@@ -3349,6 +3350,8 @@
                             element.end_animation();
                         });
                         element.timeline_in.play();
+                        element.animation_in = true;
+                        element.animated = true;
                     } else {
                         $(element.dom_element).css('opacity', '');
                         $(element.dom_element).removeClass('animated');
@@ -3407,6 +3410,7 @@
             element.out_timeout = setTimeout(function() {
                 if (element.attrs['an_letters'] == '') {
                     if (element.attrs['an_out'] == 'js') {
+                        $(element.dom_element).css('opacity', '');
                         var name_i = element.attrs['an_js_out'].split('-');
                         var e = azexo_elements.elements_instances_by_an_name[name_i[0]];
                         var scene = e.an_scenes[parseInt(name_i[1])];
@@ -3414,6 +3418,8 @@
                             element.end_animation();
                         });
                         element.timeline_out.play();
+                        element.animation_out = true;
+                        element.animated = true;
                     } else {
                         $(element.dom_element).css('opacity', '');
                         $(element.dom_element).removeClass('animated');
