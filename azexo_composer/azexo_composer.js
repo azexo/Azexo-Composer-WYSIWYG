@@ -1869,7 +1869,7 @@
         get_element: function(id) {
             return this.elements_instances[id];
         },
-        delete_element: function(id) {            
+        delete_element: function(id) {
             $(document).trigger("azexo_delete_element", id);
             delete this.elements_instances[id];
         },
@@ -3063,7 +3063,7 @@
                                     });
                                 }
                             });
-                        };                        
+                        };
                         $(document).on("azexo_add_element", container.save_container);
                         $(document).on("azexo_edited_element", container.save_container);
                         $(document).on("azexo_update_element", container.save_container);
@@ -5937,6 +5937,63 @@
 //                        element.impress.goto('overview');
 //                    }
 //                });
+                element.state = {
+                    editing: false,
+                    $node: false,
+                    data: {
+                        x: 0,
+                        y: 0,
+                        rotate: 0,
+                        scale: 0
+                    }
+                };
+                element.config = {
+                    rotateStep: 0.1,
+                    scaleStep: 0.01,
+                    visualScaling: 10,
+                    setTransformationCallback: false
+                };
+                element.defaults = {
+                    x: 0,
+                    y: 0,
+                    rotate: 0,
+                    scale: 1
+                };
+                element.mouse = {
+                    prevX: false,
+                    prevY: false,
+                    activeFunction: false
+                };
+                element.handlers = {};
+                function fixVector(x, y) {
+                    var result = {x: 0, y: 0},
+                    angle = (element.config.rotation / 180) * Math.PI,
+                            cs = Math.cos(angle),
+                            sn = Math.sin(angle);
+                    result.x = (x * cs - y * sn) * element.config.visualScaling;
+                    result.y = (x * sn + y * cs) * element.config.visualScaling;
+                    return result;
+                }
+                element.handlers.move = function(x, y) {
+                    var v = fixVector(x, y);
+                    element.state.data.x = (element.state.data.x) ? (element.state.data.x) + v.x : v.x;
+                    element.state.data.y = (element.state.data.y) ? (element.state.data.y) + v.y : v.y;
+                };
+                element.handlers.scale = function(x) {
+                    element.state.data.scale -= -x * element.config.scaleStep * element.config.visualScaling / 10;
+                };
+                element.handlers.rotate = function(x) {
+                    element.state.data.rotate -= -x * element.config.rotateStep;
+                };
+                $(element.dom_element).on('mousewheel', function(e) {
+                    var delta = e.originalEvent.wheelDelta / 120;
+                    var transform = $(element.dom_content_element).css('transform');
+                    if (delta > 0) {
+                        
+                    } else {
+
+                    }
+                });
             }
         },
         update_sortable: function() {
@@ -5996,54 +6053,6 @@
                 path: 'js/impress.js',
                 loaded: 'impress' in window,
                 callback: function() {
-                    element.state = {
-                        editing: false,
-                        $node: false,
-                        data: {
-                            x: 0,
-                            y: 0,
-                            rotate: 0,
-                            scale: 0
-                        }
-                    };
-                    element.config = {
-                        rotateStep: 0.1,
-                        scaleStep: 0.01,
-                        visualScaling: 10,
-                        setTransformationCallback: false
-                    };
-                    element.defaults = {
-                        x: 0,
-                        y: 0,
-                        rotate: 0,
-                        scale: 1
-                    };
-                    element.mouse = {
-                        prevX: false,
-                        prevY: false,
-                        activeFunction: false
-                    };
-                    element.handlers = {};
-                    function fixVector(x, y) {
-                        var result = {x: 0, y: 0},
-                        angle = (element.config.rotation / 180) * Math.PI,
-                                cs = Math.cos(angle),
-                                sn = Math.sin(angle);
-                        result.x = (x * cs - y * sn) * element.config.visualScaling;
-                        result.y = (x * sn + y * cs) * element.config.visualScaling;
-                        return result;
-                    }
-                    element.handlers.move = function(x, y) {
-                        var v = fixVector(x, y);
-                        element.state.data.x = (element.state.data.x) ? (element.state.data.x) + v.x : v.x;
-                        element.state.data.y = (element.state.data.y) ? (element.state.data.y) + v.y : v.y;
-                    };
-                    element.handlers.scale = function(x) {
-                        element.state.data.scale -= -x * element.config.scaleStep * element.config.visualScaling / 10;
-                    };
-                    element.handlers.rotate = function(x) {
-                        element.state.data.rotate -= -x * element.config.rotateStep;
-                    };
                     if (!('impress' in element)) {
                         element.impress = window.impress(element.id);
                     }
@@ -6627,7 +6636,7 @@
                 javascript += AZEXOElements.name + ".prototype.elements_instances_by_an_name = {};\n";
                 javascript += get_class_method_js(AZEXOElements, 'get_element', true);
                 javascript += get_class_method_js(AZEXOElements, 'delete_element', true);
-                javascript += get_class_method_js(AZEXOElements, 'add_element', true);                
+                javascript += get_class_method_js(AZEXOElements, 'add_element', true);
 
                 javascript += BaseElement.toString() + "\n";
                 javascript += BaseElement.name + ".prototype.p = '" + p + "';\n";
