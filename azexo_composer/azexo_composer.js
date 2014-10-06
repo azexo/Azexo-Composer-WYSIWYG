@@ -6167,7 +6167,8 @@
                         element.impress = window.impress(element.id);
                     }
                     element.impress.init();
-                    element.config = {};
+                    if(!('config' in element))
+                        element.config = {};
                     element.impress.setTransformationCallback(function(x) {
                         element.config.visualScaling = x.scale;
                         element.config.rotation = ~~(x.rotate.z);
