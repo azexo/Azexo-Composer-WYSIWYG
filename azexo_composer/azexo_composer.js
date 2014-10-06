@@ -6036,9 +6036,9 @@
                 if ('step_controls' in element)
                     element.step_controls.remove();
                 element.step_controls = $('<div class="az-step-controls ' + p + 'btn-group-vertical"></div>').hide();
-                $('<button title="' + title("Move this step") + '" class="control ' + p + 'btn ' + p + 'btn ' + p + 'glyphicon ' + p + 'glyphicon-move"> </button>').data('func', 'move').appendTo(element.step_controls);
-                $('<button title="' + title("Scale this step") + '" class="control ' + p + 'btn ' + p + 'btn ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').data('func', 'scale').appendTo(element.step_controls);
-                $('<button title="' + title("Rotate this step") + '" class="control ' + p + 'btn ' + p + 'btn ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').data('func', 'rotate').appendTo(element.step_controls);
+                $('<button title="' + title("Move this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-move"> </button>').data('func', 'move').appendTo(element.step_controls);
+                $('<button title="' + title("Scale this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').data('func', 'scale').appendTo(element.step_controls);
+                $('<button title="' + title("Rotate this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').data('func', 'rotate').appendTo(element.step_controls);
                 function showControls($where) {
                     if($(element.dom_element).parents('.azexo-editor').length > 0) {
                         var top, left, pos = $where.offset();
@@ -6054,6 +6054,9 @@
                 }
 
                 var showTimer;
+                $(element.step_controls).appendTo(element.dom_element).on('click', 'button', function(e) {
+                    return false;
+                });
                 $(element.step_controls).appendTo(element.dom_element).on('mousedown', 'button', function(e) {
                     e.preventDefault();
                     mouse.activeFunction = handlers[$(this).data('func')];

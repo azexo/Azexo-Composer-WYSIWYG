@@ -619,3 +619,9 @@ div.modal-dialog, div.ax-modal-dialog {
 .az-step.step:not(.active) {
     z-index: 0;
 }
+
+#azexo .switch-to-standard {
+    float: right;
+    z-index: 2;
+    position: relative;
+}
