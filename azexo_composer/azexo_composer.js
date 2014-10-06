@@ -3685,18 +3685,18 @@
                 if (element.attrs['an_letters'] != '') {
                     //element.animation_letters();
                 } else {
-                    $(element.dom_element).off('webkitAnimationEnd.animation mozAnimationEnd.animation MSAnimationEnd.animation oanimationend.animation animationend.animation');
-                    $(element.dom_element).on('webkitAnimationEnd.animation mozAnimationEnd.animation MSAnimationEnd.animation oanimationend.animation animationend.animation', function() {
+                    $(element.dom_element).off('webkitAnimationEnd.az_animation mozAnimationEnd.az_animation MSAnimationEnd.az_animation oanimationend.az_animation animationend.az_animation');
+                    $(element.dom_element).on('webkitAnimationEnd.az_animation mozAnimationEnd.az_animation MSAnimationEnd.az_animation oanimationend.az_animation animationend.az_animation', function() {
                         element.end_animation();
                     });
                 }
                 var callback = function() {
-                    $(parent).off('click.animation');
-                    $(parent).off('mouseenter.animation');
-                    $(parent).off('mouseleave.animation');
+                    $(parent).off('click.az_animation');
+                    $(parent).off('mouseenter.az_animation');
+                    $(parent).off('mouseleave.az_animation');
                     switch (element.attrs['an_start']) {
                         case 'click':
-                            $(parent).on('click.animation', function() {
+                            $(parent).on('click.az_animation', function() {
                                 if (!element.animated) {
                                     element.start_in_animation();
                                 }
@@ -3716,11 +3716,11 @@
                                 }});
                             break;
                         case 'hover':
-                            $(parent).on('mouseenter.animation', function() {
+                            $(parent).on('mouseenter.az_animation', function() {
                                 element.hover = true;
                                 element.start_in_animation();
                             });
-                            $(parent).on('mouseleave.animation', function() {
+                            $(parent).on('mouseleave.az_animation', function() {
                                 element.hover = false;
                                 element.start_out_animation();
                             });
@@ -5943,7 +5943,7 @@
 //                        element.impress.goto('overview');
 //                    }
 //                });
-                element.state = {
+                var state = {
                     editing: false,
                     $node: false,
                     data: {
@@ -5956,21 +5956,21 @@
                 element.config = {
                     rotateStep: 0.1,
                     scaleStep: 0.01,
-                    visualScaling: 10,
+                    redrawFunction: false,
                     setTransformationCallback: false
                 };
-                element.defaults = {
+                var defaults = {
                     x: 0,
                     y: 0,
                     rotate: 0,
                     scale: 1
                 };
-                element.mouse = {
+                var mouse = {
                     prevX: false,
                     prevY: false,
                     activeFunction: false
                 };
-                element.handlers = {};
+                var handlers = {};
                 function fixVector(x, y) {
                     var result = {x: 0, y: 0},
                     angle = (element.config.rotation / 180) * Math.PI,
@@ -5980,26 +5980,139 @@
                     result.y = (x * sn + y * cs) * element.config.visualScaling;
                     return result;
                 }
-                element.handlers.move = function(x, y) {
+                handlers.move = function(x, y) {
                     var v = fixVector(x, y);
-                    element.state.data.x = (element.state.data.x) ? (element.state.data.x) + v.x : v.x;
-                    element.state.data.y = (element.state.data.y) ? (element.state.data.y) + v.y : v.y;
+                    state.data.x = (state.data.x) ? (state.data.x) + v.x : v.x;
+                    state.data.y = (state.data.y) ? (state.data.y) + v.y : v.y;
                 };
-                element.handlers.scale = function(x) {
-                    element.state.data.scale -= -x * element.config.scaleStep * element.config.visualScaling / 10;
+                handlers.scale = function(x) {
+                    state.data.scale -= -x * element.config.scaleStep * element.config.visualScaling / 10;
                 };
-                element.handlers.rotate = function(x) {
-                    element.state.data.rotate -= -x * element.config.rotateStep;
+                handlers.rotate = function(x) {
+                    state.data.rotate -= -x * element.config.rotateStep;
                 };
+
+                var showTimer = null;
+                var redrawTimeout = null;
+                function saveData() {
+                    var el = azexo_elements.get_element($(state.$node[0]).closest('[data-az-id]').attr('data-az-id'));
+                    el.attrs['x'] = state.data.x.toString();
+                    el.attrs['y'] = state.data.y.toString();
+                    el.attrs['rotate_z'] = state.data.rotate.toString();
+                    el.attrs['scale'] = state.data.scale.toString();
+                }
+                function loadData() {
+                    state.data.x = parseFloat(state.$node[0].dataset.x) || defaults.x;
+                    state.data.y = parseFloat(state.$node[0].dataset.y) || defaults.y;
+                    state.data.scale = parseFloat(state.$node[0].dataset.scale) || defaults.scale;
+                    state.data.rotate = parseFloat(state.$node[0].dataset.rotate) || defaults.rotate;
+                    saveData();
+                }
+                function redraw() {
+                    clearTimeout(redrawTimeout);
+                    redrawTimeout = setTimeout(function() {
+                        state.$node[0].dataset.scale = state.data.scale;
+                        state.$node[0].dataset.rotate = state.data.rotate;
+                        state.$node[0].dataset.x = state.data.x;
+                        state.$node[0].dataset.y = state.data.y;
+                        element.impress.initStep(state.$node[0]);
+                        saveData();
+                        showControls(state.$node);
+                    }, 20);
+                }
+                function handleMouseMove(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var x = e.pageX - mouse.prevX,
+                            y = e.pageY - mouse.prevY;
+                    mouse.prevX = e.pageX;
+                    mouse.prevY = e.pageY;
+                    if (mouse.activeFunction) {
+                        mouse.activeFunction(x, y);
+                        redraw();
+                    }
+                    return false;
+                }
+                if ('step_controls' in element)
+                    element.step_controls.remove();
+                element.step_controls = $('<div class="az-step-controls ' + p + 'btn-group-vertical"></div>').hide();
+                $('<button title="' + title("Move this step") + '" class="control ' + p + 'btn ' + p + 'btn ' + p + 'glyphicon ' + p + 'glyphicon-move"> </button>').data('func', 'move').appendTo(element.step_controls);
+                $('<button title="' + title("Scale this step") + '" class="control ' + p + 'btn ' + p + 'btn ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').data('func', 'scale').appendTo(element.step_controls);
+                $('<button title="' + title("Rotate this step") + '" class="control ' + p + 'btn ' + p + 'btn ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').data('func', 'rotate').appendTo(element.step_controls);
+                function showControls($where) {
+                    if($(element.dom_element).parents('.azexo-editor').length > 0) {
+                        var top, left, pos = $where.offset();
+                        top = (pos.top > 0) ? pos.top + (100 / element.config.visualScaling) : 0;
+                        left = (pos.left > 0) ? pos.left + (100 / element.config.visualScaling) : 0;
+                        $(element.step_controls).show().offset({
+                            top: top,
+                            left: left
+                        });
+                    } else {
+                        $(element.step_controls).hide();
+                    }
+                }
+
+                var showTimer;
+                $(element.step_controls).appendTo(element.dom_element).on('mousedown', 'button', function(e) {
+                    e.preventDefault();
+                    mouse.activeFunction = handlers[$(this).data('func')];
+                    loadData();
+                    mouse.prevX = e.pageX;
+                    mouse.prevY = e.pageY;
+                    $(document).on('mousemove.az_presentation', handleMouseMove);
+                    return false;
+                }).on('mouseenter', function() {
+                    clearTimeout(showTimer);
+                });
+                $(document).on('mouseup', function() {
+                    mouse.activeFunction = false;
+                    $(document).off('mousemove.az_presentation');
+                });
+
+                $(element.dom_element).on('mouseenter', '.step', function() {
+                    var $t = $(this);
+                    showTimer = setTimeout(function() {
+                        if (!mouse.activeFunction) {
+                            state.$node = $t;
+                            showControls(state.$node);
+                        }
+                    }, 500);
+                    $t.data('showTimer', showTimer);
+                }).on('mouseleave', '.step', function() {
+                    //$(element.step_controls).hide();
+                    clearTimeout($(this).data('showTimer'));
+                });
+                
+                var hover = false;
+                var scroll_top = 0;
+                var transition_duration = '0s';
+                $(document).off('scroll.az_presentation');
+                $(document).on('scroll.az_presentation', function(e) {
+                    if (hover) {
+                        window.scrollTo(0, scroll_top);
+                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+                $(element.dom_element).on('mouseenter', function(e) {
+                    scroll_top = $(document).scrollTop();
+                    transition_duration = $(element.dom_content_element).css('transition-duration');
+                    $(element.dom_content_element).css('transition-duration', '0s');
+                    hover = true;
+                });
+                $(element.dom_element).on('mouseleave', function(e) {
+                    $(element.dom_content_element).css('transition-duration', transition_duration);
+                    hover = false;
+                });
                 $(element.dom_element).on('mousewheel', function(e) {
+                    var speed = 0.05;
                     var delta = e.originalEvent.wheelDelta / 120;
                     var transform = $(element.dom_content_element).css('transform');
-                    if (delta > 0) {
-                        
-                    } else {
-
-                    }
-                });
+                    var scale = 1 + delta * speed;
+                    $(element.dom_content_element).css('transform', transform + ' scale(' + scale.toString() + ')');                    
+                });                
             }
         },
         update_sortable: function() {
@@ -6043,15 +6156,6 @@
             PresentationElement.baseclass.prototype.edited.apply(this, arguments);
             this.update_dom();
         },
-        impress_init: function() {
-            var element = this;
-//            if (window.azexo_editor)
-//                $('<div id="overview" class="step" data-x="1000" data-y="500" data-scale="3"></div>').appendTo(element.dom_content_element);
-            element.impress.setTransformationCallback(function(x) {
-                element.config.visualScaling = x.scale;
-                element.config.rotation = ~~(x.rotate.z);
-            });
-        },
         showed: function($, p, fp) {
             PresentationElement.baseclass.prototype.showed.apply(this, arguments);
             var element = this;
@@ -6063,7 +6167,10 @@
                         element.impress = window.impress(element.id);
                     }
                     element.impress.init();
-                    element.impress_init();
+                    element.impress.setTransformationCallback(function(x) {
+                        element.config.visualScaling = x.scale;
+                        element.config.rotation = ~~(x.rotate.z);
+                    });                    
                     if (element.children.length > 0)
                         element.impress.goto(element.children[0].id);
 
@@ -6142,6 +6249,14 @@
     mixin(StepElement.prototype, {
         name: t('Step'),
         params: [
+//            make_param_type({
+//                type: 'integer_slider',
+//                heading: t('Transition duration'),
+//                param_name: 'duration',
+//                min: '0',
+//                max: '10000',
+//                value: '1000',
+//            }),
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Width'),
@@ -6229,72 +6344,8 @@
         show_controls: function() {
             StepElement.baseclass.prototype.show_controls.apply(this, arguments);
             if (window.azexo_editor) {
-                var element = this;
-
-                $('<button title="' + title("Scale") + '" class="control scale action ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').appendTo(this.controls);
-                $('<button title="' + title("Rotate") + '" class="control rotate action ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').appendTo(this.controls);
-                $(element.controls).find('.drag-and-drop').addClass('action');
-
-                var parent = element.parent;
-                var showTimer = null;
-                var redrawTimeout = null;
-                function saveData() {
-                    var el = azexo_elements.get_element($(parent.state.$node[0]).closest('[data-az-id]').attr('data-az-id'));
-                    el.attrs['x'] = parent.state.data.x.toString();
-                    el.attrs['y'] = parent.state.data.y.toString();
-                    el.attrs['rotate_z'] = parent.state.data.rotate.toString();
-                    el.attrs['scale'] = parent.state.data.scale.toString();
-                }
-                function loadData() {
-                    parent.state.data.x = parseFloat(parent.state.$node[0].dataset.x) || parent.defaults.x;
-                    parent.state.data.y = parseFloat(parent.state.$node[0].dataset.y) || parent.defaults.y;
-                    parent.state.data.scale = parseFloat(parent.state.$node[0].dataset.scale) || parent.defaults.scale;
-                    parent.state.data.rotate = parseFloat(parent.state.$node[0].dataset.rotate) || parent.defaults.rotate;
-                    saveData();
-                }
-                function redraw() {
-                    clearTimeout(redrawTimeout);
-                    redrawTimeout = setTimeout(function() {
-                        parent.state.$node[0].dataset.scale = parent.state.data.scale;
-                        parent.state.$node[0].dataset.rotate = parent.state.data.rotate;
-                        parent.state.$node[0].dataset.x = parent.state.data.x;
-                        parent.state.$node[0].dataset.y = parent.state.data.y;
-                        parent.impress.initStep(parent.state.$node[0]);
-                        saveData();
-                    }, 20);
-                }
-                function handleMouseMove(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var x = e.pageX - parent.mouse.prevX,
-                            y = e.pageY - parent.mouse.prevY;
-                    parent.mouse.prevX = e.pageX;
-                    parent.mouse.prevY = e.pageY;
-                    if (parent.mouse.activeFunction) {
-                        parent.mouse.activeFunction(x, y);
-                        redraw();
-                    }
-                    return false;
-                }
-                $(element.controls).on('mousedown', '.action', function(e) {
-                    parent.state.$node = $(element.dom_element);
-                    e.preventDefault();
-                    if ($(this).hasClass('drag-and-drop'))
-                        parent.mouse.activeFunction = parent.handlers['move'];
-                    if ($(this).hasClass('scale'))
-                        parent.mouse.activeFunction = parent.handlers['scale'];
-                    if ($(this).hasClass('rotate'))
-                        parent.mouse.activeFunction = parent.handlers['rotate'];
-                    loadData();
-                    parent.mouse.prevX = e.pageX;
-                    parent.mouse.prevY = e.pageY;
-                    $(document).on('mousemove.handler1', handleMouseMove);
-                    return false;
-                });
-                $(document).on('mouseup', function() {
-                    parent.mouse.activeFunction = false;
-                    $(document).off('mousemove.handler1');
-                });
+                $(this.controls).find('.drag-and-drop').remove();
+                $('<span class="control ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon">' + this.name + '</span>').prependTo(this.controls);
             }
         },
         update_sortable: function() {
@@ -6791,7 +6842,6 @@
                     javascript += register_animated_element.name + "('" + PresentationElement.prototype.base + "', true, " + PresentationElement.name + ");\n";
                     javascript += get_element_params_js(PresentationElement);
                     javascript += PresentationElement.name + ".prototype.frontend_render = true;\n";
-                    javascript += get_class_method_js(PresentationElement, 'impress_init', true);
                     javascript += get_class_method_js(PresentationElement, 'showed', true);
                     javascript += get_class_method_js(PresentationElement, 'render', true);
                     javascript += StepElement.toString() + "\n";

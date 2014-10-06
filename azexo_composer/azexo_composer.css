@@ -24,6 +24,11 @@ div.azexo.az-container > .controls {
     left: 0px !important;
     display:none !important;
 }
+
+.az-step-controls {
+    z-index: 1;
+}
+
 .az-element > .controls, .az-presentation > div > .controls, .az-presentation > div > div > .controls {
     position: absolute;
     left: 50%;
