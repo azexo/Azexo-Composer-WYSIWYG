@@ -3058,7 +3058,10 @@
                                         if (container.id in azexo_elements.elements_instances) {
                                             var name = container.attrs['container'].split('/')[1];
                                             var html = container.get_container_html();
-                                            $(textarea).val('<div class="az-element az-container" data-az-type="textarea" data-az-name="' + name + '">' + html + '</div>');
+                                            if(window.azexo_online)
+                                                $(textarea).val(html);
+                                            else
+                                                $(textarea).val('<div class="az-element az-container" data-az-type="textarea" data-az-name="' + name + '">' + html + '</div>');
                                         }
                                     });
                                 }
