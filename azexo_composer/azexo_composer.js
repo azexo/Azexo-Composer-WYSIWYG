@@ -3340,6 +3340,7 @@
         set_in_timeout: function() {
             var element = this;
             element.in_timeout = setTimeout(function() {
+                element.clear_animation();
                 if (element.attrs['an_letters'] == '') {
                     if (element.attrs['an_in'] == 'js') {
                         $(element.dom_element).css('opacity', '');
@@ -3386,20 +3387,21 @@
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
                 if (element.attrs['an_in'] != '' || element.attrs['an_js_in'] != '') {
-                    if (element.out_timeout > 0) {
-                        if (element.animated) {
-                            //still in-animate
-                            element.clear_animation();
+                    if (element.animated) {
+                        if (element.animation_out) {
+                            //still out-animate
                             element.set_in_timeout();
                         } else {
-                            //plan to in-animate
-                            clearTimeout(element.out_timeout);
-                            if (!element.hidden_after_in) {
-                                element.set_in_timeout();
+                            if (element.out_timeout > 0) {
+                                //plan to in-animate
+                                clearTimeout(element.out_timeout);
+                                if (!element.hidden_after_in) {
+                                    element.set_in_timeout();
+                                }
                             }
                         }
                     } else {
-                        //no in-animate, no plan
+                        //no animate, no plan
                         element.set_in_timeout();
                     }
                 }
@@ -3408,6 +3410,7 @@
         set_out_timeout: function() {
             var element = this;
             element.out_timeout = setTimeout(function() {
+                element.clear_animation();
                 if (element.attrs['an_letters'] == '') {
                     if (element.attrs['an_out'] == 'js') {
                         $(element.dom_element).css('opacity', '');
@@ -3454,20 +3457,21 @@
             var element = this;
             if ($(element.dom_element).parents('.azexo-animations-disabled').length == 0) {
                 if (element.attrs['an_out'] != '' || element.attrs['an_js_out'] != '') {
-                    if (element.in_timeout > 0) {
-                        if (element.animated) {
+                    if (element.animated) {
+                        if (element.animation_in) {
                             //still in-animate
-                            element.clear_animation();
                             element.set_out_timeout();
                         } else {
-                            //plan to in-animate
-                            clearTimeout(element.in_timeout);
-                            if (!element.hidden_before_in) {
-                                element.set_out_timeout();
+                            if (element.in_timeout > 0) {
+                                //plan to in-animate
+                                clearTimeout(element.in_timeout);
+                                if (!element.hidden_before_in) {
+                                    element.set_out_timeout();
+                                }
                             }
                         }
                     } else {
-                        //no in-animate, no plan
+                        //no animate, no plan
                         element.set_out_timeout();
                     }
                 }
@@ -3529,6 +3533,7 @@
                         $(this.textillate_elements[i]).find('> ul').remove();
                         $(this.textillate_elements[i]).text(text);
                     }
+                    this.textillate_elements = [];
                 }
                 this.animation_in = false;
                 this.animation_out = false;
@@ -3769,6 +3774,10 @@
         edit: function() {
             this.update_js_animations_list();
             AnimatedElement.baseclass.prototype.edit.apply(this, arguments);
+        },
+        clone: function() {
+            this.clear_animation();
+            AnimatedElement.baseclass.prototype.clone.apply(this, arguments);
         },
         show_controls: function() {
             var element = this;
@@ -6038,6 +6047,11 @@
                 if ('step_controls' in element)
                     element.step_controls.remove();
                 element.step_controls = $('<div class="az-step-controls ' + p + 'btn-group-vertical"></div>').hide();
+                $('<span class="number ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon"></span>').prependTo(element.step_controls).click(function() {
+                    var n = parseInt($(this).html()) - 1;
+                    element.impress.goto(element.children[n].id);
+                    return false;
+                });
                 $('<button title="' + title("Move this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-move"> </button>').data('func', 'move').appendTo(element.step_controls);
                 $('<button title="' + title("Scale this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').data('func', 'scale').appendTo(element.step_controls);
                 $('<button title="' + title("Rotate this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').data('func', 'rotate').appendTo(element.step_controls);
@@ -6079,6 +6093,9 @@
                     var $t = $(this);
                     showTimer = setTimeout(function() {
                         if (!mouse.activeFunction) {
+                            var el = azexo_elements.get_element($t.closest('[data-az-id]').attr('data-az-id'));
+                            var n = el.get_child_position() + 1;
+                            $(element.step_controls).find('span.number').html(n);
                             state.$node = $t;
                             showControls(state.$node);
                         }
@@ -6344,7 +6361,7 @@
                 heading: t('Scale'),
                 param_name: 'scale',
                 min: '0',
-                max: '10',
+                max: '100',
                 value: '1',
                 step: '0.01',
             }),
@@ -6354,7 +6371,7 @@
         show_parent_controls: true,
         disallowed_elements: ['az_presentation'],
         get_empty: function() {
-            return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this presentation element and for current step. ') + '<span class="' + p + 'glyphicon ' + p + 'glyphicon-plus-sign"></span>' + t(' - add a new step.') + '</div></div>';
+            return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this presentation element and for current step. Press on "Space" button to going through steps. ') + '<span class="' + p + 'glyphicon ' + p + 'glyphicon-plus-sign"></span>' + t(' - add a new step.') + '</div></div>';
         },
         get_my_shortcode: function() {
             return this.get_children_shortcode();
