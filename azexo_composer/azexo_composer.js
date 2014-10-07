@@ -5289,6 +5289,7 @@
                     stop: function(event, ui) {
                         element.attrs['width'] = parseInt($(element.dom_content_element).css("width")) / ($(element.dom_element).width() / 100) + "%";
                         element.attrs['height'] = $(element.dom_content_element).height();
+                        $(document).trigger("azexo_update_element", element.id);
                     }
                 });
                 for (var i = 0; i < this.children.length; i++) {
@@ -6000,6 +6001,7 @@
                     el.attrs['y'] = state.data.y.toString();
                     el.attrs['rotate_z'] = state.data.rotate.toString();
                     el.attrs['scale'] = state.data.scale.toString();
+                    $(document).trigger("azexo_update_element", el.id);
                 }
                 function loadData() {
                     state.data.x = parseFloat(state.$node[0].dataset.x) || defaults.x;
@@ -6040,7 +6042,7 @@
                 $('<button title="' + title("Scale this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-resize-full" > </button>').data('func', 'scale').appendTo(element.step_controls);
                 $('<button title="' + title("Rotate this step") + '" class="control ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-refresh" > </button>').data('func', 'rotate').appendTo(element.step_controls);
                 function showControls($where) {
-                    if($(element.dom_element).parents('.azexo-editor').length > 0) {
+                    if ($(element.dom_element).parents('.azexo-editor').length > 0) {
                         var top, left, pos = $where.offset();
                         top = (pos.top > 0) ? pos.top + (100 / element.config.visualScaling) : 0;
                         left = (pos.left > 0) ? pos.left + (100 / element.config.visualScaling) : 0;
@@ -6086,10 +6088,11 @@
                     //$(element.step_controls).hide();
                     clearTimeout($(this).data('showTimer'));
                 });
-                
+
                 var hover = false;
                 var scroll_top = 0;
                 var transition_duration = '0s';
+                var transition_delay = '0s';
                 $(document).off('scroll.az_presentation');
                 $(document).on('scroll.az_presentation', function(e) {
                     if (hover) {
@@ -6103,19 +6106,29 @@
                     scroll_top = $(document).scrollTop();
                     transition_duration = $(element.dom_content_element).css('transition-duration');
                     $(element.dom_content_element).css('transition-duration', '0s');
+                    transition_delay = $(element.dom_content_element).css('transition-delay');
+                    $(element.dom_content_element).css('transition-delay', '0s');
                     hover = true;
                 });
                 $(element.dom_element).on('mouseleave', function(e) {
                     $(element.dom_content_element).css('transition-duration', transition_duration);
+                    $(element.dom_content_element).css('transition-delay', transition_delay);
                     hover = false;
                 });
                 $(element.dom_element).on('mousewheel', function(e) {
+                    if ($(element.dom_content_element).css('transition-duration') != '0s' || $(element.dom_content_element).css('transition-delay') != '0s') {
+                        transition_duration = $(element.dom_content_element).css('transition-duration');
+                        $(element.dom_content_element).css('transition-duration', '0s');
+                        transition_delay = $(element.dom_content_element).css('transition-delay');
+                        $(element.dom_content_element).css('transition-delay', '0s');
+                    }
                     var speed = 0.05;
                     var delta = e.originalEvent.wheelDelta / 120;
                     var transform = $(element.dom_content_element).css('transform');
                     var scale = 1 + delta * speed;
-                    $(element.dom_content_element).css('transform', transform + ' scale(' + scale.toString() + ')');                    
-                });                
+                    element.config.visualScaling = element.config.visualScaling / scale;
+                    $(element.dom_content_element).css('transform', transform + ' scale(' + scale.toString() + ')');
+                });
             }
         },
         update_sortable: function() {
@@ -6170,12 +6183,12 @@
                         element.impress = window.impress(element.id);
                     }
                     element.impress.init();
-                    if(!('config' in element))
+                    if (!('config' in element))
                         element.config = {};
                     element.impress.setTransformationCallback(function(x) {
                         element.config.visualScaling = x.scale;
                         element.config.rotation = ~~(x.rotate.z);
-                    });                    
+                    });
                     if (element.children.length > 0)
                         element.impress.goto(element.children[0].id);
 
@@ -6361,6 +6374,7 @@
                     stop: function(event, ui) {
                         element.attrs['width'] = $(element.dom_element).width();
                         element.attrs['height'] = $(element.dom_element).height();
+                        $(document).trigger("azexo_update_element", element.id);
                         if ('impress' in element.parent) {
                             element.impress.initStep(element.dom_element.get(0));
                         }
