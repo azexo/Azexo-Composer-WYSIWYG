@@ -6292,7 +6292,7 @@
 //                heading: t('Transition duration'),
 //                param_name: 'duration',
 //                min: '0',
-//                max: '10000',
+//                max: '100000',
 //                value: '1000',
 //            }),
             make_param_type({
@@ -6300,7 +6300,7 @@
                 heading: t('Width'),
                 param_name: 'width',
                 min: '1',
-                max: '10000',
+                max: '100000',
                 value: '900',
             }),
             make_param_type({
@@ -6308,7 +6308,7 @@
                 heading: t('Height'),
                 param_name: 'height',
                 min: '1',
-                max: '10000',
+                max: '100000',
                 value: '700',
             }),
             make_param_type({
@@ -6316,7 +6316,7 @@
                 heading: t('X coordinate'),
                 param_name: 'x',
                 min: '0',
-                max: '10000',
+                max: '100000',
                 value: '0',
             }),
             make_param_type({
@@ -6324,7 +6324,7 @@
                 heading: t('Y coordinate'),
                 param_name: 'y',
                 min: '0',
-                max: '10000',
+                max: '100000',
                 value: '0',
             }),
             make_param_type({
@@ -6364,7 +6364,7 @@
                 heading: t('Scale'),
                 param_name: 'scale',
                 min: '0',
-                max: '100',
+                max: '1000',
                 value: '1',
                 step: '0.01',
             }),
