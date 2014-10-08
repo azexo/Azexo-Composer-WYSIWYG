@@ -18,10 +18,13 @@ Demo: http://azexo.com/azexo_composer/
 
 
 ### List of elements
+* Popup – popup container with unlimited content
+* Presentation – presentation based on Impress JS with unlimited content
+* Carousel – Content carousel (OWL carousel) with unlimited content. Can be used as classic slider.
+* Form – Form container (dropdown, checkbox, textfield, textarea, integer slider, date field types supported)
 * Row - Split content into columns (can have fixed image, parallax image or video as background)
 * Tabs - Bootstrap tabbed content
 * Accordion - Bootstrap accordion
-* Carousel - Content carousel (OWL carousel)
 * Layers - Free relative positioning contained elements
 * Scroll Menu - One page scroll menu
 * Text - A block of text with WYSIWYG editor
