@@ -12,7 +12,7 @@ Demo: http://azexo.com/azexo_composer/
 * Integrated front end Impress JS presentation visual builder
 * Integrated front end grid visual builder
 * Every element can be animated via CSS3 engine (on appear, on hover, on click)
-* Every element can be animated via JS scroll animations engine (with easy to understand visual builder + parallax wizard to make parallax effect by few clicks)
+* Every element can be animated via JS animations engine with real time timeline and scroll timeline (with easy to understand visual builder + parallax wizard to make parallax effect by few clicks)
 * Every element have base CSS settings editor
 * If you have JS skills you can create (via very easy API) any number of your custom elements which will be integrated into Azexo Composer page builder and will support all features listed above
 
