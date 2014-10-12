@@ -3040,7 +3040,13 @@
                         if ($(dom).find('> .az-container[data-az-type][data-az-name]').length > 0) {
                             container_dom = $(dom).children().insertAfter(textarea);
                         } else {
-                            container_dom = $('<div class="az-element az-container" data-az-type="textarea" data-az-name="' + Math.random().toString(36).substr(2) + '"></div>').insertAfter(textarea);
+                            var type = 'textarea';
+                            var name = Math.random().toString(36).substr(2);
+                            if (window.azexo_online) {
+                                type = window.azexo_type;
+                                name = window.azexo_name;
+                            }
+                            container_dom = $('<div class="az-element az-container" data-az-type="' + type + '" data-az-name="' + name + '"></div>').insertAfter(textarea);
                             container_dom.append($(dom).html());
                         }
 
@@ -3056,12 +3062,15 @@
                                 callback: function() {
                                     _.defer(function() {
                                         if (container.id in azexo_elements.elements_instances) {
-                                            var name = container.attrs['container'].split('/')[1];
                                             var html = container.get_container_html();
-                                            if(window.azexo_online)
+                                            if (window.azexo_online) {
                                                 $(textarea).val(html);
-                                            else
-                                                $(textarea).val('<div class="az-element az-container" data-az-type="textarea" data-az-name="' + name + '">' + html + '</div>');
+                                            } else {
+                                                var type = container.attrs['container'].split('/')[0];
+                                                var name = container.attrs['container'].split('/')[1];
+                                                $(textarea).val('<div class="az-element az-container" data-az-type="' + type + '" data-az-name="' + name + '">' + html + '</div>');
+                                            }
+                                            $(textarea).html($(textarea).val());
                                         }
                                     });
                                 }
@@ -5898,6 +5907,9 @@
         if (!parse) {
             this.add_step();
         }
+        if (window.azexo_editor) {
+            this.init_scroll_variables();
+        }
     }
     register_animated_element('az_presentation', true, PresentationElement);
     mixin(PresentationElement.prototype, {
@@ -5944,6 +5956,12 @@
         get_button: function() {
             return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
         },
+        init_scroll_variables: function() {
+            this.hover = false;
+            this.scroll_top = 0;
+            this.transition_duration = '0s';
+            this.transition_delay = '0s';
+        },
         show_controls: function() {
             if (window.azexo_editor) {
                 CarouselElement.baseclass.prototype.show_controls.apply(this, arguments);
@@ -5951,11 +5969,6 @@
                 $(this.controls).find('.paste').remove();
                 var element = this;
                 $('<button title="' + title("Add step") + '" class="control add-toggle ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-plus-sign" > </button>').appendTo(this.controls).click({object: this}, this.click_add_step);
-//                $('<button title="' + title("Overview") + '" class="control overview ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-fullscreen" > </button>').appendTo(this.controls).click({object: this}, function(){
-//                    if('impress' in element) {
-//                        element.impress.goto('overview');
-//                    }
-//                });
                 var state = {
                     editing: false,
                     $node: false,
@@ -6051,7 +6064,7 @@
                     element.step_controls.remove();
                 element.step_controls = $('<div class="az-step-controls ' + p + 'btn-group-vertical"></div>').hide();
                 $('<span class="number ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon"></span>').prependTo(element.step_controls).click(function() {
-                    var n = parseInt($(this).html()) - 1;
+                    var n = parseInt($(this).attr('data-step')) - 1;
                     element.impress.goto(element.children[n].id);
                     return false;
                 });
@@ -6082,14 +6095,15 @@
                     loadData();
                     mouse.prevX = e.pageX;
                     mouse.prevY = e.pageY;
-                    $(document).on('mousemove.az_presentation', handleMouseMove);
+                    $(document).on('mousemove.az_presentation_controls' + element.id, handleMouseMove);
                     return false;
                 }).on('mouseenter', function() {
                     clearTimeout(showTimer);
                 });
-                $(document).on('mouseup', function() {
+                $(document).off('mouseup.az_presentation_controls' + element.id);
+                $(document).on('mouseup.az_presentation_controls' + element.id, function() {
                     mouse.activeFunction = false;
-                    $(document).off('mousemove.az_presentation');
+                    $(document).off('mousemove.az_presentation_controls' + element.id);
                 });
 
                 $(element.dom_element).on('mouseenter', '.step', function() {
@@ -6098,6 +6112,9 @@
                         if (!mouse.activeFunction) {
                             var el = azexo_elements.get_element($t.closest('[data-az-id]').attr('data-az-id'));
                             var n = el.get_child_position() + 1;
+                            $(element.step_controls).find('span.number').attr('data-step', n);
+                            if (el.attrs['name'] != '')
+                                n = el.attrs['name'];
                             $(element.step_controls).find('span.number').html(n);
                             state.$node = $t;
                             showControls(state.$node);
@@ -6109,37 +6126,77 @@
                     clearTimeout($(this).data('showTimer'));
                 });
 
-                var hover = false;
-                var scroll_top = 0;
-                var transition_duration = '0s';
-                var transition_delay = '0s';
-                $(document).off('scroll.az_presentation');
-                $(document).on('scroll.az_presentation', function(e) {
-                    if (hover) {
-                        window.scrollTo(0, scroll_top);
+                $(document).off('scroll.az_presentation' + element.id);
+                $(document).on('scroll.az_presentation' + element.id, function(e) {
+                    if (element.hover) {
+                        window.scrollTo(0, element.scroll_top);
                     }
                     e.preventDefault();
                     e.stopPropagation();
                     return false;
                 });
                 $(element.dom_element).on('mouseenter', function(e) {
-                    scroll_top = $(document).scrollTop();
-                    transition_duration = $(element.dom_content_element).css('transition-duration');
+                    element.scroll_top = $(document).scrollTop();
+                    element.transition_duration = $(element.dom_content_element).css('transition-duration');
                     $(element.dom_content_element).css('transition-duration', '0s');
-                    transition_delay = $(element.dom_content_element).css('transition-delay');
+                    element.transition_delay = $(element.dom_content_element).css('transition-delay');
                     $(element.dom_content_element).css('transition-delay', '0s');
-                    hover = true;
+                    element.hover = true;
                 });
                 $(element.dom_element).on('mouseleave', function(e) {
-                    $(element.dom_content_element).css('transition-duration', transition_duration);
-                    $(element.dom_content_element).css('transition-delay', transition_delay);
-                    hover = false;
+                    $(element.dom_content_element).css('transition-duration', element.transition_duration);
+                    $(element.dom_content_element).css('transition-delay', element.transition_delay);
+                    element.hover = false;
+                });
+                var drag = false;
+                $(element.dom_element).on('mousedown', function(e) {
+                    if (e.target == e.currentTarget) {
+                        drag = true;
+                        mouse.prevX = e.pageX;
+                        mouse.prevY = e.pageY;
+                        var div = $(element.dom_content_element).find('> div');
+                        element.transition_duration = $(div).css('transition-duration');
+                        $(div).css('transition-duration', '0s');
+                        element.transition_delay = $(div).css('transition-delay');
+                        $(div).css('transition-delay', '0s');
+                    }
+                });
+                $(document).off('mouseup.az_presentation' + element.id);
+                $(document).on('mouseup.az_presentation' + element.id, function(e) {
+                    if (drag) {
+                        var div = $(element.dom_content_element).find('> div');
+                        $(div).css('transition-duration', element.transition_duration);
+                        $(div).css('transition-delay', element.transition_delay);
+                    }
+                    drag = false;
+                });
+                $(document).off('mousemove.az_presentation' + element.id);
+                $(document).on('mousemove.az_presentation' + element.id, function(e) {
+                    if (drag) {
+                        var div = $(element.dom_content_element).find('> div');
+                        if ($(div).css('transition-duration') != '0s' || $(div).css('transition-delay') != '0s') {
+                            element.transition_duration = $(div).css('transition-duration');
+                            $(div).css('transition-duration', '0s');
+                            element.transition_delay = $(div).css('transition-delay');
+                            $(div).css('transition-delay', '0s');
+                        }
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var x = e.pageX - mouse.prevX,
+                                y = e.pageY - mouse.prevY;
+                        mouse.prevX = e.pageX;
+                        mouse.prevY = e.pageY;
+                        var v = fixVector(x, y);
+                        var transform = $(element.dom_content_element).find('> div').css('transform');
+                        $(element.dom_content_element).find('> div').css('transform', transform + ' translate3d(' + v.x + 'px, ' + v.y + 'px, 0px)');
+                        return false;
+                    }
                 });
                 $(element.dom_element).on('mousewheel', function(e) {
                     if ($(element.dom_content_element).css('transition-duration') != '0s' || $(element.dom_content_element).css('transition-delay') != '0s') {
-                        transition_duration = $(element.dom_content_element).css('transition-duration');
+                        element.transition_duration = $(element.dom_content_element).css('transition-duration');
                         $(element.dom_content_element).css('transition-duration', '0s');
-                        transition_delay = $(element.dom_content_element).css('transition-delay');
+                        element.transition_delay = $(element.dom_content_element).css('transition-delay');
                         $(element.dom_content_element).css('transition-delay', '0s');
                     }
                     var speed = 0.05;
@@ -6246,6 +6303,20 @@
                         element.impress.goto($(this).attr('data-step'));
                         return false;
                     });
+//                    if(!window.azexo_editor) {
+//                        $(element.dom_element).on('mousewheel', function(e) {
+//                            if (e.target == e.currentTarget) {
+//                                e.preventDefault();
+//                                e.stopPropagation();
+//                                if (e.originalEvent.wheelDelta > 0) {
+//                                    element.impress.next();
+//                                } else {
+//                                    element.impress.prev();
+//                                }
+//                                return false;
+//                            }                            
+//                        });
+//                    }
                     if ('auto_play' in element) {
                         clearInterval(element.auto_play);
                     }
@@ -6269,7 +6340,12 @@
                 var pagination = $('<ul class="' + p + 'pagination"></ul>').appendTo(this.dom_element);
                 $('<li><a href="#" class="' + p + 'prev">&laquo;</a></li>').appendTo(pagination);
                 for (var i = 1; i <= this.children.length; i++) {
-                    $('<li><a href="#" class="goto" data-step="' + this.children[i - 1].id + '">' + i.toString() + '</a></li>').appendTo(pagination);
+                    if (_.indexOf(this.children[i - 1].attrs['options'].split(','), 'dummy') < 0) {
+                        var name = i.toString();
+                        if (this.children[i - 1].attrs['name'] != '')
+                            name = this.children[i - 1].attrs['name'];
+                        $('<li><a href="#" class="goto" data-step="' + this.children[i - 1].id + '">' + name + '</a></li>').appendTo(pagination);
+                    }
                 }
                 $('<li><a href="#" class="' + p + 'next">&raquo;</a></li>').appendTo(pagination);
             }
@@ -6295,6 +6371,19 @@
 //                max: '100000',
 //                value: '1000',
 //            }),
+            make_param_type({
+                type: 'textfield',
+                heading: t('Name'),
+                param_name: 'name',
+            }),
+            make_param_type({
+                type: 'checkbox',
+                heading: t('Options'),
+                param_name: 'options',
+                value: {
+                    'dummy': t("Dummy"),
+                },
+            }),
             make_param_type({
                 type: 'integer_slider',
                 heading: t('Width'),
@@ -6773,7 +6862,6 @@
                 javascript += "var " + azexo_containers_name + " = [];\n";
                 javascript += "var " + azexo_containers_loaded_name + " = {};\n";
                 javascript += connect_container.toString() + "\n";
-                javascript += jquery_name + "(document).ready(function(){" + connect_container.name + "(" + jquery_name + "('[data-az-type=\"'+window.azexo_type+'\"][data-az-name=\"'+window.azexo_name+'\"]'));});\n";
 
                 javascript += AnimatedElement.toString() + "\n";
                 javascript += extend.name + "(" + AnimatedElement.name + ", " + BaseElement.name + ");\n";
@@ -6811,10 +6899,12 @@
                 if (RowElement.prototype.base in bases) {
                     javascript += RowElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + RowElement.prototype.base + "', true, " + RowElement.name + ");\n";
+                    javascript += get_element_params_js(RowElement);
                     javascript += get_class_method_js(RowElement, 'showed', true);
                     javascript += RowElement.name + ".prototype.set_columns = function(columns){};\n";
                     javascript += ColumnElement.toString() + "\n";
                     javascript += register_element.name + "('" + ColumnElement.prototype.base + "', true, " + ColumnElement.name + ");\n";
+                    javascript += get_element_params_js(ColumnElement);
                     javascript += get_class_method_js(ColumnElement, 'showed', true);
                 }
 
@@ -6835,6 +6925,7 @@
                 if (LayersElement.prototype.base in bases) {
                     javascript += LayersElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + LayersElement.prototype.base + "', true, " + LayersElement.name + ");\n";
+                    javascript += get_element_params_js(LayersElement);
                 }
 
                 if (TabsElement.prototype.base in bases) {
@@ -6871,6 +6962,7 @@
                     javascript += get_class_method_js(CarouselElement, 'render', true);
                     javascript += SlideElement.toString() + "\n";
                     javascript += register_element.name + "('" + SlideElement.prototype.base + "', true, " + SlideElement.name + ");\n";
+                    javascript += get_element_params_js(SlideElement);
                     javascript += SlideElement.name + ".prototype.frontend_render = true;\n";
                     javascript += get_class_method_js(SlideElement, 'showed', true);
                     javascript += get_class_method_js(SlideElement, 'render', true);
@@ -6885,6 +6977,7 @@
                     javascript += get_class_method_js(PresentationElement, 'render', true);
                     javascript += StepElement.toString() + "\n";
                     javascript += register_element.name + "('" + StepElement.prototype.base + "', true, " + StepElement.name + ");\n";
+                    javascript += get_element_params_js(StepElement);
                 }
 
                 if (ContainerElement.prototype.base in bases) {
@@ -6901,6 +6994,7 @@
                 if (ScrollMenuElement.prototype.base in bases) {
                     javascript += ScrollMenuElement.toString() + "\n";
                     javascript += register_element.name + "('" + ScrollMenuElement.prototype.base + "', false, " + ScrollMenuElement.name + ");\n";
+                    javascript += get_element_params_js(ScrollMenuElement);
                     javascript += get_class_method_js(ScrollMenuElement, 'showed', true);
                 }
 
@@ -6908,6 +7002,7 @@
                     javascript += azexo_submit_form.toString() + "\n";
                     javascript += FormElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + FormElement.prototype.base + "', true, " + FormElement.name + ");\n";
+                    javascript += get_element_params_js(FormElement);
                     javascript += get_class_method_js(FormElement, 'showed', true);
                     javascript += azexo_get_recaptcha_publickey.toString() + "\n";
                 }
@@ -6944,6 +7039,20 @@
 //                javascript += create_cms_elements.toString() + "\n";
 //                javascript += create_cms_elements.name + "();\n";
 
+                if (window.azexo_online) {
+                    hashCode = function(s) {
+                        return s.split("").reduce(function(a, b) {
+                            a = ((a << 5) - a) + b.charCodeAt(0);
+                            return a & a
+                        }, 0);
+                    }
+                    javascript += jquery_name + "(document).ready(function(){" + connect_container.name + "(" + jquery_name + "('[data-az-hash=\"" + hashCode(javascript) + "\"]'));});\n";
+                } else {
+                    var type = element.attrs['container'].split('/')[0];
+                    var name = element.attrs['container'].split('/')[1];
+                    javascript += jquery_name + "(document).ready(function(){" + connect_container.name + "(" + jquery_name + "('[data-az-type=\"" + type + "\"][data-az-name=\"" + name + "\"]'));});\n";
+                }
+
                 javascript += "})(window.jQuery);\n";
                 return javascript;
             }
@@ -6974,6 +7083,7 @@
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
             $(dom).find('.az-element > .controls').remove();
             $(dom).find('> .controls').remove();
+            $(dom).find('.az-step-controls').remove();
             $(dom).find('.az-empty').remove();
             $(dom).find('.ui-resizable-e').remove();
             $(dom).find('.ui-resizable-s').remove();
@@ -6986,10 +7096,7 @@
 
             var javascript = '';
             if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes) {
-                var type = element.attrs['container'].split('/')[0];
-                var name = element.attrs['container'].split('/')[1];
-                var type_data = 'window.azexo_type="' + type + '";window.azexo_name="' + name + '";';
-                javascript = "<script type=\"text/javascript\">" + type_data + "\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
+                javascript = "<script type=\"text/javascript\">\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
             }
             return get_css(element) + get_hover_styles(element) + get_js(element) + javascript + $(dom).html();
         },

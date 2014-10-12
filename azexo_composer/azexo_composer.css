@@ -613,6 +613,11 @@ div.modal-dialog, div.ax-modal-dialog {
     transform: translate(-50%, 0%);    
 }
 
+.az-container:not(.azexo-editor) .az-step {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .az-step.step.active {
     z-index: 1;
 }
