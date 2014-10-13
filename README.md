@@ -49,11 +49,9 @@ LICENSE
 ---------
 
 Copyright 2014 Andrey Soloduhin
-
 Released under the MIT and GPL (version 2 or later) Licenses.
 
-
-INTEGRATION IMPLEMENTED
+PRODUCTS FROM AZEXO
 ---------
 
-[WordPress/Drupal/Joomla/HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo)
+Azexo Composer already integrated with [WordPress/Drupal/Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. Also it can be as stand alone editor of [HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo) templates.
