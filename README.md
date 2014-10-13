@@ -55,5 +55,5 @@ PRODUCTS FROM AZEXO
 ---------
 
 Azexo Composer already integrated with [WordPress / Drupal / Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. Also it can be used as editor of [HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo) templates. If you purchase this products you get:
-* Free lifetime support
-* Free lifetime updates with new features and bug fixes
+* Lifetime support
+* Lifetime updates with new features and bug fixes
