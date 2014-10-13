@@ -54,4 +54,4 @@ Released under the MIT and GPL (version 2 or later) Licenses.
 PRODUCTS FROM AZEXO
 ---------
 
-Azexo Composer already integrated with [WordPress/Drupal/Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. Also it can be as stand alone editor of [HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo) templates.
+Azexo Composer already integrated with [WordPress/Drupal/Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. Also it can be used as editor of [HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo) templates.
