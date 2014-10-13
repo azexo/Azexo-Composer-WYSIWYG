@@ -1885,7 +1885,7 @@
         if (azexo_frontend)
             this.id = _.uniqueId('f');
         else
-            this.id = _.uniqueId();
+            this.id = _.uniqueId('b');
         if (parent != null) {
             this.parent = parent;
             if (parse)
@@ -3069,8 +3069,7 @@
                                                 var type = container.attrs['container'].split('/')[0];
                                                 var name = container.attrs['container'].split('/')[1];
                                                 $(textarea).val('<div class="az-element az-container" data-az-type="' + type + '" data-az-name="' + name + '">' + html + '</div>');
-                                            }
-                                            $(textarea).html($(textarea).val());
+                                            }                                            
                                         }
                                     });
                                 }
@@ -6019,7 +6018,7 @@
                 };
 
                 var showTimer = null;
-                var redrawTimeout = null;
+//                var redrawTimeout = null;
                 function saveData() {
                     var el = azexo_elements.get_element($(state.$node[0]).closest('[data-az-id]').attr('data-az-id'));
                     el.attrs['x'] = state.data.x.toString();
@@ -6036,8 +6035,8 @@
                     saveData();
                 }
                 function redraw() {
-                    clearTimeout(redrawTimeout);
-                    redrawTimeout = setTimeout(function() {
+//                    clearTimeout(redrawTimeout);
+//                    redrawTimeout = setTimeout(function() {
                         state.$node[0].dataset.scale = state.data.scale;
                         state.$node[0].dataset.rotate = state.data.rotate;
                         state.$node[0].dataset.x = state.data.x;
@@ -6045,7 +6044,7 @@
                         element.impress.initStep(state.$node[0]);
                         saveData();
                         showControls(state.$node);
-                    }, 20);
+//                    }, 20);
                 }
                 function handleMouseMove(e) {
                     e.preventDefault();
