@@ -103,7 +103,8 @@ $ellipsis_title_after_first_row = TRUE;
 //*************************
 //Permissions configuration
 //******************
-include_once '../../../azexo_settings.php';
+if (file_exists('../../../azexo_settings.php'))
+    include_once '../../../azexo_settings.php';
 
 if ($_COOKIE['azexo_password'] == $admin_password) {
     $delete_files = TRUE;
