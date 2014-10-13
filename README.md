@@ -48,7 +48,7 @@ Demo: http://azexo.com/azexo_composer/
 LICENSE
 ---------
 
-Copyright 2014 Andrey Soloduhin
+Copyright 2014 Azexo
 Released under the MIT and GPL (version 2 or later) Licenses.
 
 PRODUCTS FROM AZEXO
