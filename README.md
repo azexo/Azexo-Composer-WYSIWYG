@@ -51,3 +51,9 @@ LICENSE
 Copyright 2014 Andrey Soloduhin
 
 Released under the MIT and GPL (version 2 or later) Licenses.
+
+
+INTEGRATION IMPLEMENTED
+---------
+
+[WordPress/Drupal/Joomla/HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo)
