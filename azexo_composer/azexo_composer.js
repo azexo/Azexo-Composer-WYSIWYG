@@ -2145,18 +2145,18 @@
                             $(element.controls).offset(offset);
                         }
                         $(element.dom_element).off('mouseenter').on('mouseenter', function() {
-                            if (window.azexo_editor) {
+                            if ($(element.dom_element).parents('.azexo-editor').length > 0) {
                                 $(element.parent.controls).css('display', 'block');
                                 update_controls(element);
                             }
                         });
                         $(element.dom_element).off('mouseleave').on('mouseleave', function() {
-                            if (window.azexo_editor) {
+                            if ($(element.dom_element).parents('.azexo-editor').length > 0) {
                                 $(element.controls).css('display', '');
                             }
                         });
                         setInterval(function() {
-                            if (window.azexo_editor) {
+                            if ($(element.dom_element).parents('.azexo-editor').length > 0) {
                                 if (!$(element.dom_element).is(':hover') && !$(element.parent.controls).is(':hover')) {
                                     $(element.controls).css('display', '');
                                 }
@@ -2170,8 +2170,9 @@
                                     $(element.parent.controls).css('display', $(e.controls).css('display'));
                                 if (_.isUndefined($(element.parent.controls).data('spc'))) {
                                     $(element.parent.controls).off('mouseenter').on('mouseenter', function() {
-                                        var element = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
-                                        $(element.controls).css('display', 'block');
+                                        var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
+                                        if(!_.isUndefined(el))
+                                            $(el.controls).css('display', 'block');
                                     });
                                     $(element.parent.controls).data('spc', true);
                                 }
@@ -2183,10 +2184,12 @@
                             update_controls(element);
                         });
                         $(element.parent.controls).find('span').off('click').on('click', function() {
-                            var element = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
                             $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
-                            $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
-                            update_controls(element);
+                            var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
+                            if(!_.isUndefined(el)) {
+                                $(el.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
+                                update_controls(el);
+                            }
                         });
                         $(element.controls).find('span').trigger('click');
                     });
