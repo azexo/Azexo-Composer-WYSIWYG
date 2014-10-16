@@ -1610,9 +1610,9 @@
                     if (_.indexOf(element.attrs['display'].split(','), 'hours') >= 0)
                         html += event.strftime('<span class="az-hours">%-H</span> ' + t('hours') + ' ');
                     if (_.indexOf(element.attrs['display'].split(','), 'minutes') >= 0)
-                        html += event.strftime('<span class="az-minutes">%M</span> ' + t('minutes') + ' ');
+                        html += event.strftime('<span class="az-minutes">%M</span> ' + t('min') + ' ');
                     if (_.indexOf(element.attrs['display'].split(','), 'seconds') >= 0)
-                        html += event.strftime('<span class="az-seconds">%S</span> ' + t('seconds') + ' ');
+                        html += event.strftime('<span class="az-seconds">%S</span> ' + t('sec') + ' ');
                     return html;
                 }
                 this.add_js_list({
