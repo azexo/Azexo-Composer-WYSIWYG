@@ -18,7 +18,6 @@
         '_self': t('Same window'),
         '_blank': t('New window'),
     };
-
     var azexo_elements = [
         {
             base: 'az_text',
@@ -37,7 +36,7 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-text ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</div>');
                 this.dom_content_element = this.dom_element;
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -77,7 +76,7 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 if (this.attrs['link'] == '') {
                     this.dom_element = $('<div class="az-element az-icon ' + this.attrs['el_class'] + '"><span class="' + this.attrs['icon'] + '" style="' + this.attrs['style'] + '"></span></div>');
                 } else {
@@ -228,7 +227,7 @@
             frontend_render: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 var prettyphoto_config = {
@@ -244,7 +243,6 @@
                     modal: false, /* If set to true, only the close button will close the window */
                     social_tools: ''
                 };
-
                 if (this.attrs['img_link_large'] == 'yes') {
                     this.add_css('prettyphoto/css/prettyPhoto.css', 'prettyPhoto' in $.fn, function() {
                     });
@@ -293,7 +291,7 @@
                 }
             },
             render: function($, p, fp) {
-                
+
                 var id = this.id;
                 var element = this;
                 this.dom_element = $('<div class="az-element az-image ' + this.attrs['el_class'] + '"></div>');
@@ -311,9 +309,7 @@
                 }
                 var img = render_image(this.attrs['image'], this.attrs['width'], this.attrs['height']);
                 $(img).appendTo(this.dom_element);
-
                 $(this.dom_element).find('img').attr('style', this.attrs['style']);
-
                 if (this.attrs['img_link_large'] == 'yes') {
                     $(this.dom_element).find('img').each(function() {
                         $(this).wrap('<a href="' + $(this).attr('src') + '" data-rel="prettyPhoto[rel-' + id + ']"></a>');
@@ -369,8 +365,8 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 if (this.attrs['link'] == '') {
                     this.dom_element = $('<div class="az-element az-button ' + this.attrs['el_class'] + '"><button type="button" class="' + p + 'btn ' + this.attrs['type'] + ' ' + this.attrs['size'] + '" style="' + this.attrs['style'] + '">' + this.attrs['title'] + '</button></div>');
                 } else {
@@ -391,8 +387,8 @@
                 return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this jumbotron.') + '</div></div>';
             },
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-ctnr az-jumbotron ' + p + 'jumbotron ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                 this.dom_content_element = this.dom_element;
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -422,8 +418,8 @@
                 return '<div class="az-empty"><div class="top-left ' + p + 'well"><h1>↖</h1>' + t('Settings for this panel. You can enter panel title by click on this button: ') + '<span class="' + p + 'glyphicon ' + p + 'glyphicon-pencil"></span></div></div>';
             },
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-panel ' + p + 'panel ' + this.attrs['el_class'] + ' ' + this.attrs['type'] + '" style="' + this.attrs['style'] + '"></div>');
                 if (this.attrs['title'] != '') {
                     var heading = $('<div class="' + p + 'panel-heading"><h3 class="' + p + 'panel-title">' + this.attrs['title'] + '</div></div>');
@@ -527,8 +523,8 @@
                 return '<div class="az-empty"><div class="bottom ' + p + 'well"><h1>' + t('At the moment popup is empty. Click to put an element here.') + '</h1></div></div>';
             },
             showed: function($, p, fp) {
-                
-                
+
+
                 var element = this;
                 function open_popup() {
                     $(element.dom_content_element).removeClass(p + 'hidden');
@@ -555,8 +551,8 @@
                 $(this.dom_element).find('.open-popup').click(open_popup);
             },
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-popup ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                 switch (this.attrs['type']) {
                     case '':
@@ -615,7 +611,7 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-alert ' + p + 'alert ' + this.attrs['type'] + ' ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['message'] + '</div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
@@ -662,7 +658,7 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<blockquote class="az-element az-blockquote ' + this.attrs['el_class'] + ' ' + this.attrs['reverse'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</blockquote>');
                 this.dom_content_element = this.dom_element;
                 if (this.attrs['cite'] != '')
@@ -704,8 +700,8 @@
                 },
             ],
             render: function($, p, fp) {
-                
-                
+
+
                 this.dom_element = $('<div class="az-element az-progress-bar ' + p + 'progress ' + this.attrs['el_class'] + ' ' + this.attrs['options'].replace(',', ' ') + '" style="' + this.attrs['style'] + '"><div class="' + p + 'progress-bar ' + this.attrs['type'] + '" role="progressbar" aria-valuenow="' + this.attrs['width'] + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + this.attrs['width'] + '%">' + this.attrs['label'] + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
@@ -806,7 +802,7 @@
             frontend_render: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 var sliderTimeout = this.attrs['interval'] * 1000;
@@ -913,7 +909,7 @@
                 }
             },
             render: function($, p, fp) {
-                
+
                 var id = this.id;
                 var element = this;
                 var images = this.attrs['images'].split(',');
@@ -1028,8 +1024,8 @@
             ],
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
-                
+
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 var prettyphoto_config = {
@@ -1066,16 +1062,13 @@
                 });
             },
             render: function($, p, fp) {
-                
-                
+
+
                 var id = this.id;
                 var element = this;
                 var images = this.attrs['images'].split(',');
-
                 this.dom_element = $('<div id="' + this.id + '" class="az-element az-images-carousel ' + p + 'carousel ' + p + 'slide ' + this.attrs['el_class'] + '" data-ride="carousel" style="' + this.attrs['style'] + '"></div>');
-
                 var hide = this.attrs['hide'].split(',');
-
                 if ($.inArray('pagination_control', hide) < 0) {
                     var indicators = $('<ol class="' + p + 'carousel-indicators"></ol>');
                     for (var i = 0; i < images.length; i++) {
@@ -1095,7 +1088,6 @@
                     $(item).height(this.attrs['height'] + 'px');
                 }
                 $(this.dom_element).append(inner);
-
                 if ($.inArray('prev_next_buttons', hide) < 0) {
                     var controls = $('<a class="' + p + 'left ' + p + 'carousel-control" href="#' + this.id + '" data-slide="prev"><span class="' + p + 'glyphicon ' + p + 'glyphicon-chevron-left"></span></a><a class="' + p + 'right ' + p + 'carousel-control" href="#' + this.id + '" data-slide="next"><span class="' + p + 'glyphicon ' + p + 'glyphicon-chevron-right"></span></a>');
                     $(this.dom_element).append(controls);
@@ -1103,8 +1095,6 @@
 
                 $(this.dom_element).find('.' + p + 'carousel-indicators li:first').addClass(p + 'active');
                 $(this.dom_element).find('.' + p + 'carousel-inner .' + p + 'item:first').addClass(p + 'active');
-
-
                 switch (this.attrs['onclick']) {
                     case 'link_image':
                         $(this.dom_element).find('.' + p + 'carousel-inner .' + p + 'item img').each(function() {
@@ -1153,7 +1143,7 @@
             ],
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 function youtube_parser(url) {
                     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
                     var match = url.match(regExp);
@@ -1200,7 +1190,7 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-html ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</div>');
                 this.dom_content_element = this.dom_element;
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -1322,7 +1312,7 @@
             show_settings_on_create: true,
             frontend_render: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 this.add_css('css/jquery.circliful.css', 'circliful' in $.fn, function() {
@@ -1338,7 +1328,7 @@
                     }});
             },
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-circle-counter ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div id="' + this.id + '" data-dimension="' + this.attrs['dimension']
                         + '" data-text="' + this.attrs['text']
                         + '" data-info="' + this.attrs['info']
@@ -1419,7 +1409,7 @@
             ],
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 this.add_js_list({
@@ -1438,7 +1428,6 @@
                                 }});
                         }, {offset: '100%', triggerOnce: true});
                         $(document).trigger('scroll');
-
 //                $(element.dom_element).waypoint({
 //                    handler: function() {
 //                    }
@@ -1446,7 +1435,7 @@
                     }});
             },
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-counter"><div id="' + this.id + '" class="' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '">' + this.attrs['start'] + '</div></div>');
                 $(this.dom_element).find('#' + this.id).css('font-size', this.attrs['fontsize'] + 'px');
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -1475,7 +1464,7 @@
                 }
             },
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 if (this.children.length == 0 && this.attrs['images_with_tags'] != '') {
                     var shortcode = '[az_grid]';
@@ -1499,14 +1488,210 @@
                 }
             },
             render: function($, p, fp) {
-                
+
                 this.dom_element = $('<div class="az-element az-wizard az-tagged-images-grid ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                 this.dom_content_element = this.dom_element;
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
+        {
+            base: 'az_countdown',
+            name: t('Countdown Timer'),
+            icon: 'fa fa-clock-o',
+            description: t('Place countdown element'),
+            params: [
+                {
+                    type: 'dropdown',
+                    heading: t('Date / Time Limitations'),
+                    param_name: 'counter_scope',
+                    description: t('Select the countdown scope in terms of date and time.'),
+                    value: {
+                        'date': t('Specify Date Only'),
+                        'date_time': t('Specify Date and Time'),
+                        'repeating': t('Specifiy Time Only (repeating on every day)'),
+                        'resetting': t('Resetting Counter (set interval up to 24 hours)'),
+                    },
+                },
+                {
+                    type: 'datetime',
+                    heading: t('Date'),
+                    param_name: 'date',
+                    datepicker: true,
+                    description: t('Select the date to which you want to count down to.'),
+                    formatDate: 'd.m.Y',
+                    dependency: {'element': 'counter_scope', 'value': ['date']},
+                },
+                {
+                    type: 'datetime',
+                    heading: t('Date / Time'),
+                    param_name: 'date_time',
+                    timepicker: true,
+                    datepicker: true,
+                    description: t('Select the date and time to which you want to count down to.'),
+                    formatDate: 'd.m.Y',
+                    formatTime: 'H',
+                    dependency: {'element': 'counter_scope', 'value': ['date_time']},
+                },
+                {
+                    type: 'datetime',
+                    heading: t('Time'),
+                    param_name: 'time',
+                    timepicker: true,
+                    description: t('Select the time on the day above to which you want to count down to.'),
+                    formatTime: 'H',
+                    dependency: {'element': 'counter_scope', 'value': ['repeating']},
+                },
+                {
+                    type: 'integer_slider',
+                    heading: t('Reset in Hours'),
+                    param_name: 'reset_hours',
+                    max: 24,
+                    description: t('Define the number of hours until countdown reset.'),
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'integer_slider',
+                    heading: t('Reset in Minutes'),
+                    param_name: 'reset_minutes',
+                    max: 60,
+                    description: t('Define the number of minutes until countdown reset.'),
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'integer_slider',
+                    heading: t('Reset in Seconds'),
+                    param_name: 'reset_seconds',
+                    max: 60,
+                    description: t('Define the number of seconds until countdown reset.'),
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'link',
+                    heading: t('Page Referrer'),
+                    param_name: 'referrer',
+                    description: t('Provide an optional link to another site/page to be opened after countdown expires.'),
+                    dependency: {'element': 'counter_scope', 'value': ['repeating', 'resetting']},
+                },
+                {
+                    type: 'checkbox',
+                    heading: t('Automatic Restart'),
+                    param_name: 'restart',
+                    description: t('Switch the toggle if you want to restart the countdown after each expiration.'),
+                    value: {
+                        'yes': t("Yes, please"),
+                    },
+                    dependency: {'element': 'counter_scope', 'value': ['resetting']},
+                },
+                {
+                    type: 'saved_datetime',
+                    param_name: 'saved',
+                },
+                {
+                    type: 'checkbox',
+                    heading: t('Display Options'),
+                    param_name: 'display',
+                    value: {
+                        'days': t("Show Remaining Days"),
+                        'hours': t("Show Remaining Hours"),
+                        'minutes': t("Show Remaining Minutes"),
+                        'seconds': t("Show Remaining Seconds"),
+                    },
+                },
+            ],
+            show_settings_on_create: true,
+            frontend_render: true,
+            showed: function($, p, fp) {
+                this.baseclass.prototype.showed.apply(this, arguments);
+                var element = this;
+                function get_html(event) {
+                    var html = '';
+                    if (_.indexOf(element.attrs['display'].split(','), 'days') >= 0)
+                        html += event.strftime('<span class="az-days">%-D</span> ' + t('days') + ' ');
+                    if (_.indexOf(element.attrs['display'].split(','), 'hours') >= 0)
+                        html += event.strftime('<span class="az-hours">%-H</span> ' + t('hours') + ' ');
+                    if (_.indexOf(element.attrs['display'].split(','), 'minutes') >= 0)
+                        html += event.strftime('<span class="az-minutes">%M</span> ' + t('minutes') + ' ');
+                    if (_.indexOf(element.attrs['display'].split(','), 'seconds') >= 0)
+                        html += event.strftime('<span class="az-seconds">%S</span> ' + t('seconds') + ' ');
+                    return html;
+                }
+                this.add_js_list({
+                    paths: ['jquery.countdown/jquery.countdown.min.js', 'datetimepicker/jquery.datetimepicker.js'],
+                    loaded: 'countdown' in $.fn && 'datetimepicker' in $.fn,
+                    callback: function() {
+                        var options = {};
+                        switch (element.attrs['counter_scope']) {
+                            case 'date':
+                                var d = Date.parseDate(element.attrs['date'], 'd.m.Y');
+                                if (d != null) {
+                                    $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate()).on('update.countdown', function(event) {
+                                        $(this).html(get_html(event));
+                                    });
+                                }
+                                break;
+                            case 'date_time':
+                                var d = Date.parseDate(element.attrs['date_time'], 'd.m.Y H');
+                                if (d != null) {
+                                    $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':00:00').on('update.countdown', function(event) {
+                                        $(this).html(get_html(event));
+                                    });
+                                }
+                                break;
+                            case 'repeating':
+                                var d = new Date();
+                                d.setHours(element.attrs['time']);
+                                if (d != null) {
+                                    $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':00:00').on('update.countdown', function(event) {
+                                        $(this).html(get_html(event));
+                                    }).on('finish.countdown', function(event) {
+                                        if (element.attrs['referrer'] != '') {
+                                            window.location.replace(element.attrs['referrer']);
+                                        }
+                                    });
+                                }
+                                break;
+                            case 'resetting':
+                                if (element.attrs['saved'] != '') {
+                                    var saved = new Date(element.attrs['saved']);
+                                    var interval = (Math.round(element.attrs['reset_hours']) * 60 * 60 + Math.round(element.attrs['reset_minutes']) * 60 + Math.round(element.attrs['reset_seconds'])) * 1000;
+                                    if (element.attrs['restart'] == 'yes') {
+                                        var current = new Date();
+                                        var elapsed = current.getTime() - saved.getTime();
+                                        var k = elapsed / interval;
+                                        elapsed = elapsed - Math.floor(k) * interval;
+                                        var delta = interval - elapsed;
+                                        var d = new Date(current.getTime() + delta);
+                                        $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()).on('update.countdown', function(event) {
+                                            $(this).html(get_html(event));
+                                        }).on('finish.countdown', function(event) {
+                                            if (element.attrs['referrer'] != '') {
+                                                window.location.replace(element.attrs['referrer']);
+                                            }
+                                        });
+                                    } else {
+                                        var d = new Date(saved.getTime() + interval);
+                                        $(element.dom_element).find('.countdown').countdown(d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()).on('update.countdown', function(event) {
+                                            $(this).html(get_html(event));
+                                        }).on('finish.countdown', function(event) {
+                                            if (element.attrs['referrer'] != '') {
+                                                window.location.replace(element.attrs['referrer']);
+                                            }
+                                        });
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }});
+            },
+            render: function($, p, fp) {
+                this.dom_element = $('<div class="az-element az-countdown ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+                $('<div class="countdown"></div>').appendTo(this.dom_element);
+                this.baseclass.prototype.render.apply(this, arguments);
+            },
+        },
     ];
-
     if ('azexo_elements' in window) {
         window.azexo_elements = window.azexo_elements.concat(azexo_elements);
     } else {
@@ -1530,8 +1715,8 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
                 var select = '<select name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" class="' + p + 'form-control" ' + required + '>';
                 select += '<option value="">' + t('Please select') + '</option>';
@@ -1560,8 +1745,8 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 var inputs = '';
                 var options = this.attrs['options'].split("\n");
                 for (var i = 0; i < options.length; i++) {
@@ -1581,8 +1766,8 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
-                
+
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
                 this.dom_element = $('<div class="az-element az-textfield ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" placeholder="' + this.attrs['name'] + '" ' + required + '></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -1622,7 +1807,7 @@
             hidden: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 function nouislider(slider, min, max, value, step, target) {
                     azexo_add_css('nouislider/jquery.nouislider.css', function() {
@@ -1656,8 +1841,8 @@
                 nouislider($(this.dom_element).find('.slider'), this.attrs['minimum'], this.attrs['maximum'], '', this.attrs['step'], $(this.dom_element).find('input'));
             },
             render: function($, p, fp) {
-                
-                
+
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
                 this.dom_element = $('<div class="az-element az-number ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" ' + required + ' placeholder="' + this.attrs['name'] + '"></div><div class="slider"></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -1682,7 +1867,7 @@
             show_settings_on_create: true,
             frontend_render: true,
             showed: function($, p, fp) {
-                
+
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 this.add_css('datetimepicker/jquery.datetimepicker.css', function() {
@@ -1708,7 +1893,7 @@
                 });
             },
             render: function($, p, fp) {
-                
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
                 this.dom_element = $('<div class="az-element az-date ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['name'] + '</label><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" ' + required + '></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
@@ -1724,7 +1909,7 @@
             hidden: true,
             show_settings_on_create: true,
             render: function($, p, fp) {
-                
+
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
                 this.dom_element = $('<div class="az-element az-textarea ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" " placeholder="' + this.attrs['name'] + '" ' + required + '></textarea></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
