@@ -103,30 +103,30 @@ $ellipsis_title_after_first_row = TRUE;
 //*************************
 //Permissions configuration
 //******************
-if (file_exists('../../../azexo_settings.php'))
+$delete_files = TRUE;
+$create_folders = TRUE;
+$delete_folders = TRUE;
+$upload_files = TRUE;
+$rename_files = TRUE;
+$rename_folders = TRUE;
+$duplicate_files = TRUE;
+$copy_cut_files = TRUE; // for copy/cut files
+$copy_cut_dirs = TRUE; // for copy/cut directories    
+if (file_exists('../../../azexo_settings.php')) {
     include_once '../../../azexo_settings.php';
-
-if ($_COOKIE['azexo_password'] == $admin_password) {
-    $delete_files = TRUE;
-    $create_folders = TRUE;
-    $delete_folders = TRUE;
-    $upload_files = TRUE;
-    $rename_files = TRUE;
-    $rename_folders = TRUE;
-    $duplicate_files = TRUE;
-    $copy_cut_files = TRUE; // for copy/cut files
-    $copy_cut_dirs = TRUE; // for copy/cut directories
-} else {
-    $delete_files = FALSE;
-    $create_folders = FALSE;
-    $delete_folders = FALSE;
-    $upload_files = FALSE;
-    $rename_files = FALSE;
-    $rename_folders = FALSE;
-    $duplicate_files = FALSE;
-    $copy_cut_files = FALSE;
-    $copy_cut_dirs = FALSE;
+    if (!isset($_COOKIE['azexo_password']) || !isset($admin_password) || ($_COOKIE['azexo_password'] != $admin_password)) {
+        $delete_files = FALSE;
+        $create_folders = FALSE;
+        $delete_folders = FALSE;
+        $upload_files = FALSE;
+        $rename_files = FALSE;
+        $rename_folders = FALSE;
+        $duplicate_files = FALSE;
+        $copy_cut_files = FALSE;
+        $copy_cut_dirs = FALSE;
+    }
 }
+
 
 // defines size limit for paste in MB / operation
 // set 'FALSE' for no limit
