@@ -2245,6 +2245,8 @@
                         update: this.update_sorting,
                         placeholder: 'az-sortable-placeholder',
                         forcePlaceholderSize: true,
+                        tolerance: "pointer",
+                        distance: 1,
                         over: function(event, ui) {
                             ui.placeholder.attr('class', ui.helper.attr('class'));
                             ui.placeholder.removeClass('ui-sortable-helper');
@@ -4608,6 +4610,8 @@
                     update: this.update_sorting,
                     placeholder: 'az-sortable-placeholder',
                     forcePlaceholderSize: true,
+                    tolerance: "pointer",
+                    distance: 1,
                     over: function(event, ui) {
                         ui.placeholder.attr('class', ui.helper.attr('class'));
                         ui.placeholder.removeClass('ui-sortable-helper');
@@ -4843,6 +4847,8 @@
                     update: element.update_sorting,
                     placeholder: 'az-sortable-placeholder',
                     forcePlaceholderSize: true,
+                    tolerance: "pointer",
+                    distance: 1,
                     start: over,
                     over: over,
                 });
@@ -5457,6 +5463,8 @@
                     update: this.update_sorting,
                     placeholder: 'az-sortable-placeholder',
                     forcePlaceholderSize: true,
+                    tolerance: "pointer",
+                    distance: 1,
                     over: function(event, ui) {
                         ui.placeholder.attr('class', ui.helper.attr('class'));
                         ui.placeholder.removeClass('ui-sortable-helper');
@@ -5620,6 +5628,8 @@
                     update: this.update_sorting,
                     placeholder: 'az-sortable-placeholder',
                     forcePlaceholderSize: true,
+                    tolerance: "pointer",
+                    distance: 1,
                     over: function(event, ui) {
                         ui.placeholder.attr('class', ui.helper.attr('class'));
                         ui.placeholder.removeClass('ui-sortable-helper');
@@ -7481,6 +7491,8 @@
                     update: this.update_sorting,
                     placeholder: 'az-sortable-placeholder',
                     forcePlaceholderSize: true,
+                    tolerance: "pointer",
+                    distance: 1,
                     over: function(event, ui) {
                         ui.placeholder.attr('class', ui.helper.attr('class'));
                         ui.placeholder.removeClass('ui-sortable-helper');

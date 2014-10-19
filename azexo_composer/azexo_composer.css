@@ -45,8 +45,8 @@ div.azexo.az-container > .controls {
     transform: translate(-50%, -50%);
 }
 
-.azexo-editor .az-container, .azexo-editor .az-ctnr {    
-    margin: 1px 0px;
+.azexo-editor.az-container, .azexo-editor .az-container, .azexo-editor .az-ctnr {
+    min-height: 5px;
 }
 
 .azexo-editor div.az-container,
