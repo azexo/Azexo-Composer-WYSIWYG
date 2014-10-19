@@ -2171,7 +2171,7 @@
                                 if (_.isUndefined($(element.parent.controls).data('spc'))) {
                                     $(element.parent.controls).off('mouseenter').on('mouseenter', function() {
                                         var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
-                                        if(!_.isUndefined(el))
+                                        if (!_.isUndefined(el))
                                             $(el.controls).css('display', 'block');
                                     });
                                     $(element.parent.controls).data('spc', true);
@@ -2186,7 +2186,7 @@
                         $(element.parent.controls).find('span').off('click').on('click', function() {
                             $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
-                            if(!_.isUndefined(el)) {
+                            if (!_.isUndefined(el)) {
                                 $(el.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                                 update_controls(el);
                             }
@@ -3072,7 +3072,7 @@
                                                 var type = container.attrs['container'].split('/')[0];
                                                 var name = container.attrs['container'].split('/')[1];
                                                 $(textarea).val('<div class="az-element az-container" data-az-type="' + type + '" data-az-name="' + name + '">' + html + '</div>');
-                                            }                                            
+                                            }
                                         }
                                     });
                                 }
@@ -3710,12 +3710,12 @@
                     });
                 }
                 var callback = function() {
-                    $(parent).off('click.az_animation');
-                    $(parent).off('mouseenter.az_animation');
-                    $(parent).off('mouseleave.az_animation');
+                    $(parent).off('click.az_animation' + element.id);
+                    $(parent).off('mouseenter.az_animation' + element.id);
+                    $(parent).off('mouseleave.az_animation' + element.id);
                     switch (element.attrs['an_start']) {
                         case 'click':
-                            $(parent).on('click.az_animation', function() {
+                            $(parent).on('click.az_animation' + element.id, function() {
                                 if (!element.animated) {
                                     element.start_in_animation();
                                 }
@@ -3735,11 +3735,11 @@
                                 }});
                             break;
                         case 'hover':
-                            $(parent).on('mouseenter.az_animation', function() {
+                            $(parent).on('mouseenter.az_animation' + element.id, function() {
                                 element.hover = true;
                                 element.start_in_animation();
                             });
-                            $(parent).on('mouseleave.az_animation', function() {
+                            $(parent).on('mouseleave.az_animation' + element.id, function() {
                                 element.hover = false;
                                 element.start_out_animation();
                             });
@@ -6040,13 +6040,13 @@
                 function redraw() {
 //                    clearTimeout(redrawTimeout);
 //                    redrawTimeout = setTimeout(function() {
-                        state.$node[0].dataset.scale = state.data.scale;
-                        state.$node[0].dataset.rotate = state.data.rotate;
-                        state.$node[0].dataset.x = state.data.x;
-                        state.$node[0].dataset.y = state.data.y;
-                        element.impress.initStep(state.$node[0]);
-                        saveData();
-                        showControls(state.$node);
+                    state.$node[0].dataset.scale = state.data.scale;
+                    state.$node[0].dataset.rotate = state.data.rotate;
+                    state.$node[0].dataset.x = state.data.x;
+                    state.$node[0].dataset.y = state.data.y;
+                    element.impress.initStep(state.$node[0]);
+                    saveData();
+                    showControls(state.$node);
 //                    }, 20);
                 }
                 function handleMouseMove(e) {

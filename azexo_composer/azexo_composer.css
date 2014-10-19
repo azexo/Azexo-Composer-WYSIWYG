@@ -45,6 +45,10 @@ div.azexo.az-container > .controls {
     transform: translate(-50%, -50%);
 }
 
+.azexo-editor .az-container, .azexo-editor .az-ctnr {    
+    margin: 1px 0px;
+}
+
 .azexo-editor div.az-container,
 /*.azexo-editor div.az-row,
 .azexo-editor div.az-grid,
@@ -623,10 +627,4 @@ div.modal-dialog, div.ax-modal-dialog {
 }
 .az-step.step:not(.active) {
     z-index: 0;
-}
-
-#azexo .switch-to-standard {
-    float: right;
-    z-index: 2;
-    position: relative;
 }
