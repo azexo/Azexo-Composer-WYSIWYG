@@ -5945,6 +5945,7 @@
                 value: {
                     'navigation': t("Navigation"),
                     'auto_play': t("Auto play"),
+                    'full_filling': t("Full filling available area"),
                 },
             }),
             make_param_type({
@@ -6315,20 +6316,32 @@
                         element.impress.goto($(this).attr('data-step'));
                         return false;
                     });
-//                    if(!window.azexo_editor) {
-//                        $(element.dom_element).on('mousewheel', function(e) {
-//                            if (e.target == e.currentTarget) {
-//                                e.preventDefault();
-//                                e.stopPropagation();
-//                                if (e.originalEvent.wheelDelta > 0) {
-//                                    element.impress.next();
-//                                } else {
-//                                    element.impress.prev();
-//                                }
-//                                return false;
-//                            }                            
-//                        });
-//                    }
+                    if (!window.azexo_editor) {
+                        $(element.dom_content_element).find('.az-step').each(function() {
+                            $(this).on('mousewheel', function(e) {
+                                if ($(this).hasClass('active')) {
+                                    if (this.offsetHeight == this.scrollHeight) {
+                                        if (e.originalEvent.wheelDelta < 0) {
+                                            element.impress.next();
+                                            return false;
+                                        } else {
+                                            element.impress.prev();
+                                            return false;
+                                        }
+                                    } else {
+                                        if (this.scrollTop == 0 && e.originalEvent.wheelDelta > 0) {
+                                            element.impress.prev();
+                                            return false;
+                                        }
+                                        if ((this.offsetHeight + this.scrollTop >= this.scrollHeight) && e.originalEvent.wheelDelta < 0) {
+                                            element.impress.next();
+                                            return false;
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
                     if ('auto_play' in element) {
                         clearInterval(element.auto_play);
                     }
@@ -6336,6 +6349,13 @@
                         element.auto_play = setInterval(function() {
                             element.impress.next();
                         }, 5000);
+                    }
+                    if (_.indexOf(element.attrs['options'].split(','), 'full_filling') >= 0) {                        
+                        $(element.dom_element).css('height', $(window).height() + 'px');
+                        $(element.dom_content_element).find('.az-step').each(function() {
+                            $(this).css('height', $(element.dom_element).height() + 'px');
+                            $(this).css('width', $(element.dom_element).width() + 'px');
+                        });
                     }
                 }});
         },
@@ -6861,8 +6881,8 @@
                 javascript += register_element.name + "('az_unknown', true, " + UnknownElement.name + ");\n";
 
                 javascript += "window.azexo_baseurl = '" + window.azexo_baseurl + "';\n";
-                if ('ajaxurl' in window)
-                    javascript += "window.ajaxurl = '" + window.ajaxurl + "';\n";
+//                if ('ajaxurl' in window)
+//                    javascript += "window.ajaxurl = '" + window.ajaxurl + "';\n";
                 if ('azexo_lang' in window)
                     javascript += "window.azexo_lang = '" + window.azexo_lang + "';\n";
                 if ('recaptcha_publickey' in window)
