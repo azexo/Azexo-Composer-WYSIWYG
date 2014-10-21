@@ -5950,14 +5950,6 @@
             }),
             make_param_type({
                 type: 'integer_slider',
-                heading: t('Perspective'),
-                param_name: 'perspective',
-                min: '0',
-                max: '10000',
-                value: '1000',
-            }),
-            make_param_type({
-                type: 'integer_slider',
                 heading: t('Transition duration'),
                 param_name: 'duration',
                 min: '0',
@@ -6201,11 +6193,11 @@
                         mouse.prevY = e.pageY;
                         var v = fixVector(x, y);
                         var transform = $(element.dom_content_element).find('> div').css('transform');
-                        $(element.dom_content_element).find('> div').css('transform', transform + ' translate3d(' + v.x + 'px, ' + v.y + 'px, 0px)');
+                        $(element.dom_content_element).find('> div').css('transform', transform + ' translate(' + v.x + 'px, ' + v.y + 'px)');
                         return false;
                     }
                 });
-                $(element.dom_element).on('mousewheel', function(e) {
+                $(element.dom_element).on('wheel mousewheel', function(e) {
                     if ($(element.dom_content_element).css('transition-duration') != '0s' || $(element.dom_content_element).css('transition-delay') != '0s') {
                         element.transition_duration = $(element.dom_content_element).css('transition-duration');
                         $(element.dom_content_element).css('transition-duration', '0s');
@@ -6277,7 +6269,10 @@
                         element.config = {};
                     element.impress.setTransformationCallback(function(x) {
                         element.config.visualScaling = x.scale;
-                        element.config.rotation = ~~(x.rotate.z);
+                        if('z'in x.rotate)
+                            element.config.rotation = ~~(x.rotate.z);
+                        else
+                            element.config.rotation = ~~(x.rotate);
                     });
                     if (element.children.length > 0)
                         element.impress.goto(element.children[0].id);
@@ -6318,7 +6313,7 @@
                     });
                     if (!window.azexo_editor) {
                         $(element.dom_content_element).find('.az-step').each(function() {
-                            $(this).on('mousewheel', function(e) {
+                            $(this).on('wheel mousewheel', function(e) {
                                 if ($(this).hasClass('active')) {
                                     if (this.offsetHeight == this.scrollHeight) {
                                         if (e.originalEvent.wheelDelta < 0) {
@@ -6365,7 +6360,6 @@
             $(this.dom_element).css('height', this.attrs['height'] + 'px');
             $(this.dom_element).css('overflow', 'hidden');
             this.dom_content_element = $('<div id="' + this.id + '"></div>').appendTo(this.dom_element);
-            $(this.dom_content_element).attr('data-perspective', this.attrs['perspective']);
             $(this.dom_content_element).attr('data-transition-duration', this.attrs['duration']);
 
             if (_.indexOf(this.attrs['options'].split(','), 'navigation') >= 0) {
