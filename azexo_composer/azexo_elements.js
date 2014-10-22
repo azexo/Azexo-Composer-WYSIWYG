@@ -658,8 +658,10 @@
             is_container: true,
             has_content: true,
             render: function($, p, fp) {
-
-                this.dom_element = $('<blockquote class="az-element az-blockquote ' + this.attrs['el_class'] + ' ' + this.attrs['reverse'] + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</blockquote>');
+                var reverse = this.attrs['reverse'];
+                if (reverse != '')
+                    reverse = p + reverse;
+                this.dom_element = $('<blockquote class="az-element az-blockquote ' + this.attrs['el_class'] + ' ' + reverse + '" style="' + this.attrs['style'] + '">' + this.attrs['content'] + '</blockquote>');
                 this.dom_content_element = this.dom_element;
                 if (this.attrs['cite'] != '')
                     $(this.dom_element).append('<footer><cite>' + this.attrs['cite'] + '</cite></footer>');
@@ -700,9 +702,10 @@
                 },
             ],
             render: function($, p, fp) {
-
-
-                this.dom_element = $('<div class="az-element az-progress-bar ' + p + 'progress ' + this.attrs['el_class'] + ' ' + this.attrs['options'].replace(',', ' ') + '" style="' + this.attrs['style'] + '"><div class="' + p + 'progress-bar ' + this.attrs['type'] + '" role="progressbar" aria-valuenow="' + this.attrs['width'] + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + this.attrs['width'] + '%">' + this.attrs['label'] + '</div></div>');
+                var options = this.attrs['options'];
+                if (options != '')
+                    options = _.map(options.split(','), function(value){ return p + value;}).join(' ');
+                this.dom_element = $('<div class="az-element az-progress-bar ' + p + 'progress ' + this.attrs['el_class'] + ' ' + options + '" style="' + this.attrs['style'] + '"><div class="' + p + 'progress-bar ' + this.attrs['type'] + '" role="progressbar" aria-valuenow="' + this.attrs['width'] + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + this.attrs['width'] + '%">' + this.attrs['label'] + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
