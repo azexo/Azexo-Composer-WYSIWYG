@@ -163,7 +163,7 @@
                     action: 'azexo_save_container',
                     type: type,
                     name: name,
-                    shortcode: shortcode,
+                    shortcode: btoa(encodeURIComponent(shortcode)),
                 },
                 dataType: "json",
                 cache: false,
@@ -181,7 +181,7 @@
                     action: 'container_save',
                     type: type,
                     name: name,
-                    shortcode: shortcode,
+                    shortcode: btoa(encodeURIComponent(shortcode)),
                 },
                 dataType: "json",
                 cache: false,
@@ -1102,35 +1102,6 @@
     function vimeo_parser(url) {
         var m = url.match(/^.+vimeo.com\/(.*\/)?([^#\?]*)/);
         return m ? m[2] || m[1] : false;
-    }
-    function nouislider(slider, min, max, value, step, target) {
-        azexo_add_css('nouislider/jquery.nouislider.css', function() {
-        });
-        azexo_add_js({
-            path: 'nouislider/jquery.nouislider.min.js',
-            callback: function() {
-                $(slider).noUiSlider({
-                    range: {
-                        min: parseFloat(min),
-                        max: parseFloat(max)
-                    },
-                    start: (value == '') ? NaN : parseFloat(value),
-                    handles: 1,
-                    step: parseFloat(step),
-                    behaviour: "extend-tap",
-                    serialization: {
-                        lower: [$.Link({
-                                target: target
-                            })],
-                    },
-                    slide: function() {
-                    },
-                    set: function() {
-                    }
-                }).change(function() {
-                });
-            }
-        });
     }
     function toAbsoluteURL(url) {
         if (url.search(/^\/\//) != -1) {
@@ -2088,23 +2059,23 @@
                         }
                         $('.controls').css('visibility', 'hidden').css('opacity', '0');
                         $('.control').css('opacity', '0');
-                        $('.az-element').removeClass('highlight');
+                        $('.az-element').removeClass('az-highlight');
                         if (!last) {
                             if (parent instanceof LayersElement) {
                                 if (parent.layer_number < parent.children.length) {
                                     var layer = parent.children[parent.layer_number];
                                     $(layer.dom_element).find(' > .controls').css('visibility', 'visible').css('opacity', '1').find(' > .control').css('opacity', '1');
-                                    $(layer.dom_element).addClass('highlight');
+                                    $(layer.dom_element).addClass('az-highlight');
                                     element.right_click_number--;
                                     parent.layer_number++;
                                 } else {
                                     $(parent.dom_element).find(' > .controls').css('visibility', 'visible').css('opacity', '1').find(' > .control').css('opacity', '1');
-                                    $(parent.dom_element).addClass('highlight');
+                                    $(parent.dom_element).addClass('az-highlight');
                                     parent.layer_number = 0;
                                 }
                             } else {
                                 $(parent.dom_element).find(' > .controls').css('visibility', 'visible').css('opacity', '1').find(' > .control').css('opacity', '1');
-                                $(parent.dom_element).addClass('highlight');
+                                $(parent.dom_element).addClass('az-highlight');
                             }
                         } else {
                             element.right_click_number = 0;
@@ -2118,10 +2089,10 @@
                         element.layer_number = 0;
                 });
                 $(this.dom_element).mouseleave(function(e) {
-                    if ($(element.dom_element).hasClass('highlight')) {
+                    if ($(element.dom_element).hasClass('az-highlight')) {
                         $('.controls').css('visibility', '').css('opacity', '');
                         $('.control').css('opacity', '')
-                        $('.az-element').removeClass('highlight');
+                        $('.az-element').removeClass('az-highlight');
                     }
                 });
                 if (element.show_parent_controls) {
@@ -6269,7 +6240,7 @@
                         element.config = {};
                     element.impress.setTransformationCallback(function(x) {
                         element.config.visualScaling = x.scale;
-                        if('z'in x.rotate)
+                        if ('z'in x.rotate)
                             element.config.rotation = ~~(x.rotate.z);
                         else
                             element.config.rotation = ~~(x.rotate);
@@ -6345,7 +6316,7 @@
                             element.impress.next();
                         }, 5000);
                     }
-                    if (_.indexOf(element.attrs['options'].split(','), 'full_filling') >= 0) {                        
+                    if (_.indexOf(element.attrs['options'].split(','), 'full_filling') >= 0) {
                         $(element.dom_element).css('height', $(window).height() + 'px');
                         $(element.dom_content_element).find('.az-step').each(function() {
                             $(this).css('height', $(element.dom_element).height() + 'px');

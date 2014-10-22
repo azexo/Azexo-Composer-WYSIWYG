@@ -1810,30 +1810,20 @@
 
                 this.baseclass.prototype.showed.apply(this, arguments);
                 function nouislider(slider, min, max, value, step, target) {
-                    azexo_add_css('nouislider/jquery.nouislider.css', function() {
+                    azexo_add_css('noUiSlider/distribute/jquery.nouislider.min.css', function() {
                     });
                     azexo_add_js({
-                        path: 'nouislider/jquery.nouislider.min.js',
+                        path: 'noUiSlider/distribute/jquery.nouislider.all.min.js',
                         callback: function() {
                             $(slider).noUiSlider({
-                                range: {
-                                    min: parseFloat(min),
-                                    max: parseFloat(max)
-                                },
-                                start: (value == '') ? NaN : parseFloat(value),
-                                handles: 1,
+                                start: [(value == '' || isNaN(value) || value == 'NaN') ? min : parseFloat(value)],
                                 step: parseFloat(step),
-                                behaviour: "extend-tap",
-                                serialization: {
-                                    lower: [$.Link({
-                                            target: target
-                                        })],
+                                range: {
+                                    min: [parseFloat(min)],
+                                    max: [parseFloat(max)]
                                 },
-                                slide: function() {
-                                },
-                                set: function() {
-                                }
-                            }).change(function() {
+                            }).on('change', function() {
+                                $(target).val($(slider).val());
                             });
                         }
                     });

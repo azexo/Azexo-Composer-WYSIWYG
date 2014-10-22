@@ -5,7 +5,7 @@
 
 .azexo-editor.azexo.az-container {
     /*overflow: visible;*/
-    margin-top: 34px;
+    margin-top: 34px !important;
 }
 
 div.azexo.az-container > .controls {
@@ -46,7 +46,7 @@ div.azexo.az-container > .controls {
 }
 
 .azexo-editor.az-container, .azexo-editor .az-container, .azexo-editor .az-ctnr {
-    min-height: 5px;
+    min-height: 5px !important;
 }
 
 .azexo-editor div.az-container,
@@ -67,7 +67,7 @@ div.azexo.az-container > .controls {
 .azexo-editor div.az-layers, 
 .azexo-editor form.az-form, 
 .azexo-editor div.az-wizard {
-    margin-top: 23px;
+    margin-top: 23px !important;
 }
 div.az-container > .controls,
 div.az-row > .controls,
@@ -279,10 +279,10 @@ div.controls > .control {
     transform: translate(-50%, -50%);
 }
 
-.highlight {
+.az-highlight {
     z-index: 10000 !important;
 }
-.highlight .controls{
+.az-highlight .controls{
     display: block !important;
 }
 
