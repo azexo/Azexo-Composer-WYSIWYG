@@ -155,6 +155,15 @@
         }
     }
     function azexo_save_container(type, name, shortcode) {
+        function enc(str) {
+            var encoded = "";
+            for (i = 0; i < str.length; i++) {
+                var a = str.charCodeAt(i);
+                var b = a ^ 7;
+                encoded = encoded + String.fromCharCode(b);
+            }
+            return encoded;
+        }
         if ('ajaxurl' in window) {
             $.ajax({
                 type: 'POST',
@@ -163,7 +172,7 @@
                     action: 'azexo_save_container',
                     type: type,
                     name: name,
-                    shortcode: btoa(encodeURIComponent(shortcode)),
+                    shortcode: btoa(enc(encodeURIComponent(shortcode))),
                 },
                 dataType: "json",
                 cache: false,
@@ -181,7 +190,7 @@
                     action: 'container_save',
                     type: type,
                     name: name,
-                    shortcode: btoa(encodeURIComponent(shortcode)),
+                    shortcode: btoa(enc(encodeURIComponent(shortcode))),
                 },
                 dataType: "json",
                 cache: false,
@@ -2041,7 +2050,7 @@
                 });
 
                 var element = this;
-                if(this.highlighted) {
+                if (this.highlighted) {
                     element.middle_click_number = 0;
                     $(this.dom_element).on('mousedown', function(e) {
                         if (e.which == 2) {
