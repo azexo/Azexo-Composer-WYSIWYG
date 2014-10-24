@@ -1810,16 +1810,16 @@
             hidden: true,
             show_settings_on_create: true,
             showed: function($, p, fp) {
-
+                var element = this;
                 this.baseclass.prototype.showed.apply(this, arguments);
                 function nouislider(slider, min, max, value, step, target) {
-                    azexo_add_css('noUiSlider/distribute/jquery.nouislider.min.css', function() {
+                    element.add_css('noUiSlider/distribute/jquery.nouislider.min.css', function() {
                     });
-                    azexo_add_js({
+                    element.add_js({
                         path: 'noUiSlider/distribute/jquery.nouislider.all.min.js',
                         callback: function() {
                             $(slider).noUiSlider({
-                                start: [(value == '' || isNaN(value) || value == 'NaN') ? min : parseFloat(value)],
+                                start: [(value == '' || isNaN(parseFloat(value)) || value == 'NaN') ? min : parseFloat(value)],
                                 step: parseFloat(step),
                                 range: {
                                     min: [parseFloat(min)],

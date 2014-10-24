@@ -266,7 +266,7 @@
             path: 'noUiSlider/distribute/jquery.nouislider.all.min.js',
             callback: function() {
                 $(slider).noUiSlider({
-                    start: [(value == '' || isNaN(value) || value == 'NaN') ? min : parseFloat(value)],
+                    start: [(value == '' || isNaN(parseFloat(value)) || value == 'NaN') ? min : parseFloat(value)],
                     step: parseFloat(step),
                     range: {
                         min: [parseFloat(min)],
