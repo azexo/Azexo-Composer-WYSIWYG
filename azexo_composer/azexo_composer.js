@@ -6051,7 +6051,7 @@
                 }
                 if ('step_controls' in element)
                     element.step_controls.remove();
-                element.step_controls = $('<div class="az-step-controls ' + p + 'btn-group-vertical"></div>').hide();
+                element.step_controls = $('<div class="az-step-controls ' + p + 'btn-group-vertical"></div>').css('display', 'none');
                 $('<span class="number ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon"></span>').prependTo(element.step_controls).click(function() {
                     var n = parseInt($(this).attr('data-step')) - 1;
                     element.impress.goto(element.children[n].id);
@@ -6065,7 +6065,7 @@
                         var top, left, pos = $where.offset();
                         top = (pos.top > 0) ? pos.top + (100 / element.config.visualScaling) : 0;
                         left = (pos.left > 0) ? pos.left + (100 / element.config.visualScaling) : 0;
-                        $(element.step_controls).show().offset({
+                        $(element.step_controls).css('display', 'inline-block').offset({
                             top: top,
                             left: left
                         });
