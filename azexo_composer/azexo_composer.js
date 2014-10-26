@@ -1181,6 +1181,7 @@
             for (var i = 0; i < params.length; i++) {
                 if (params[i].hidden)
                     continue;
+                params[i].element = element;
                 if (params[i].tab in tabs) {
                     tabs[params[i].tab].push(params[i]);
                 } else {
@@ -3214,7 +3215,32 @@
                 param_name: 'an_js_in',
                 tab: t('Animation'),
                 value: {},
-                dependency: {'element': 'an_in', 'value': ['js']},
+                dependency: {'element': 'an_in', 'value': ['js'], 'callback': function(caller_param) {
+                        var param = this;
+                        var element = this.element;
+                        function animations_editor_remove() {
+                            element.save_js_animations(false);
+                            $(element.animations_editor).remove();
+                            delete element.animations_editor;                            
+                        }
+                        if ('animations_editor' in element) {
+                            animations_editor_remove();
+                        }
+                        $(caller_param.dom_element).find('select').off('change.an_js_in').on('change.an_js_in',function(){
+                            var v = caller_param.get_value();
+                            if(v != 'js') {
+                                animations_editor_remove();
+                            }
+                        });
+                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>').insertAfter(this.dom_element);
+                        element.show_js_animations_editor(form, false, function(data) {
+                            if('id' in data)
+                                $(param.dom_element).find('select').append('<option value="' + data.id + '">' + data.title + '</option>');                                
+                        });
+                        $('#az-editor-modal').find('.save').off('mousedown.an_js_in').on('mousedown.an_js_in', function(){
+                            element.save_js_animations(false);
+                        });
+                    }},
             }),
             make_param_type({
                 type: 'dropdown',
@@ -3230,7 +3256,32 @@
                 param_name: 'an_js_out',
                 tab: t('Animation'),
                 value: {},
-                dependency: {'element': 'an_out', 'value': ['js']},
+                dependency: {'element': 'an_out', 'value': ['js'], 'callback': function(caller_param) {
+                        var param = this;
+                        var element = this.element;
+                        function animations_editor_remove() {
+                            element.save_js_animations(false);
+                            $(element.animations_editor).remove();
+                            delete element.animations_editor;                            
+                        }
+                        if ('animations_editor' in element) {
+                            animations_editor_remove();
+                        }
+                        $(caller_param.dom_element).find('select').off('change.an_js_out').on('change.an_js_out',function(){
+                            var v = caller_param.get_value();
+                            if(v != 'js') {
+                                animations_editor_remove();
+                            }
+                        });
+                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>').insertAfter(this.dom_element);
+                        element.show_js_animations_editor(form, false, function(data) {
+                            if('id' in data)
+                                $(param.dom_element).find('select').append('<option value="' + data.id + '">' + data.title + '</option>');
+                        });
+                        $('#az-editor-modal').find('.save').off('mousedown.an_js_out').on('mousedown.an_js_out', function(){
+                            element.save_js_animations(false);
+                        });                        
+                    }},
             }),
             make_param_type({
                 type: 'checkbox',
@@ -3761,7 +3812,7 @@
             for (var name in azexo_elements.elements_instances_by_an_name) {
                 for (var i = 0; i < azexo_elements.elements_instances_by_an_name[name].an_scenes.length; i++) {
                     if (azexo_elements.elements_instances_by_an_name[name].an_scenes[i].duration == '-1')
-                        animations[name + '-' + i] = i + ' ' + t('scene in') + ' ' + name + ' ' + t('element');
+                        animations[name + '-' + i] = i + ' ' + t('scene in') + ' ' + name + ' ' + t('animations set');
                 }
             }
             for (var i = 0; i < this.params.length; i++) {
@@ -3778,339 +3829,362 @@
             this.clear_animation();
             AnimatedElement.baseclass.prototype.clone.apply(this, arguments);
         },
-        show_controls: function() {
+        show_js_animations_editor: function(form, scroll, callback) {
             var element = this;
-            if (window.azexo_editor) {
-                AnimatedElement.baseclass.prototype.show_controls.apply(this, arguments);
-                $('<button title="' + title("JS animation") + '" class="control js-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
-                    $('#az-js-animation-modal').remove();
-                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("JS animation settings") + '</h4></div>';
-                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
-                    var modal = $('<div id="az-js-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
-                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
-                    $(modal).find('.' + p + 'modal-body').append(tabs);
-                    var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"><div class="tree ' + p + 'col-sm-5"></div><div class="options ' + p + 'col-sm-7"></div></div>');
-                    $(tabs).find('#script').append(form);
-                    $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
-
-                    azexo_add_css('jstree/dist/themes/default/style.min.css', function() {
-                    });
-                    $(form).find('.tree').append('<div class="' + p + 'form-group an-name"><label>' + t("Name") + '</label><div><input class="' + p + 'form-control" name="an_name" type="text" value="' + element.an_name + '" required ></div><p class="' + p + 'help-block">' + t("Name to identify this element in JS animations") + '</p></div>');
-                    azexo_add_js({
-                        path: 'jstree/dist/jstree.min.js',
-                        loaded: 'jstree' in $.fn,
-                        callback: function() {
-                            var index = {};
-                            var index_type = {};
-                            var index_parents = {};
-                            function scene_title(scene) {
-                                switch (scene.duration) {
-                                    case '-1':
-                                        return t("Real time library scene");
+            element.animations_editor = $('<div class="tree ' + p + 'col-sm-5"></div><div class="options ' + p + 'col-sm-7"></div>').appendTo(form);
+            azexo_add_css('jstree/dist/themes/default/style.min.css', function() {
+            });
+            var help = '';
+            if (scroll)
+                help = t("Name to identify this element in scroll animations");
+            else
+                help = t("Name to identify this JS animations set");
+            $(form).find('.tree').append('<div class="' + p + 'form-group an-name"><label>' + t("Name") + '</label><div><input class="' + p + 'form-control" name="an_name" type="text" value="' + element.an_name + '" required ></div><p class="' + p + 'help-block">' + help + '</p></div>');
+            azexo_add_js({
+                path: 'jstree/dist/jstree.min.js',
+                loaded: 'jstree' in $.fn,
+                callback: function() {
+                    var index = {};
+                    var index_type = {};
+                    var index_parents = {};
+                    function scene_title(scene) {
+                        switch (scene.duration) {
+                            case '-1':
+                                return t("Real time scene");
+                                break;
+                            case '0':
+                                return t("Scroll real time scene") + ':' + scene.offset + '|' + scene.triggerHook;
+                                break;
+                            default:
+                                return t("Scroll scene") + ':' + scene.duration + '|' + scene.offset + '|' + scene.triggerHook;
+                                break;
+                        }
+                    }
+                    function tween_title(tween) {
+                        return t("Tween") + ':' + tween.target + '|' + tween.duration;
+                    }
+                    function get_scene(id) {
+                        $(form).find('.options').empty();
+                        if (scroll && index[id].duration != '-1')
+                            $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Type") + '</label><div class="' + p + 'radio"><div class="' + p + 'radio"><label><input type="radio" name="type" value="scroll">' + t("Scroll position as time line") + '</label></div><div class="' + p + 'radio"><label><input type="radio" name="type" value="real">' + t("Real time fired by scroll position") + '</label></div></div>');
+                        else
+                            $('<div class="' + p + 'form-group"><label>' + t("Type") + '</label><div class="' + p + 'radio"><label><input type="radio" name="type" value="library">' + t("Real time, store in library") + '</label></div></div>').appendTo($(form).find('.options')).css('display', 'none');
+                        $(form).find('.options [name="type"]').on('change', function() {
+                            if ($(this).is(':checked')) {
+                                switch ($(this).val()) {
+                                    case 'library':
+                                        $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'block');
+                                        $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'none');
+                                        index[id].duration = '-1';
+                                        tree.jstree('edit', id, scene_title(index[id]));
                                         break;
-                                    case '0':
-                                        return t("Scroll real time scene") + ':' + scene.offset + '|' + scene.triggerHook;
+                                    case 'scroll':
+                                        $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
+                                        $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'none');
+                                        $(form).find('.options [name="duration"]').val('1000');
+                                        index[id].duration = $(form).find('.options [name="duration"]').val();
+                                        tree.jstree('edit', id, scene_title(index[id]));
                                         break;
-                                    default:
-                                        return t("Scroll scene") + ':' + scene.duration + '|' + scene.offset + '|' + scene.triggerHook;
+                                    case 'real':
+                                        $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
+                                        $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
+                                        index[id].duration = '0';
+                                        tree.jstree('edit', id, scene_title(index[id]));
                                         break;
                                 }
                             }
-                            function tween_title(tween) {
-                                return t("Tween") + ':' + tween.target + '|' + tween.duration;
-                            }
-                            function get_scene(id) {
-                                $(form).find('.options').empty();
+                        });
+                        switch (index[id].duration) {
+                            case '-1':
+                                $(form).find('.options [name="type"][value="library"]').attr('checked', 'checked');
+                                break;
+                            case '0':
+                                $(form).find('.options [name="type"][value="real"]').attr('checked', 'checked');
+                                break;
+                            default:
+                                $(form).find('.options [name="type"][value="scroll"]').attr('checked', 'checked');
+                                break;
+                        }
 
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Type") + '</label><div class="' + p + 'radio"><label><input type="radio" name="type" value="library">' + t("Real time, store in library") + '</label></div><div class="' + p + 'radio"><label><input type="radio" name="type" value="scroll">' + t("Scroll position as time line") + '</label></div><div class="' + p + 'radio"><label><input type="radio" name="type" value="real">' + t("Real time fired by scroll position") + '</label></div></div>');
-                                $(form).find('.options [name="type"]').on('change', function() {
-                                    if ($(this).is(':checked')) {
-                                        switch ($(this).val()) {
-                                            case 'library':
-                                                $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'block');
-                                                $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'none');
-                                                index[id].duration = '-1';
-                                                tree.jstree('edit', id, scene_title(index[id]));
-                                                break;
-                                            case 'scroll':
-                                                $(form).find('.options .' + p + 'form-group.duration, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
-                                                $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay').css('display', 'none');
-                                                $(form).find('.options [name="duration"]').val('1000');
-                                                index[id].duration = $(form).find('.options [name="duration"]').val();
-                                                tree.jstree('edit', id, scene_title(index[id]));
-                                                break;
-                                            case 'real':
-                                                $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
-                                                $(form).find('.options .' + p + 'form-group.repeat, .options .' + p + 'form-group.repeatdelay, .options .' + p + 'form-group.offset, .options .' + p + 'form-group.trigger, .options .' + p + 'form-group.pin').css('display', 'block');
-                                                index[id].duration = '0';
-                                                tree.jstree('edit', id, scene_title(index[id]));
-                                                break;
-                                        }
-                                    }
-                                });
-                                switch (index[id].duration) {
-                                    case '-1':
-                                        $(form).find('.options [name="type"][value="library"]').attr('checked', 'checked');
-                                        break;
-                                    case '0':
-                                        $(form).find('.options [name="type"][value="real"]').attr('checked', 'checked');
-                                        break;
-                                    default:
-                                        $(form).find('.options [name="type"][value="scroll"]').attr('checked', 'checked');
-                                        break;
-                                }
+                        $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("The duration of the scene in pixels") + '</p></div>');
+                        $(form).find('.options [name="duration"]').on('change', function() {
+                            index[id].duration = $(this).val();
+                            tree.jstree('edit', id, scene_title(index[id]));
+                        });
 
-                                $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("The duration of the scene in pixels") + '</p></div>');
-                                $(form).find('.options [name="duration"]').on('change', function() {
-                                    index[id].duration = $(this).val();
-                                    tree.jstree('edit', id, scene_title(index[id]));
-                                });
+                        $(form).find('.options').append('<div class="' + p + 'form-group offset"><label>' + t("Offset") + '</label><div><input class="' + p + 'form-control" name="offset" type="text" value="' + index[id].offset + '"></div><p class="' + p + 'help-block">' + t("Offset Value (in pixels) for the Trigger Position.") + '</p></div>');
+                        $(form).find('.options [name="offset"]').on('change', function() {
+                            index[id].offset = $(this).val();
+                            tree.jstree('edit', id, scene_title(index[id]));
+                        });
 
-                                $(form).find('.options').append('<div class="' + p + 'form-group offset"><label>' + t("Offset") + '</label><div><input class="' + p + 'form-control" name="offset" type="text" value="' + index[id].offset + '"></div><p class="' + p + 'help-block">' + t("Offset Value (in pixels) for the Trigger Position.") + '</p></div>');
-                                $(form).find('.options [name="offset"]').on('change', function() {
-                                    index[id].offset = $(this).val();
-                                    tree.jstree('edit', id, scene_title(index[id]));
-                                });
+                        $(form).find('.options').append('<div class="' + p + 'form-group repeat"><label>' + t("Repeat") + '</label><div class="' + p + 'checkbox"><label><input type="checkbox" name="indefinite"> ' + t("repeat indefinitely") + '</label></div><div><input class="' + p + 'form-control" name="repeat" type="text" value="' + index[id].repeat + '"></div><p class="' + p + 'help-block">' + t("Number of times that the timeline should repeat after its first iteration") + '</p></div>');
+                        $(form).find('.options [name="repeat"]').on('change', function() {
+                            index[id].repeat = $(this).val();
+                        });
+                        $(form).find('.options [name="indefinite"]').on('change', function() {
+                            if ($(this).prop('checked')) {
+                                index[id].repeat = '-1';
+                                $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'none');
+                            } else {
+                                index[id].repeat = $(form).find('.options [name="repeat"]').val();
+                                if (index[id].repeat < 0) {
+                                    $(form).find('.options [name="repeat"]').val('0')
+                                    index[id].repeat = 0;
+                                }
+                                $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'block');
+                            }
+                        });
+                        if (index[id].repeat == '-1') {
+                            $(form).find('.options [name="indefinite"]').attr('checked', 'checked');
+                            $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'none');
+                        } else {
+                            $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'block');
+                        }
+                        $(form).find('.options').append('<div class="' + p + 'form-group repeatdelay"><label>' + t("Repeat delay") + '</label><div><input class="' + p + 'form-control" name="repeatDelay" type="text" value="' + index[id].repeatDelay + '"></div><p class="' + p + 'help-block">' + t("Amount of time in seconds between repeats.") + '</p></div>');
+                        $(form).find('.options [name="repeatDelay"]').on('change', function() {
+                            index[id].repeatDelay = $(this).val();
+                        });
 
-                                $(form).find('.options').append('<div class="' + p + 'form-group repeat"><label>' + t("Repeat") + '</label><div class="' + p + 'checkbox"><label><input type="checkbox" name="indefinite"> ' + t("repeat indefinitely") + '</label></div><div><input class="' + p + 'form-control" name="repeat" type="text" value="' + index[id].repeat + '"></div><p class="' + p + 'help-block">' + t("Number of times that the timeline should repeat after its first iteration") + '</p></div>');
-                                $(form).find('.options [name="repeat"]').on('change', function() {
-                                    index[id].repeat = $(this).val();
-                                });
-                                $(form).find('.options [name="indefinite"]').on('change', function() {
-                                    if ($(this).prop('checked')) {
-                                        index[id].repeat = '-1';
-                                        $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'none');
-                                    } else {
-                                        index[id].repeat = $(form).find('.options [name="repeat"]').val();
-                                        if (index[id].repeat < 0) {
-                                            $(form).find('.options [name="repeat"]').val('0')
-                                            index[id].repeat = 0;
-                                        }
-                                        $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'block');
-                                    }
-                                });
-                                if (index[id].repeat == '-1') {
-                                    $(form).find('.options [name="indefinite"]').attr('checked', 'checked');
-                                    $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'none');
-                                } else {
-                                    $(form).find('.options .' + p + 'form-group.repeat .' + p + 'form-control').css('display', 'block');
-                                }
-                                $(form).find('.options').append('<div class="' + p + 'form-group repeatdelay"><label>' + t("Repeat delay") + '</label><div><input class="' + p + 'form-control" name="repeatDelay" type="text" value="' + index[id].repeatDelay + '"></div><p class="' + p + 'help-block">' + t("Amount of time in seconds between repeats.") + '</p></div>');
-                                $(form).find('.options [name="repeatDelay"]').on('change', function() {
-                                    index[id].repeatDelay = $(this).val();
-                                });
-
-                                var hook = ["onEnter", "onCenter", "onLeave"];
-                                hook = _.object(hook, hook);
-                                $(form).find('.options').append('<div class="' + p + 'form-group trigger"><label>' + t("Trigger hook") + '</label><div>' + get_select(hook, 'trigger-hook', index[id].triggerHook) + '</div><p class="' + p + 'help-block">' + t("Trigger hook") + '</p></div>');
-                                $(form).find('.options [name="trigger-hook"]').on('change', function() {
-                                    index[id].triggerHook = $(this).val();
-                                    tree.jstree('edit', id, scene_title(index[id]));
-                                });
-                                $(form).find('.options').append('<div class="' + p + 'form-group pin"><label>' + t("Pin") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'pin', index[id].pin) + '</div><p class="' + p + 'help-block">' + t("Pin element") + '</p></div>');
-                                $(form).find('.options [name="pin"]').on('change', function() {
-                                    index[id].pin = $(this).val();
-                                });
-                                $(form).find('.options [name="type"]').trigger('change');
+                        var hook = ["onEnter", "onCenter", "onLeave"];
+                        hook = _.object(hook, hook);
+                        $(form).find('.options').append('<div class="' + p + 'form-group trigger"><label>' + t("Trigger hook") + '</label><div>' + get_select(hook, 'trigger-hook', index[id].triggerHook) + '</div><p class="' + p + 'help-block">' + t("Trigger hook") + '</p></div>');
+                        $(form).find('.options [name="trigger-hook"]').on('change', function() {
+                            index[id].triggerHook = $(this).val();
+                            tree.jstree('edit', id, scene_title(index[id]));
+                        });
+                        $(form).find('.options').append('<div class="' + p + 'form-group pin"><label>' + t("Pin") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'pin', index[id].pin) + '</div><p class="' + p + 'help-block">' + t("Pin element") + '</p></div>');
+                        $(form).find('.options [name="pin"]').on('change', function() {
+                            index[id].pin = $(this).val();
+                        });
+                        $(form).find('.options [name="type"]').trigger('change');
+                    }
+                    function add_scene(duration) {
+                        element.an_scenes.push({duration: duration.toString(), offset: 0, triggerHook: 'onCenter', timeline: [], repeat: '0', repeatDelay: '0'});
+                        var id = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[element.an_scenes.length - 1]), state: {opened: true}}, 'last');
+                        index[id] = element.an_scenes[element.an_scenes.length - 1];
+                        index_type[id] = 'scene';
+                        add_step(id);
+                        if (!scroll) {
+                            element.an_name = $(form).find('.tree [name="an_name"]').val();
+                            if (element.an_name != '') {
+                                element.attrs['an_name'] = element.an_name;
+                                azexo_elements.elements_instances_by_an_name[element.an_name] = element;
+                                $(element.dom_element).attr('data-an-name', element.an_name);
+                                var i = element.an_scenes.length - 1;
+                                var name = element.an_name;
+                                callback({id : name + '-' + i, title : i + ' ' + t('scene in') + ' ' + name + ' ' + t('animations set')});
                             }
-                            function add_scene(duration) {
-                                element.an_scenes.push({duration: duration.toString(), offset: 0, triggerHook: 'onCenter', timeline: [], repeat: '0', repeatDelay: '0'});
-                                var id = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[element.an_scenes.length - 1]), state: {opened: true}}, 'last');
-                                index[id] = element.an_scenes[element.an_scenes.length - 1];
-                                index_type[id] = 'scene';
-                                add_step(id);
-                            }
-                            function get_step(id) {
-                                $(form).find('.options').empty();
-                            }
-                            function add_step(scene) {
-                                var n = tree.jstree('get_children_dom', scene).length;
-                                var id = tree.jstree('create_node', scene, {type: 'step', text: t("Step") + ':' + n.toString(), state: {opened: true}}, 'last');
-                                index[scene].timeline.push({tweens: []});
-                                index[id] = index[scene].timeline[index[scene].timeline.length - 1];
-                                index_type[id] = 'step';
-                                index_parents[id] = scene;
-                                add_tween(id);
-                            }
-                            function get_tween(id) {
-                                var scene = index_parents[index_parents[id]];
-                                $(form).find('.options').empty();
-                                if (index[scene].duration != '-1') {
-                                    $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', index[id].target) + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
-                                    $(form).find('.options [name="target"]').on('change', function() {
-                                        index[id].target = $(this).val();
-                                        tree.jstree('edit', id, tween_title(index[id]));
-                                    });
-                                }
-                                $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("Duration of the tween in seconds.") + '</p></div>');
-                                $(form).find('.options [name="duration"]').on('change', function() {
-                                    index[id].duration = $(this).val();
-                                    tree.jstree('edit', id, tween_title(index[id]));
-                                });
-                                function css_plugin_settings(container, obj, name) {
-                                    var n = 0;
-                                    var css_properties = _.keys(document.body.style);
-                                    css_properties = _.object(css_properties, css_properties);
-                                    function add_property(container, current_property, current_value) {
-                                        var property_name = 'property' + n.toString();
-                                        var value_name = 'property' + n.toString() + 'value';
-                                        var row = $('<div class="row"><div class="select ' + p + 'col-xs-5">' + get_select(css_properties, property_name, current_property) + '</div><div class="value ' + p + 'col-xs-5"><input class="' + p + 'form-control" name="' + value_name + '" type="text" value="' + current_value + '"></div><div class="remove ' + p + 'col-xs-2"><button title="' + title("Remove") + '" type="button" class="control remove ' + p + 'btn ' + p + 'btn-danger ' + p + 'glyphicon ' + p + 'glyphicon-remove"> </button></div></div>').appendTo(container);
-                                        $(row).find('[name="' + property_name + '"]').chosen({
-                                            search_contains: true,
-                                        });
-                                        function update() {
-                                            var pr = $(row).find('[name="' + property_name + '"]').val();
-                                            if (current_property != '' && current_property != pr) {
-                                                delete obj[name][current_property];
-                                            }
-                                            var v = $(row).find('[name="' + value_name + '"]').val();
-                                            if (pr != '') {
-                                                current_property = pr;
-                                                if (!_.isObject(obj[name]))
-                                                    obj[name] = {};
-                                                obj[name][pr] = v;
-                                            }
-                                        }
-                                        $(row).find('[name="' + property_name + '"]').change(function() {
-                                            update();
-                                        });
-                                        $(row).find('[name="' + value_name + '"]').change(function() {
-                                            update();
-                                        });
-                                        $(row).find('button.remove').click(function() {
-                                            var pr = $(row).find('[name="' + property_name + '"]').val();
-                                            if (pr != '') {
-                                                if (_.isObject(obj[name]))
-                                                    delete obj[name][pr];
-                                            }
-                                            $(row).remove();
-                                        });
-                                        n++;
-                                        return row;
-                                    }
-                                    var group = $('<div><div class="' + p + 'form-group properties"></div><div class="add-property"></div></div>').appendTo(container);
-                                    for (var pr in obj[name]) {
-                                        var row = add_property($(group).find('.properties'), pr, obj[name][pr]);
-                                    }
-                                    $('<button title="' + title("Add property") + '" class="add-property ' + p + 'btn ' + p + 'btn-default">' + t("Add property") + '</button>').appendTo($(group).find('.add-property')).click(function() {
-                                        add_property($(group).find('.properties'), '', '');
-                                    });
-                                }
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("From") + '</label><div class="from"></div><p class="' + p + 'help-block">' + t("From") + '</p></div>');
-                                css_plugin_settings($(form).find('.options .from'), index[id].from, 'css');
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("To") + '</label><div class="to"></div><p class="' + p + 'help-block">' + t("To") + '</p></div>');
-                                css_plugin_settings($(form).find('.options .to'), index[id].to, 'css');
-                                var ease_types = ["Linear", "Power0", "Power1", "Power2", "Power3", "Power4", "Quad", "Cubic", "Quart", "Quint", "Strong", "Elastic", "Back", "Bounce", "SlowMo", "SteppedEase", "Circ", "Expo", "Sine"];
-                                var eases = [];
-                                for (var i = 0; i < ease_types.length; i++) {
-                                    eases.push(ease_types[i] + ".easeNone");
-                                    eases.push(ease_types[i] + ".easeIn");
-                                    eases.push(ease_types[i] + ".easeOut");
-                                    eases.push(ease_types[i] + ".easeInOut");
-                                }
-                                eases = _.object(eases, eases);
-                                $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Ease") + '</label><div>' + get_select(eases, 'ease', index[id].ease) + '</div><p class="' + p + 'help-block">' + t("Ease") + '</p></div>');
-                                $(form).find('.options [name="ease"]').on('change', function() {
-                                    index[id].ease = $(this).val();
-                                });
-                                $(form).find('.options [name="ease"]').chosen({
+                        }
+                    }
+                    function get_step(id) {
+                        $(form).find('.options').empty();
+                    }
+                    function add_step(scene) {
+                        var n = tree.jstree('get_children_dom', scene).length;
+                        var id = tree.jstree('create_node', scene, {type: 'step', text: t("Step") + ':' + n.toString(), state: {opened: true}}, 'last');
+                        index[scene].timeline.push({tweens: []});
+                        index[id] = index[scene].timeline[index[scene].timeline.length - 1];
+                        index_type[id] = 'step';
+                        index_parents[id] = scene;
+                        add_tween(id);
+                    }
+                    function get_tween(id) {
+                        var scene = index_parents[index_parents[id]];
+                        $(form).find('.options').empty();
+                        if (index[scene].duration != '-1') {
+                            $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', index[id].target) + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
+                            $(form).find('.options [name="target"]').on('change', function() {
+                                index[id].target = $(this).val();
+                                tree.jstree('edit', id, tween_title(index[id]));
+                            });
+                        }
+                        $(form).find('.options').append('<div class="' + p + 'form-group duration"><label>' + t("Duration") + '</label><div><input class="' + p + 'form-control" name="duration" type="text" value="' + index[id].duration + '"></div><p class="' + p + 'help-block">' + t("Duration of the tween in seconds.") + '</p></div>');
+                        $(form).find('.options [name="duration"]').on('change', function() {
+                            index[id].duration = $(this).val();
+                            tree.jstree('edit', id, tween_title(index[id]));
+                        });
+                        function css_plugin_settings(container, obj, name) {
+                            var n = 0;
+                            var css_properties = _.keys(document.body.style);
+                            css_properties = _.object(css_properties, css_properties);
+                            function add_property(container, current_property, current_value) {
+                                var property_name = 'property' + n.toString();
+                                var value_name = 'property' + n.toString() + 'value';
+                                var row = $('<div class="row"><div class="select ' + p + 'col-xs-5">' + get_select(css_properties, property_name, current_property) + '</div><div class="value ' + p + 'col-xs-5"><input class="' + p + 'form-control" name="' + value_name + '" type="text" value="' + current_value + '"></div><div class="remove ' + p + 'col-xs-2"><button title="' + title("Remove") + '" type="button" class="control remove ' + p + 'btn ' + p + 'btn-danger ' + p + 'glyphicon ' + p + 'glyphicon-remove"> </button></div></div>').appendTo(container);
+                                $(row).find('[name="' + property_name + '"]').chosen({
                                     search_contains: true,
                                 });
-                                $(form).find('.options').append('<div class="' + p + 'form-group delay"><label>' + t("Delay") + '</label><div><input class="' + p + 'form-control" name="delay" type="text" value="' + index[id].delay + '"></div><p class="' + p + 'help-block">' + t("Amount of delay in seconds before the tween should begin.") + '</p></div>');
-                                $(form).find('.options [name="delay"]').on('change', function() {
-                                    index[id].delay = $(this).val();
+                                function update() {
+                                    var pr = $(row).find('[name="' + property_name + '"]').val();
+                                    if (current_property != '' && current_property != pr) {
+                                        delete obj[name][current_property];
+                                    }
+                                    var v = $(row).find('[name="' + value_name + '"]').val();
+                                    if (pr != '') {
+                                        current_property = pr;
+                                        if (!_.isObject(obj[name]))
+                                            obj[name] = {};
+                                        obj[name][pr] = v;
+                                    }
+                                }
+                                $(row).find('[name="' + property_name + '"]').change(function() {
+                                    update();
                                 });
-                                if (index[scene].duration != '0' && index[scene].duration != '-1') {
-                                    $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
-                                    $(form).find('.options .' + p + 'form-group.delay').css('display', 'none');
-                                }
+                                $(row).find('[name="' + value_name + '"]').change(function() {
+                                    update();
+                                });
+                                $(row).find('button.remove').click(function() {
+                                    var pr = $(row).find('[name="' + property_name + '"]').val();
+                                    if (pr != '') {
+                                        if (_.isObject(obj[name]))
+                                            delete obj[name][pr];
+                                    }
+                                    $(row).remove();
+                                });
+                                n++;
+                                return row;
                             }
-                            function add_tween(step) {
-                                index[step].tweens.push({target: '', duration: 1, from: {}, to: {}, ease: 'Linear.easeNone', delay: '0'});
-                                var id = tree.jstree('create_node', step, {type: 'tween', text: tween_title(index[step].tweens[index[step].tweens.length - 1]), state: {opened: true}}, 'last');
-                                index[id] = index[step].tweens[index[step].tweens.length - 1];
-                                index_type[id] = 'tween';
-                                index_parents[id] = step;
+                            var group = $('<div><div class="' + p + 'form-group properties"></div><div class="add-property"></div></div>').appendTo(container);
+                            for (var pr in obj[name]) {
+                                var row = add_property($(group).find('.properties'), pr, obj[name][pr]);
                             }
-                            function get_path(id) {
-                                switch (index_type[id]) {
-                                    case 'scene':
-                                        var i = element.an_scenes.indexOf(index[id]);
-                                        if (i > -1) {
-                                            return [i];
-                                        }
-                                        break;
-                                    case 'step':
-                                        var i = element.an_scenes.indexOf(index[index_parents[id]]);
-                                        if (i > -1) {
-                                            var j = element.an_scenes[i].timeline.indexOf(index[id]);
-                                            if (j > -1) {
-                                                return [i, j];
-                                            }
-                                        }
-                                        break;
-                                    case 'tween':
-                                        var i = element.an_scenes.indexOf(index[index_parents[index_parents[id]]]);
-                                        if (i > -1) {
-                                            var j = element.an_scenes[i].timeline.indexOf(index[index_parents[id]]);
-                                            if (j > -1) {
-                                                var k = element.an_scenes[i].timeline[j].tweens.indexOf(index[id]);
-                                                if (k > -1) {
-                                                    return [i, j, k];
-                                                }
-                                            }
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
+                            $('<button title="' + title("Add property") + '" class="add-property ' + p + 'btn ' + p + 'btn-default">' + t("Add property") + '</button>').appendTo($(group).find('.add-property')).click(function() {
+                                add_property($(group).find('.properties'), '', '');
                                 return false;
-                            }
-                            function fill_tree() {
-                                for (var i = 0; i < element.an_scenes.length; i++) {
-                                    var scene = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[i]), state: {opened: true}}, 'last');
-                                    index[scene] = element.an_scenes[i];
-                                    index_type[scene] = 'scene';
-                                    for (var j = 0; j < element.an_scenes[i].timeline.length; j++) {
-                                        var step = tree.jstree('create_node', scene, {type: 'step', text: t("Step") + ':' + j.toString(), state: {opened: true}}, 'last');
-                                        index[step] = element.an_scenes[i].timeline[j];
-                                        index_type[step] = 'step';
-                                        index_parents[step] = scene;
-                                        for (var k = 0; k < element.an_scenes[i].timeline[j].tweens.length; k++) {
-                                            var tween = tree.jstree('create_node', step, {type: 'tween', text: tween_title(element.an_scenes[i].timeline[j].tweens[k]), state: {opened: true}}, 'last');
-                                            index[tween] = element.an_scenes[i].timeline[j].tweens[k];
-                                            index_type[tween] = 'tween';
-                                            index_parents[tween] = step;
+                            });
+                        }
+                        $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("From") + '</label><div class="from"></div><p class="' + p + 'help-block">' + t("From") + '</p></div>');
+                        css_plugin_settings($(form).find('.options .from'), index[id].from, 'css');
+                        $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("To") + '</label><div class="to"></div><p class="' + p + 'help-block">' + t("To") + '</p></div>');
+                        css_plugin_settings($(form).find('.options .to'), index[id].to, 'css');
+                        var ease_types = ["Linear", "Power0", "Power1", "Power2", "Power3", "Power4", "Quad", "Cubic", "Quart", "Quint", "Strong", "Elastic", "Back", "Bounce", "SlowMo", "SteppedEase", "Circ", "Expo", "Sine"];
+                        var eases = [];
+                        for (var i = 0; i < ease_types.length; i++) {
+                            eases.push(ease_types[i] + ".easeNone");
+                            eases.push(ease_types[i] + ".easeIn");
+                            eases.push(ease_types[i] + ".easeOut");
+                            eases.push(ease_types[i] + ".easeInOut");
+                        }
+                        eases = _.object(eases, eases);
+                        $(form).find('.options').append('<div class="' + p + 'form-group"><label>' + t("Ease") + '</label><div>' + get_select(eases, 'ease', index[id].ease) + '</div><p class="' + p + 'help-block">' + t("Ease") + '</p></div>');
+                        $(form).find('.options [name="ease"]').on('change', function() {
+                            index[id].ease = $(this).val();
+                        });
+                        $(form).find('.options [name="ease"]').chosen({
+                            search_contains: true,
+                        });
+                        $(form).find('.options').append('<div class="' + p + 'form-group delay"><label>' + t("Delay") + '</label><div><input class="' + p + 'form-control" name="delay" type="text" value="' + index[id].delay + '"></div><p class="' + p + 'help-block">' + t("Amount of delay in seconds before the tween should begin.") + '</p></div>');
+                        $(form).find('.options [name="delay"]').on('change', function() {
+                            index[id].delay = $(this).val();
+                        });
+                        if (index[scene].duration != '0' && index[scene].duration != '-1') {
+                            $(form).find('.options .' + p + 'form-group.duration').css('display', 'none');
+                            $(form).find('.options .' + p + 'form-group.delay').css('display', 'none');
+                        }
+                    }
+                    function add_tween(step) {
+                        index[step].tweens.push({target: '', duration: 1, from: {}, to: {}, ease: 'Linear.easeNone', delay: '0'});
+                        var id = tree.jstree('create_node', step, {type: 'tween', text: tween_title(index[step].tweens[index[step].tweens.length - 1]), state: {opened: true}}, 'last');
+                        index[id] = index[step].tweens[index[step].tweens.length - 1];
+                        index_type[id] = 'tween';
+                        index_parents[id] = step;
+                    }
+                    function get_path(id) {
+                        switch (index_type[id]) {
+                            case 'scene':
+                                var i = element.an_scenes.indexOf(index[id]);
+                                if (i > -1) {
+                                    return [i];
+                                }
+                                break;
+                            case 'step':
+                                var i = element.an_scenes.indexOf(index[index_parents[id]]);
+                                if (i > -1) {
+                                    var j = element.an_scenes[i].timeline.indexOf(index[id]);
+                                    if (j > -1) {
+                                        return [i, j];
+                                    }
+                                }
+                                break;
+                            case 'tween':
+                                var i = element.an_scenes.indexOf(index[index_parents[index_parents[id]]]);
+                                if (i > -1) {
+                                    var j = element.an_scenes[i].timeline.indexOf(index[index_parents[id]]);
+                                    if (j > -1) {
+                                        var k = element.an_scenes[i].timeline[j].tweens.indexOf(index[id]);
+                                        if (k > -1) {
+                                            return [i, j, k];
                                         }
                                     }
                                 }
-                            }
-                            var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo($(form).find('.tree'));
-                            $('<button title="' + title("Add scene") + '" class="add-scene ' + p + 'btn ' + p + 'btn-default">' + t("Add scene") + '</button>').appendTo(buttons).click(function() {
-                                add_scene('-1');
-                            });
-                            $('<button title="' + title("Add timeline step") + '" class="add-step ' + p + 'btn ' + p + 'btn-default" disabled>' + t("Add step") + '</button>').appendTo(buttons).click(function() {
-                                var ids = tree.jstree('get_selected');
-                                add_step(ids[0]);
-                            });
-                            $('<button title="' + title("Add tween") + '" class="add-tween ' + p + 'btn ' + p + 'btn-default" disabled>' + t("Add tween") + '</button>').appendTo(buttons).click(function() {
-                                var ids = tree.jstree('get_selected');
-                                add_tween(ids[0]);
-                            });
-                            $('<button title="' + title("Delete") + '" class="delete ' + p + 'btn ' + p + 'btn-default">' + t("Delete") + '</button>').appendTo(buttons).click(function() {
-                                var ids = tree.jstree('get_selected');
-                                if (ids.length > 0) {
-                                    tree.jstree('delete_node', ids[0]);
+                                break;
+                            default:
+                                break;
+                        }
+                        return false;
+                    }
+                    function fill_tree() {
+                        for (var i = 0; i < element.an_scenes.length; i++) {
+                            var scene = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[i]), state: {opened: true}}, 'last');
+                            index[scene] = element.an_scenes[i];
+                            index_type[scene] = 'scene';
+                            for (var j = 0; j < element.an_scenes[i].timeline.length; j++) {
+                                var step = tree.jstree('create_node', scene, {type: 'step', text: t("Step") + ':' + j.toString(), state: {opened: true}}, 'last');
+                                index[step] = element.an_scenes[i].timeline[j];
+                                index_type[step] = 'step';
+                                index_parents[step] = scene;
+                                for (var k = 0; k < element.an_scenes[i].timeline[j].tweens.length; k++) {
+                                    var tween = tree.jstree('create_node', step, {type: 'tween', text: tween_title(element.an_scenes[i].timeline[j].tweens[k]), state: {opened: true}}, 'last');
+                                    index[tween] = element.an_scenes[i].timeline[j].tweens[k];
+                                    index_type[tween] = 'tween';
+                                    index_parents[tween] = step;
                                 }
-                            });
-                            var tree = $('<div id="jstree"></div>').appendTo($(form).find('.tree')).jstree({
-                                "core": {
-                                    'check_callback': function(operation, node, node_parent, node_position, more) {
-                                        return true;
-                                    },
-                                    "multiple": false,
-                                    "animation": 0
-                                },
+                            }
+                        }
+                    }
+                    element.add_scene_to_animations_editor = function(scene) {
+                        element.an_scenes.push(scene);
+                        var an_scenes = _.clone(element.an_scenes);
+                        $(form).find('#jstree .jstree-node').each(function() {
+                            tree.jstree('delete_node', $(this).attr('id'));
+                        });
+                        element.an_scenes = an_scenes;
+                        fill_tree();
+                    }
+                    var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo($(form).find('.tree'));
+                    $('<button title="' + title("Add scene") + '" class="add-scene ' + p + 'btn ' + p + 'btn-default">' + t("Add scene") + '</button>').appendTo(buttons).click(function() {
+                        if (scroll)
+                            add_scene('1000');
+                        else
+                            add_scene('-1');
+                        return false;
+                    });
+                    $('<button title="' + title("Add timeline step") + '" class="add-step ' + p + 'btn ' + p + 'btn-default" disabled>' + t("Add step") + '</button>').appendTo(buttons).click(function() {
+                        var ids = tree.jstree('get_selected');
+                        add_step(ids[0]);
+                        return false;
+                    });
+                    $('<button title="' + title("Add tween") + '" class="add-tween ' + p + 'btn ' + p + 'btn-default" disabled>' + t("Add tween") + '</button>').appendTo(buttons).click(function() {
+                        var ids = tree.jstree('get_selected');
+                        add_tween(ids[0]);
+                        return false;
+                    });
+                    $('<button title="' + title("Delete") + '" class="delete ' + p + 'btn ' + p + 'btn-default">' + t("Delete") + '</button>').appendTo(buttons).click(function() {
+                        var ids = tree.jstree('get_selected');
+                        if (ids.length > 0) {
+                            tree.jstree('delete_node', ids[0]);
+                        }
+                        return false;
+                    });
+                    var tree = $('<div id="jstree"></div>').appendTo($(form).find('.tree')).jstree({
+                        "core": {
+                            'check_callback': function(operation, node, node_parent, node_position, more) {
+                                return operation === 'rename_node' ? false : true;
+                            },
+                            "multiple": false,
+                            "animation": 0
+                        },
 //                                "dnd": {
 //                                    "is_draggable": function(nodes) {
 //                                        var draggable = true;
@@ -4123,183 +4197,201 @@
 //                                        return draggable;
 //                                    }
 //                                },
-                                "types": {
-                                    "#": {
-                                        "valid_children": ["scene"]
-                                    },
-                                    "scene": {
-                                        "icon": p + 'glyphicon ' + p + 'glyphicon-play',
-                                        "valid_children": ["step"]
-                                    },
-                                    "step": {
-                                        "icon": p + 'glyphicon ' + p + 'glyphicon-step-forward',
-                                        "valid_children": ["tween"]
-                                    },
-                                    "tween": {
-                                        "icon": p + 'glyphicon ' + p + 'glyphicon-leaf',
-                                        "valid_children": []
-                                    }
-                                },
-                                "plugins": ["dnd", "types"]
-                            }).on('changed.jstree', function(e, data) {
-                                for (var i = 0; i < data.selected.length; i++) {
-                                    var id = data.instance.get_node(data.selected[i]).id;
-                                    switch (index_type[id]) {
-                                        case 'scene':
-                                            $(buttons).find('.add-step').removeAttr('disabled');
-                                            $(buttons).find('.add-tween').attr('disabled', 'disabled');
-                                            get_scene(id);
-                                            break;
-                                        case 'step':
-                                            $(buttons).find('.add-step').attr('disabled', 'disabled')
-                                            $(buttons).find('.add-tween').removeAttr('disabled');
-                                            get_step(id);
-                                            break;
-                                        case 'tween':
-                                            $(buttons).find('.add-step').attr('disabled', 'disabled');
-                                            $(buttons).find('.add-tween').attr('disabled', 'disabled');
-                                            get_tween(id);
-                                            break;
-                                        default:
-                                            $(buttons).find('.add-step').attr('disabled', 'disabled');
-                                            $(buttons).find('.add-tween').attr('disabled', 'disabled');
-                                            break;
-                                    }
-                                }
-                            }).on('delete_node.jstree', function(e, data) {
-                                var id = data.node.id;
-                                var path = get_path(data.node.id);
-                                switch (path.length) {
-                                    case 1:
-                                        element.an_scenes.splice(path[0], 1);
-                                        break;
-                                    case 2:
-                                        element.an_scenes[path[0]].timeline.splice(path[1], 1);
-                                        break;
-                                    case 3:
-                                        element.an_scenes[path[0]].timeline[path[1]].tweens.splice(path[2], 1);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }).on('move_node.jstree', function(e, data) {
-                                var path = get_path(data.node.id);
-                                if (data.parent == data.old_parent) {
-                                    switch (path.length) {
-                                        case 1:
-                                            element.an_scenes.splice(data.position, 0, element.an_scenes.splice(data.old_position, 1)[0]);
-                                            break;
-                                        case 2:
-                                            element.an_scenes[path[0]].timeline.splice(data.position, 0, element.an_scenes[path[0]].timeline.splice(data.old_position, 1)[0]);
-                                            break;
-                                        case 3:
-                                            element.an_scenes[path[0]].timeline[path[1]].tweens.splice(data.position, 0, element.an_scenes[path[0]].timeline[path[1]].tweens.splice(data.old_position, 1)[0]);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                } else {
-                                    var parent_path = get_path(data.parent);
-                                    var obj = null;
-                                    switch (path.length) {
-                                        case 1:
-                                            obj = element.an_scenes.splice(path[0], 1)[0];
-                                            break;
-                                        case 2:
-                                            obj = element.an_scenes[path[0]].timeline.splice(path[1], 1)[0];
-                                            break;
-                                        case 3:
-                                            obj = element.an_scenes[path[0]].timeline[path[1]].tweens.splice(path[2], 1)[0];
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    switch (parent_path.length) {
-                                        case 0:
-                                            element.an_scenes.splice(data.position, 0, obj);
-                                            break;
-                                        case 1:
-                                            element.an_scenes[parent_path[0]].timeline.splice(data.position, 0, obj);
-                                            break;
-                                        case 2:
-                                            element.an_scenes[parent_path[0]].timeline[parent_path[1]].tweens.splice(data.position, 0, obj);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                            });
-
-                            element.an_name = '';
-                            if ('an_name' in element.attrs) {
-                                element.an_name = element.attrs['an_name'];
-                                azexo_elements.elements_instances_by_an_name[element.an_name] = element;
+                        "types": {
+                            "#": {
+                                "valid_children": ["scene"]
+                            },
+                            "scene": {
+                                "icon": p + 'glyphicon ' + p + 'glyphicon-play',
+                                "valid_children": ["step"]
+                            },
+                            "step": {
+                                "icon": p + 'glyphicon ' + p + 'glyphicon-step-forward',
+                                "valid_children": ["tween"]
+                            },
+                            "tween": {
+                                "icon": p + 'glyphicon ' + p + 'glyphicon-leaf',
+                                "valid_children": []
                             }
-                            element.an_scenes = [];
-                            if ('an_scenes' in element.attrs) {
-                                element.an_scenes = $.parseJSON(decodeURIComponent(atob(element.attrs['an_scenes'])));
+                        },
+                        "plugins": ["dnd", "types"]
+                    }).on('changed.jstree', function(e, data) {
+                        for (var i = 0; i < data.selected.length; i++) {
+                            var id = data.instance.get_node(data.selected[i]).id;
+                            switch (index_type[id]) {
+                                case 'scene':
+                                    $(buttons).find('.add-step').removeAttr('disabled');
+                                    $(buttons).find('.add-tween').attr('disabled', 'disabled');
+                                    get_scene(id);
+                                    break;
+                                case 'step':
+                                    $(buttons).find('.add-step').attr('disabled', 'disabled')
+                                    $(buttons).find('.add-tween').removeAttr('disabled');
+                                    get_step(id);
+                                    break;
+                                case 'tween':
+                                    $(buttons).find('.add-step').attr('disabled', 'disabled');
+                                    $(buttons).find('.add-tween').attr('disabled', 'disabled');
+                                    get_tween(id);
+                                    break;
+                                default:
+                                    $(buttons).find('.add-step').attr('disabled', 'disabled');
+                                    $(buttons).find('.add-tween').attr('disabled', 'disabled');
+                                    break;
                             }
-                            fill_tree();
-
-                            $('<div class="' + p + 'form-group"><label>' + t("Choose a wizard") + '</label>' + get_select({'vparalax': 'Vertical paralax for child element'}, 'wizard', '') + '</div><div id="wizard-form"></div>').appendTo($(tabs).find('#wizards'));
-                            $(tabs).find('#wizards [name="wizard"]').change(function() {
-                                $(tabs).find('#wizard-form').empty();
-                                switch ($(this).val()) {
-                                    case 'vparalax':
-                                        $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', '') + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
-                                        $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Shift") + '</label><div><input class="' + p + 'form-control" name="shift" type="text" value="1000"></div><p class="' + p + 'help-block">' + t("Number of pixels before/after original position when animation start/stop.") + '</p></div>');
-                                        $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Speed") + '</label><div><input class="' + p + 'form-control" name="speed" type="text" value="1"></div><p class="' + p + 'help-block">' + t("Speed ratio. Where 1 mean speed which is equal to viewport speed.") + '</p></div>');
-                                        $('<button title="' + title("Create script") + '" class="create-script ' + p + 'btn ' + p + 'btn-default">' + t("Create script") + '</button>').appendTo($(tabs).find('#wizard-form')).click(function() {
-                                            var shift = parseInt($(tabs).find('#wizard-form [name="shift"]').val());
-                                            var speed = parseFloat($(tabs).find('#wizard-form [name="speed"]').val());
-
-                                            var target = $(tabs).find('#wizard-form [name="target"]').val();
-                                            var target_element = azexo_elements.elements_instances_by_an_name[target];
-                                            if ($(element.dom_element).find(target_element.dom_element).length > 0) {
-                                                var tween = {target: target, duration: 1, from: {css: {transform: 'translateY(' + (shift * speed).toString() + 'px)'}}, to: {css: {transform: 'translateY(' + (-shift * speed).toString() + 'px)'}}, ease: 'Linear.easeNone', delay: '0'};
-                                                var step = {tweens: [tween]};
-                                                var top = $(target_element.dom_element).offset().top - $(element.dom_element).offset().top;
-                                                var scene = {duration: 2 * shift, offset: top - shift, triggerHook: 'onCenter', timeline: [step], repeat: '0', repeatDelay: '0'};
-
-                                                element.an_scenes.push(scene);
-                                                var an_scenes = _.clone(element.an_scenes);
-                                                $('#jstree .jstree-node').each(function() {
-                                                    tree.jstree('delete_node', $(this).attr('id'));
-                                                });
-                                                element.an_scenes = an_scenes;
-                                                fill_tree();
-                                                $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
-                                            } else {
-                                                $(tabs).find('#wizard-form').prepend(get_alert(t('Animated target element must be child of the current element.')));
-                                            }
-                                        });
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            });
+                        }
+                    }).on('delete_node.jstree', function(e, data) {
+                        var id = data.node.id;
+                        var path = get_path(data.node.id);
+                        switch (path.length) {
+                            case 1:
+                                element.an_scenes.splice(path[0], 1);
+                                break;
+                            case 2:
+                                element.an_scenes[path[0]].timeline.splice(path[1], 1);
+                                break;
+                            case 3:
+                                element.an_scenes[path[0]].timeline[path[1]].tweens.splice(path[2], 1);
+                                break;
+                            default:
+                                break;
+                        }
+                    }).on('move_node.jstree', function(e, data) {
+                        var path = get_path(data.node.id);
+                        if (data.parent == data.old_parent) {
+                            switch (path.length) {
+                                case 1:
+                                    element.an_scenes.splice(data.position, 0, element.an_scenes.splice(data.old_position, 1)[0]);
+                                    break;
+                                case 2:
+                                    element.an_scenes[path[0]].timeline.splice(data.position, 0, element.an_scenes[path[0]].timeline.splice(data.old_position, 1)[0]);
+                                    break;
+                                case 3:
+                                    element.an_scenes[path[0]].timeline[path[1]].tweens.splice(data.position, 0, element.an_scenes[path[0]].timeline[path[1]].tweens.splice(data.old_position, 1)[0]);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        } else {
+                            var parent_path = get_path(data.parent);
+                            var obj = null;
+                            switch (path.length) {
+                                case 1:
+                                    obj = element.an_scenes.splice(path[0], 1)[0];
+                                    break;
+                                case 2:
+                                    obj = element.an_scenes[path[0]].timeline.splice(path[1], 1)[0];
+                                    break;
+                                case 3:
+                                    obj = element.an_scenes[path[0]].timeline[path[1]].tweens.splice(path[2], 1)[0];
+                                    break;
+                                default:
+                                    break;
+                            }
+                            switch (parent_path.length) {
+                                case 0:
+                                    element.an_scenes.splice(data.position, 0, obj);
+                                    break;
+                                case 1:
+                                    element.an_scenes[parent_path[0]].timeline.splice(data.position, 0, obj);
+                                    break;
+                                case 2:
+                                    element.an_scenes[parent_path[0]].timeline[parent_path[1]].tweens.splice(data.position, 0, obj);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     });
+
+                    element.an_name = '';
+                    if ('an_name' in element.attrs) {
+                        element.an_name = element.attrs['an_name'];
+                        azexo_elements.elements_instances_by_an_name[element.an_name] = element;
+                    }
+                    element.an_scenes = [];
+                    if ('an_scenes' in element.attrs) {
+                        element.an_scenes = $.parseJSON(decodeURIComponent(atob(element.attrs['an_scenes'])));
+                    }
+                    fill_tree();
+                }
+            });
+        },
+        save_js_animations: function(scroll) {
+            var element = this;
+            azexo_add_js({
+                path: 'js/json2.min.js',
+                loaded: 'JSON' in window,
+                callback: function() {
+                    if (element.an_name != '') {
+                        element.attrs['an_name'] = element.an_name;
+                        azexo_elements.elements_instances_by_an_name[element.an_name] = element;
+                        $(element.dom_element).attr('data-an-name', element.an_name);
+                    }
+                    element.attrs['an_scenes'] = btoa(encodeURIComponent(JSON.stringify(element.an_scenes)));
+                    if(scroll)
+                        element.update_scroll_animation();
+                }
+            });
+        },
+        show_controls: function() {
+            var element = this;
+            if (window.azexo_editor) {
+                AnimatedElement.baseclass.prototype.show_controls.apply(this, arguments);
+                $('<button title="' + title("Scroll animations") + '" class="control scroll-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
+
+                    $('#az-js-animation-modal').remove();
+                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Scroll animation settings") + '</h4></div>';
+                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
+                    var modal = $('<div id="az-js-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
+                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
+                    $(modal).find('.' + p + 'modal-body').append(tabs);
+                    var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>');
+                    $(tabs).find('#script').append(form);
+                    $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
+
+                    element.show_js_animations_editor(form, true, function() {
+                    });
+
+                    $('<div class="' + p + 'form-group"><label>' + t("Choose a wizard") + '</label>' + get_select({'vparalax': 'Vertical paralax for child element'}, 'wizard', '') + '</div><div id="wizard-form"></div>').appendTo($(tabs).find('#wizards'));
+                    $(tabs).find('#wizards [name="wizard"]').change(function() {
+                        $(tabs).find('#wizard-form').empty();
+                        switch ($(this).val()) {
+                            case 'vparalax':
+                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Target") + '</label><div>' + get_select(_.object(_.keys(azexo_elements.elements_instances_by_an_name), _.keys(azexo_elements.elements_instances_by_an_name)), 'target', '') + '</div><p class="' + p + 'help-block">' + t("Target element") + '</p></div>');
+                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Shift") + '</label><div><input class="' + p + 'form-control" name="shift" type="text" value="1000"></div><p class="' + p + 'help-block">' + t("Number of pixels before/after original position when animation start/stop.") + '</p></div>');
+                                $(tabs).find('#wizard-form').append('<div class="' + p + 'form-group"><label>' + t("Speed") + '</label><div><input class="' + p + 'form-control" name="speed" type="text" value="1"></div><p class="' + p + 'help-block">' + t("Speed ratio. Where 1 mean speed which is equal to viewport speed.") + '</p></div>');
+                                $('<button title="' + title("Create script") + '" class="create-script ' + p + 'btn ' + p + 'btn-default">' + t("Create script") + '</button>').appendTo($(tabs).find('#wizard-form')).click(function() {
+                                    var shift = parseInt($(tabs).find('#wizard-form [name="shift"]').val());
+                                    var speed = parseFloat($(tabs).find('#wizard-form [name="speed"]').val());
+
+                                    var target = $(tabs).find('#wizard-form [name="target"]').val();
+                                    var target_element = azexo_elements.elements_instances_by_an_name[target];
+                                    if ($(element.dom_element).find(target_element.dom_element).length > 0) {
+                                        var tween = {target: target, duration: 1, from: {css: {transform: 'translateY(' + (shift * speed).toString() + 'px)'}}, to: {css: {transform: 'translateY(' + (-shift * speed).toString() + 'px)'}}, ease: 'Linear.easeNone', delay: '0'};
+                                        var step = {tweens: [tween]};
+                                        var top = $(target_element.dom_element).offset().top - $(element.dom_element).offset().top;
+                                        var scene = {duration: 2 * shift, offset: top - shift, triggerHook: 'onCenter', timeline: [step], repeat: '0', repeatDelay: '0'};
+                                        element.add_scene_to_animations_editor(scene);
+                                        $('#az-js-animation-tabs a[href="#script"]')[fp + 'tab']('show');
+                                    } else {
+                                        $(tabs).find('#wizard-form').prepend(get_alert(t('Animated target element must be child of the current element.')));
+                                    }
+                                });
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
                     $('#az-js-animation-modal').find('.save').click(function() {
                         $(form).find('.tree [name="an_name"]')
                         if ($(form).find('.tree [name="an_name"]').val() == '') {
                             $(form).find('.tree .an-name').addClass('has-error');
                             return false;
                         }
-                        azexo_add_js({
-                            path: 'js/json2.min.js',
-                            loaded: 'JSON' in window,
-                            callback: function() {
-                                element.an_name = $(form).find('.tree [name="an_name"]').val();
-                                if (element.an_name != '') {
-                                    element.attrs['an_name'] = element.an_name;
-                                    azexo_elements.elements_instances_by_an_name[element.an_name] = element;
-                                    $(element.dom_element).attr('data-an-name', element.an_name);
-                                }
-                                element.attrs['an_scenes'] = btoa(encodeURIComponent(JSON.stringify(element.an_scenes)));
-                                element.update_scroll_animation();
-                            }
-                        });
+                        element.an_name = $(form).find('.tree [name="an_name"]').val();
+                        element.save_js_animations(true);
                         $('#az-js-animation-modal')[fp + 'modal']('hide');
                         $(document).trigger("azexo_edited_element", element.id);
                         return false;
@@ -5329,6 +5421,7 @@
                             $(e.data.object.dom_element).css("left", '0%');
                             e.data.object.attrs['pos_width'] = '100%';
                             $(e.data.object.dom_element).css("width", '100%');
+                            return false;
                         });
                     if (this.children[i].controls.find('.heigth100').length == 0)
                         $('<button title="' + title("100% heigth") + '" class="control heigth100 ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-resize-vertical" > </button>').appendTo(this.children[i].controls).click({object: this.children[i]}, function(e) {
@@ -5336,6 +5429,7 @@
                             $(e.data.object.dom_element).css("top", '0%');
                             e.data.object.attrs['pos_height'] = '100%';
                             $(e.data.object.dom_element).css("height", '100%');
+                            return false;
                         });
                     if (this.children[i].controls.find('.forward').length == 0)
                         $('<button title="' + title("Bring forward") + '" class="control forward ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-arrow-up" > </button>').appendTo(this.children[i].controls).click({object: this.children[i]}, function(e) {
@@ -5347,6 +5441,7 @@
                                 e.data.object.attrs['pos_zindex'] = 0;
                             }
                             element.zindex_normalize();
+                            return false;
                         });
                     if (this.children[i].controls.find('.backward').length == 0)
                         $('<button title="' + title("Send backward") + '" class="control backward ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-arrow-down" > </button>').appendTo(this.children[i].controls).click({object: this.children[i]}, function(e) {
@@ -5360,6 +5455,7 @@
                                 e.data.object.attrs['pos_zindex'] = 0;
                             }
                             element.zindex_normalize();
+                            return false;
                         });
 
                     $(this.children[i].dom_element).draggable({
