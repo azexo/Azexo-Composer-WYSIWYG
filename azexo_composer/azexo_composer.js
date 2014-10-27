@@ -3226,16 +3226,23 @@
                         if ('animations_editor' in element) {
                             animations_editor_remove();
                         }
+                        function refresh_param() {                            
+                            element.update_js_animations_list();
+                            var el = param.dom_element;
+                            var v = param.get_value();
+                            param.render(v);
+                            $(el).replaceWith(param.dom_element);
+                        }
+                        refresh_param();
                         $(caller_param.dom_element).find('select').off('change.an_js_in').on('change.an_js_in',function(){
                             var v = caller_param.get_value();
                             if(v != 'js') {
                                 animations_editor_remove();
                             }
                         });
-                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>').insertAfter(this.dom_element);
-                        element.show_js_animations_editor(form, false, function(data) {
-                            if('id' in data)
-                                $(param.dom_element).find('select').append('<option value="' + data.id + '">' + data.title + '</option>');                                
+                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix ' + p + 'form-group ' + p + 'well"></div>').insertAfter(this.dom_element);                        
+                        element.show_js_animations_editor(form, false, function() {
+                            refresh_param()
                         });
                         $('#az-editor-modal').find('.save').off('mousedown.an_js_in').on('mousedown.an_js_in', function(){
                             element.save_js_animations(false);
@@ -3267,16 +3274,23 @@
                         if ('animations_editor' in element) {
                             animations_editor_remove();
                         }
+                        function refresh_param() {                            
+                            element.update_js_animations_list();
+                            var el = param.dom_element;
+                            var v = param.get_value();
+                            param.render(v);
+                            $(el).replaceWith(param.dom_element);
+                        }
+                        refresh_param();
                         $(caller_param.dom_element).find('select').off('change.an_js_out').on('change.an_js_out',function(){
                             var v = caller_param.get_value();
                             if(v != 'js') {
                                 animations_editor_remove();
                             }
                         });
-                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>').insertAfter(this.dom_element);
-                        element.show_js_animations_editor(form, false, function(data) {
-                            if('id' in data)
-                                $(param.dom_element).find('select').append('<option value="' + data.id + '">' + data.title + '</option>');
+                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix ' + p + 'form-group ' + p + 'well"></div>').insertAfter(this.dom_element);                        
+                        element.show_js_animations_editor(form, false, function() {
+                            refresh_param();
                         });
                         $('#az-editor-modal').find('.save').off('mousedown.an_js_out').on('mousedown.an_js_out', function(){
                             element.save_js_animations(false);
@@ -3811,8 +3825,10 @@
             var animations = {};
             for (var name in azexo_elements.elements_instances_by_an_name) {
                 for (var i = 0; i < azexo_elements.elements_instances_by_an_name[name].an_scenes.length; i++) {
-                    if (azexo_elements.elements_instances_by_an_name[name].an_scenes[i].duration == '-1')
-                        animations[name + '-' + i] = i + ' ' + t('scene in') + ' ' + name + ' ' + t('animations set');
+                    if(azexo_elements.elements_instances_by_an_name[name].an_name == name) {
+                        if (azexo_elements.elements_instances_by_an_name[name].an_scenes[i].duration == '-1')
+                            animations[name + '-' + i] = i + ' ' + t('scene in') + ' ' + name + ' ' + t('animations set');
+                    }
                 }
             }
             for (var i = 0; i < this.params.length; i++) {
@@ -3831,7 +3847,8 @@
         },
         show_js_animations_editor: function(form, scroll, callback) {
             var element = this;
-            element.animations_editor = $('<div class="tree ' + p + 'col-sm-5"></div><div class="options ' + p + 'col-sm-7"></div>').appendTo(form);
+            element.animations_editor = form;
+            $('<div class="tree ' + p + 'col-sm-5"></div><div class="options ' + p + 'col-sm-7"></div>').appendTo(form);
             azexo_add_css('jstree/dist/themes/default/style.min.css', function() {
             });
             var help = '';
@@ -3973,7 +3990,7 @@
                                 $(element.dom_element).attr('data-an-name', element.an_name);
                                 var i = element.an_scenes.length - 1;
                                 var name = element.an_name;
-                                callback({id : name + '-' + i, title : i + ' ' + t('scene in') + ' ' + name + ' ' + t('animations set')});
+                                callback();
                             }
                         }
                     }
