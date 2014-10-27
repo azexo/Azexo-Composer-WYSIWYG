@@ -4143,19 +4143,21 @@
                     }
                     function fill_tree() {
                         for (var i = 0; i < element.an_scenes.length; i++) {
-                            var scene = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[i]), state: {opened: true}}, 'last');
-                            index[scene] = element.an_scenes[i];
-                            index_type[scene] = 'scene';
-                            for (var j = 0; j < element.an_scenes[i].timeline.length; j++) {
-                                var step = tree.jstree('create_node', scene, {type: 'step', text: t("Step") + ':' + j.toString(), state: {opened: true}}, 'last');
-                                index[step] = element.an_scenes[i].timeline[j];
-                                index_type[step] = 'step';
-                                index_parents[step] = scene;
-                                for (var k = 0; k < element.an_scenes[i].timeline[j].tweens.length; k++) {
-                                    var tween = tree.jstree('create_node', step, {type: 'tween', text: tween_title(element.an_scenes[i].timeline[j].tweens[k]), state: {opened: true}}, 'last');
-                                    index[tween] = element.an_scenes[i].timeline[j].tweens[k];
-                                    index_type[tween] = 'tween';
-                                    index_parents[tween] = step;
+                            if((scroll && element.an_scenes[i].duration != '-1') || (!scroll && element.an_scenes[i].duration == '-1')) {
+                                var scene = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[i]), state: {opened: true}}, 'last');
+                                index[scene] = element.an_scenes[i];
+                                index_type[scene] = 'scene';
+                                for (var j = 0; j < element.an_scenes[i].timeline.length; j++) {
+                                    var step = tree.jstree('create_node', scene, {type: 'step', text: t("Step") + ':' + j.toString(), state: {opened: true}}, 'last');
+                                    index[step] = element.an_scenes[i].timeline[j];
+                                    index_type[step] = 'step';
+                                    index_parents[step] = scene;
+                                    for (var k = 0; k < element.an_scenes[i].timeline[j].tweens.length; k++) {
+                                        var tween = tree.jstree('create_node', step, {type: 'tween', text: tween_title(element.an_scenes[i].timeline[j].tweens[k]), state: {opened: true}}, 'last');
+                                        index[tween] = element.an_scenes[i].timeline[j].tweens[k];
+                                        index_type[tween] = 'tween';
+                                        index_parents[tween] = step;
+                                    }
                                 }
                             }
                         }
