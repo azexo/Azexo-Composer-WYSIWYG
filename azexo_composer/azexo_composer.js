@@ -7015,6 +7015,7 @@
                 }
                 if ('an_start' in attributes || 'an_scenes' in attributes)
                     javascript += get_class_method_js(AnimatedElement, 'showed', true);
+                javascript += get_class_method_js(AnimatedElement, 'render', true);
                 javascript += register_animated_element.toString() + "\n";
 
                 javascript += FormDataElement.toString() + "\n";
