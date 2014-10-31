@@ -57,6 +57,7 @@ div.azexo.az-container > .controls {
 .azexo-editor div.az-carousel,
 .azexo-editor div.az-presentation,*/
 .azexo-editor div.az-column, 
+.azexo-editor div.az-link, 
 .azexo-editor li.az-item, 
 .azexo-editor div.az-tab, 
 .azexo-editor div.az-toggle, 
@@ -76,6 +77,7 @@ div.az-tabs > .controls,
 div.az-accordion > .controls, 
 div.az-carousel > .controls,
 div.az-presentation > .controls,
+div.az-link > .controls, 
 div.az-column > .controls, 
 li.az-item > .controls, 
 div.az-tab > .controls, 
@@ -627,4 +629,8 @@ div.modal-dialog, div.ax-modal-dialog {
 }
 .az-step.step:not(.active) {
     z-index: 0;
+}
+
+div.az-link {
+    cursor: pointer;
 }

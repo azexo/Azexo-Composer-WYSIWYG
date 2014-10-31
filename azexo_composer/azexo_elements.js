@@ -43,6 +43,44 @@
             },
         },
         {
+            base: 'az_link',
+            name: t('Link'),
+            icon: 'fa fa-link',
+            description: t('Link wrapper'),
+            params: [
+                {
+                    type: 'link',
+                    heading: t('Link'),
+                    param_name: 'link',
+                    description: t('Conent link (url).'),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Link target'),
+                    param_name: 'link_target',
+                    description: t('Select where to open link.'),
+                    value: target_options,
+                    dependency: {'element': 'link', 'not_empty': {}},
+                },
+            ],
+            is_container: true,
+            show_settings_on_create: true,
+            showed: function($, p, fp) {
+                this.baseclass.prototype.showed.apply(this, arguments);
+                var element = this;
+                $(element.dom_element).click(function() {
+                    window.open(element.attrs['link'], element.attrs['link_target']);
+                    return false;
+                });
+            },
+            render: function($, p, fp) {
+                this.dom_element = $('<div class="az-element az-link ' + this.attrs['el_class'] + '"></div>');
+                this.dom_content_element = $('<div class="az-ctnr"></div>').appendTo(this.dom_element);
+                ;
+                this.baseclass.prototype.render.apply(this, arguments);
+            },
+        },
+        {
             base: 'az_icon',
             name: t('Icon'),
             icon: 'fa fa-info',
@@ -523,8 +561,7 @@
                 return '<div class="az-empty"><div class="bottom ' + p + 'well"><h1>' + t('At the moment popup is empty. Click to put an element here.') + '</h1></div></div>';
             },
             showed: function($, p, fp) {
-
-
+                this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
                 function open_popup() {
                     $(element.dom_content_element).removeClass(p + 'hidden');
@@ -704,7 +741,9 @@
             render: function($, p, fp) {
                 var options = this.attrs['options'];
                 if (options != '')
-                    options = _.map(options.split(','), function(value){ return p + value;}).join(' ');
+                    options = _.map(options.split(','), function(value) {
+                        return p + value;
+                    }).join(' ');
                 this.dom_element = $('<div class="az-element az-progress-bar ' + p + 'progress ' + this.attrs['el_class'] + ' ' + options + '" style="' + this.attrs['style'] + '"><div class="' + p + 'progress-bar ' + this.attrs['type'] + '" role="progressbar" aria-valuenow="' + this.attrs['width'] + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + this.attrs['width'] + '%">' + this.attrs['label'] + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },

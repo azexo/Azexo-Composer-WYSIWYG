@@ -1397,7 +1397,9 @@
                 f.find("[type='checkbox'][name='" + n + "']").attr('checked', 'checked');
             }
             f.find("select[name='" + n + "'] > option").removeAttr('selected');
-            f.find("select[name='" + n + "'] > option[value='" + v + "']").prop('selected', 'selected');
+            for (var i = 0; i < v.length; i++) {
+                f.find("select[name='" + n + "'] > option[value='" + v[i] + "']").prop('selected', 'selected');
+            }
         })
         //Uncheck checkboxes and radio buttons not in the form data
         $("input:checkbox:checked,input:radio:checked").each(function() {
@@ -1421,6 +1423,7 @@
             azexo_get_cms_element_settings(instance, function(data) {
                 $(param.dom_element).empty();
                 $(data).appendTo(param.dom_element);
+                $(param.dom_element).find('[type="submit"]').remove();
                 if (param.form_value.length > 0) {
                     $(param.dom_element).deserialize(htmlDecode(param.form_value));
                 }
@@ -1901,7 +1904,7 @@
         azexo_elements.add_element(this.id, this, parse);
     }
     BaseElement.prototype = {
-        el_classes: _.object([p + 'optgroup-bootstrap', p + 'bg-primary', p + 'text-primary', p + 'bg-default', p + 'text-default', p + 'text-muted', p + 'small', p + 'text-left', p + 'text-right', p + 'text-center', p + 'text-justify', p + 'pull-left', p + 'pull-right', p + 'center-block', p + 'well', p + 'visible-xs-block', p + 'visible-sm-block', p + 'visible-md-block', p + 'visible-lg-block', p + 'hidden-xs', p + 'hidden-sm', p + 'hidden-md', p + 'hidden-lg'], [t("Bootstrap classes"), t("Background primary style"), t("Text primary style"), t("Background default style"), t("Text default style"), t("Text muted style"), t("Text small style"), t("Text align left"), t("Text align right"), t("Text align center"), t("Text align justify"), t("Pull left"), t("Pull right"), t("Block align center"), t("Well"), t("Visible on extra small devices, phones (<768px)"), t("Visible on small devices, tablets (≥768px)"), t("Visible on medium devices, desktops (≥992px)"), t("Visible onn large devices, desktops (≥1200px)"), t("Hidden on extra small devices, phones (<768px)"), t("Hidden on small devices, tablets (≥768px)"), t("Hidden on medium devices, desktops (≥992px)"), t("Hidden on large devices, desktops (≥1200px)")]),
+        el_classes: _.object([p + 'optgroup-bootstrap', p + 'bg-primary', p + 'text-primary', p + 'bg-success', p + 'text-success', p + 'bg-default', p + 'text-default', p + 'text-muted', p + 'small', p + 'text-left', p + 'text-right', p + 'text-center', p + 'text-justify', p + 'pull-left', p + 'pull-right', p + 'center-block', p + 'well', p + 'visible-xs-block', p + 'visible-sm-block', p + 'visible-md-block', p + 'visible-lg-block', p + 'hidden-xs', p + 'hidden-sm', p + 'hidden-md', p + 'hidden-lg'], [t("Bootstrap classes"), t("Background primary style"), t("Text primary style"), t("Background success style"), t("Text success style"), t("Background default style"), t("Text default style"), t("Text muted style"), t("Text small style"), t("Text align left"), t("Text align right"), t("Text align center"), t("Text align justify"), t("Pull left"), t("Pull right"), t("Block align center"), t("Well"), t("Visible on extra small devices, phones (<768px)"), t("Visible on small devices, tablets (≥768px)"), t("Visible on medium devices, desktops (≥992px)"), t("Visible onn large devices, desktops (≥1200px)"), t("Hidden on extra small devices, phones (<768px)"), t("Hidden on small devices, tablets (≥768px)"), t("Hidden on medium devices, desktops (≥992px)"), t("Hidden on large devices, desktops (≥1200px)")]),
         elements: {},
         tags: {},
         max_nested_depth: 3,
@@ -3221,12 +3224,12 @@
                         function animations_editor_remove() {
                             element.save_js_animations(false);
                             $(element.animations_editor).remove();
-                            delete element.animations_editor;                            
+                            delete element.animations_editor;
                         }
                         if ('animations_editor' in element) {
                             animations_editor_remove();
                         }
-                        function refresh_param() {                            
+                        function refresh_param() {
                             element.update_js_animations_list();
                             var el = param.dom_element;
                             var v = param.get_value();
@@ -3234,17 +3237,17 @@
                             $(el).replaceWith(param.dom_element);
                         }
                         refresh_param();
-                        $(caller_param.dom_element).find('select').off('change.an_js_in').on('change.an_js_in',function(){
+                        $(caller_param.dom_element).find('select').off('change.an_js_in').on('change.an_js_in', function() {
                             var v = caller_param.get_value();
-                            if(v != 'js') {
+                            if (v != 'js') {
                                 animations_editor_remove();
                             }
                         });
-                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix ' + p + 'form-group ' + p + 'well"></div>').insertAfter(this.dom_element);                        
+                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix ' + p + 'form-group ' + p + 'well"></div>').insertAfter(this.dom_element);
                         element.show_js_animations_editor(form, false, function() {
                             refresh_param()
                         });
-                        $('#az-editor-modal').find('.save').off('mousedown.an_js_in').on('mousedown.an_js_in', function(){
+                        $('#az-editor-modal').find('.save').off('mousedown.an_js_in').on('mousedown.an_js_in', function() {
                             element.save_js_animations(false);
                         });
                     }},
@@ -3269,12 +3272,12 @@
                         function animations_editor_remove() {
                             element.save_js_animations(false);
                             $(element.animations_editor).remove();
-                            delete element.animations_editor;                            
+                            delete element.animations_editor;
                         }
                         if ('animations_editor' in element) {
                             animations_editor_remove();
                         }
-                        function refresh_param() {                            
+                        function refresh_param() {
                             element.update_js_animations_list();
                             var el = param.dom_element;
                             var v = param.get_value();
@@ -3282,19 +3285,19 @@
                             $(el).replaceWith(param.dom_element);
                         }
                         refresh_param();
-                        $(caller_param.dom_element).find('select').off('change.an_js_out').on('change.an_js_out',function(){
+                        $(caller_param.dom_element).find('select').off('change.an_js_out').on('change.an_js_out', function() {
                             var v = caller_param.get_value();
-                            if(v != 'js') {
+                            if (v != 'js') {
                                 animations_editor_remove();
                             }
                         });
-                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix ' + p + 'form-group ' + p + 'well"></div>').insertAfter(this.dom_element);                        
+                        var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix ' + p + 'form-group ' + p + 'well"></div>').insertAfter(this.dom_element);
                         element.show_js_animations_editor(form, false, function() {
                             refresh_param();
                         });
-                        $('#az-editor-modal').find('.save').off('mousedown.an_js_out').on('mousedown.an_js_out', function(){
+                        $('#az-editor-modal').find('.save').off('mousedown.an_js_out').on('mousedown.an_js_out', function() {
                             element.save_js_animations(false);
-                        });                        
+                        });
                     }},
             }),
             make_param_type({
@@ -3825,7 +3828,7 @@
             var animations = {};
             for (var name in azexo_elements.elements_instances_by_an_name) {
                 for (var i = 0; i < azexo_elements.elements_instances_by_an_name[name].an_scenes.length; i++) {
-                    if(azexo_elements.elements_instances_by_an_name[name].an_name == name) {
+                    if (azexo_elements.elements_instances_by_an_name[name].an_name == name) {
                         if (azexo_elements.elements_instances_by_an_name[name].an_scenes[i].duration == '-1')
                             animations[name + '-' + i] = i + ' ' + t('scene in') + ' ' + name + ' ' + t('animations set');
                     }
@@ -4143,7 +4146,7 @@
                     }
                     function fill_tree() {
                         for (var i = 0; i < element.an_scenes.length; i++) {
-                            if((scroll && element.an_scenes[i].duration != '-1') || (!scroll && element.an_scenes[i].duration == '-1')) {
+                            if ((scroll && element.an_scenes[i].duration != '-1') || (!scroll && element.an_scenes[i].duration == '-1')) {
                                 var scene = tree.jstree('create_node', '#', {type: 'scene', text: scene_title(element.an_scenes[i]), state: {opened: true}}, 'last');
                                 index[scene] = element.an_scenes[i];
                                 index_type[scene] = 'scene';
@@ -4348,7 +4351,7 @@
                         $(element.dom_element).attr('data-an-name', element.an_name);
                     }
                     element.attrs['an_scenes'] = btoa(encodeURIComponent(JSON.stringify(element.an_scenes)));
-                    if(scroll)
+                    if (scroll)
                         element.update_scroll_animation();
                 }
             });
