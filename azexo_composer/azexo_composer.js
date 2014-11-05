@@ -2902,61 +2902,64 @@
         $.holdReady(false);
     });
     function connect_container(dom_element) {
-        var html = $(dom_element).html();
-        var match = /^\s*\<[\s\S]*\>\s*$/.exec(html);
-        if (match || html == '') {
-            $(dom_element).find('> script').detach().appendTo('head');
-            $(dom_element).find('> link[href]').detach().appendTo('head');
-            //$(dom_element).find('> script').remove();
-            //$(dom_element).find('> link[href]').remove();
-            var container = new ContainerElement(null, false);
-            container.attrs['container'] = $(dom_element).attr('data-az-type') + '/' + $(dom_element).attr('data-az-name');
-            container.dom_element = $(dom_element);
-            $(container.dom_element).attr('data-az-id', container.id);
-            //container.dom_content_element = $(dom_element).closest_descendents('[data-azcnt]');
-            container.dom_content_element = $(dom_element);
-            $(container.dom_element).css('display', '');
-            $(container.dom_element).addClass('azexo');
-            container.parse_html(container.dom_content_element);
-            container.html_content = true;
-            container.loaded_container = container.attrs['container'];
+        if($(dom_element).length > 0) {
+            var html = $(dom_element).html();
+            var match = /^\s*\<[\s\S]*\>\s*$/.exec(html);
+            if (match || html == '') {
+                $(dom_element).find('> script').detach().appendTo('head');
+                $(dom_element).find('> link[href]').detach().appendTo('head');
+                //$(dom_element).find('> script').remove();
+                //$(dom_element).find('> link[href]').remove();
+                var container = new ContainerElement(null, false);
+                container.attrs['container'] = $(dom_element).attr('data-az-type') + '/' + $(dom_element).attr('data-az-name');
+                container.dom_element = $(dom_element);
+                $(container.dom_element).attr('data-az-id', container.id);
+                //container.dom_content_element = $(dom_element).closest_descendents('[data-azcnt]');
+                container.dom_content_element = $(dom_element);
+                $(container.dom_element).css('display', '');
+                $(container.dom_element).addClass('azexo');
+                container.parse_html(container.dom_content_element);
+                container.html_content = true;
+                container.loaded_container = container.attrs['container'];
 
-            for (var i = 0; i < container.children.length; i++) {
-                container.children[i].recursive_render();
-            }
-            if (!azexo_frontend) {
-                container.dom_content_element.empty();
-                if (window.azexo_editor) {
-                    container.show_controls();
-                    container.update_sortable();
+                for (var i = 0; i < container.children.length; i++) {
+                    container.children[i].recursive_render();
                 }
-                container.attach_children();
+                if (!azexo_frontend) {
+                    container.dom_content_element.empty();
+                    if (window.azexo_editor) {
+                        container.show_controls();
+                        container.update_sortable();
+                    }
+                    container.attach_children();
+                }
+                container.rendered = true;
+                for (var i = 0; i < container.children.length; i++) {
+                    container.children[i].recursive_showed();
+                }
+            } else {
+                if (html.replace(/^\s+|\s+$/g, '') != '')
+                    azexo_containers_loaded[$(dom_element).attr('data-az-type') + '/' + $(dom_element).attr('data-az-name')] = html.replace(/^\s+|\s+$/g, '');
+                var container = new ContainerElement(null, false);
+                container.attrs['container'] = $(dom_element).attr('data-az-type') + '/' + $(dom_element).attr('data-az-name');
+                container.render($, p, fp);
+                var classes = $(container.dom_element).attr('class') + ' ' + $(dom_element).attr('class');
+                classes = $.unique(classes.split(' ')).join(' ');
+                $(container.dom_element).attr('class', classes);
+                $(container.dom_element).attr('style', $(dom_element).attr('style'));
+                $(container.dom_element).css('display', '');
+                $(container.dom_element).addClass('azexo');
+                $(dom_element).replaceWith(container.dom_element);
+                container.showed($, p, fp);
+                if (window.azexo_editor)
+                    container.show_controls();
             }
-            container.rendered = true;
-            for (var i = 0; i < container.children.length; i++) {
-                container.children[i].recursive_showed();
+            if (window.azexo_editor) {
+                $(container.dom_element).addClass('azexo-editor');
             }
-        } else {
-            if (html.replace(/^\s+|\s+$/g, '') != '')
-                azexo_containers_loaded[$(dom_element).attr('data-az-type') + '/' + $(dom_element).attr('data-az-name')] = html.replace(/^\s+|\s+$/g, '');
-            var container = new ContainerElement(null, false);
-            container.attrs['container'] = $(dom_element).attr('data-az-type') + '/' + $(dom_element).attr('data-az-name');
-            container.render($, p, fp);
-            var classes = $(container.dom_element).attr('class') + ' ' + $(dom_element).attr('class');
-            classes = $.unique(classes.split(' ')).join(' ');
-            $(container.dom_element).attr('class', classes);
-            $(container.dom_element).attr('style', $(dom_element).attr('style'));
-            $(container.dom_element).css('display', '');
-            $(container.dom_element).addClass('azexo');
-            $(dom_element).replaceWith(container.dom_element);
-            container.showed($, p, fp);
-            if (window.azexo_editor)
-                container.show_controls();
+            return container;
         }
-        if (window.azexo_editor) {
-            $(container.dom_element).addClass('azexo-editor');
-        }
-        return container;
+        return null;
     }
     var azexo_loaded = false;
     function azexo_load() {
@@ -2965,7 +2968,8 @@
         azexo_loaded = true;
         $('.az-container').each(function() {
             var container = connect_container(this);
-            azexo_containers.push(container);
+            if(container)
+                azexo_containers.push(container);
         });
         if (window.azexo_editor) {
             if ($('#azexo-clipboard').length == 0) {
@@ -3044,34 +3048,35 @@
 
                         window.azexo_title['Save container'] = t('Generate HTML and JS for all elements which placed in current container element.');
                         var container = connect_container(container_dom);
+                        if(container) {
+                            $(textarea).data('azexo_composer', container);
 
-                        $(textarea).data('azexo_composer', container);
-
-                        container.save_container = function() {
-                            azexo_add_js({
-                                path: 'js/json2.min.js',
-                                loaded: 'JSON' in window,
-                                callback: function() {
-                                    _.defer(function() {
-                                        if (container.id in azexo_elements.elements_instances) {
-                                            var html = container.get_container_html();
-                                            if (window.azexo_online) {
-                                                $(textarea).val(html);
-                                            } else {
-                                                var type = container.attrs['container'].split('/')[0];
-                                                var name = container.attrs['container'].split('/')[1];
-                                                $(textarea).val('<div class="az-element az-container" data-az-type="' + type + '" data-az-name="' + name + '">' + html + '</div>');
+                            container.save_container = function() {
+                                azexo_add_js({
+                                    path: 'js/json2.min.js',
+                                    loaded: 'JSON' in window,
+                                    callback: function() {
+                                        _.defer(function() {
+                                            if (container.id in azexo_elements.elements_instances) {
+                                                var html = container.get_container_html();
+                                                if (window.azexo_online) {
+                                                    $(textarea).val(html);
+                                                } else {
+                                                    var type = container.attrs['container'].split('/')[0];
+                                                    var name = container.attrs['container'].split('/')[1];
+                                                    $(textarea).val('<div class="az-element az-container" data-az-type="' + type + '" data-az-name="' + name + '">' + html + '</div>');
+                                                }
                                             }
-                                        }
-                                    });
-                                }
-                            });
-                        };
-                        $(document).on("azexo_add_element", container.save_container);
-                        $(document).on("azexo_edited_element", container.save_container);
-                        $(document).on("azexo_update_element", container.save_container);
-                        $(document).on("azexo_delete_element", container.save_container);
-                        $(document).on("azexo_update_sorting", container.save_container);
+                                        });
+                                    }
+                                });
+                            };
+                            $(document).on("azexo_add_element", container.save_container);
+                            $(document).on("azexo_edited_element", container.save_container);
+                            $(document).on("azexo_update_element", container.save_container);
+                            $(document).on("azexo_delete_element", container.save_container);
+                            $(document).on("azexo_update_sorting", container.save_container);
+                        }
                     }
                 });
             },

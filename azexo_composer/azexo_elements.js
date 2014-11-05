@@ -76,7 +76,6 @@
             render: function($, p, fp) {
                 this.dom_element = $('<div class="az-element az-link ' + this.attrs['el_class'] + '"></div>');
                 this.dom_content_element = $('<div class="az-ctnr"></div>').appendTo(this.dom_element);
-                ;
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
