@@ -5257,7 +5257,7 @@
         render: function($, p, fp) {
             var element = this;
             this.dom_element = $('<div class="az-element az-grid ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
-            this.dom_content_element = $('<ul></ul>').appendTo(this.dom_element);
+            this.dom_content_element = $('<ul class="' + p + 'clearfix"></ul>').appendTo(this.dom_element);
             GridElement.baseclass.prototype.render.apply(this, arguments);
         },
     });
