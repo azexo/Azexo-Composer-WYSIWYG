@@ -2169,6 +2169,7 @@
                             $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             update_controls(element);
+                            return false;
                         });
                         $(element.parent.controls).find('span').off('click').on('click', function() {
                             $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
@@ -2177,6 +2178,7 @@
                                 $(el.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                                 update_controls(el);
                             }
+                            return false;
                         });
                         $(element.controls).find('span').trigger('click');
                     });
