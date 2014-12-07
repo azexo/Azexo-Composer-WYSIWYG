@@ -72,6 +72,7 @@ div.azexo.az-container > .controls {
 }
 div.az-container > .controls,
 div.az-row > .controls,
+div.az-section > .controls,
 div.az-grid > .controls,
 div.az-tabs > .controls, 
 div.az-accordion > .controls, 
@@ -101,6 +102,7 @@ div.az-wizard > .controls {
 div.azexo-editor div.az-wizard:before,
 div.azexo-editor div.az-ctnr:before,
 div.azexo-editor div.az-element.az-row:before,
+div.azexo-editor div.az-element.az-section:before,
 div.azexo-editor div.az-element.az-grid ul:before,
 div.azexo-editor div.az-tabs .tab-content:before,
 div.azexo-editor div.az-accordion.az-element:before {

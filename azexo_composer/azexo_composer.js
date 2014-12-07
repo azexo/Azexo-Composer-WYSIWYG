@@ -1781,7 +1781,7 @@
                 var depth = container.get_nested_depth(key);
                 if (depth < BaseElement.prototype.max_nested_depth) {
 
-                    if (container instanceof ContainerElement && container.parent == null && key != 'az_row') {
+                    if (container instanceof ContainerElement && container.parent == null && (key != 'az_row' && key != 'az_section')) {
                         var row = new RowElement(container, false);
                         row.update_dom();
 
@@ -2169,7 +2169,6 @@
                             $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             update_controls(element);
-                            return false;
                         });
                         $(element.parent.controls).find('span').off('click').on('click', function() {
                             $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
@@ -2178,7 +2177,6 @@
                                 $(el.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                                 update_controls(el);
                             }
-                            return false;
                         });
                         $(element.controls).find('span').trigger('click');
                     });
@@ -2536,7 +2534,7 @@
 
                 if (this.get_nested_depth(shortcode) > BaseElement.prototype.max_nested_depth)
                     return;
-                if (this instanceof ContainerElement && this.parent == null && shortcode != 'az_row') {
+                if (this instanceof ContainerElement && this.parent == null && (shortcode != 'az_row' && shortcode != 'az_section')) {
                     this.parse_shortcode('[az_row][az_column width="1/1"]' + content + '[/az_column][/az_row]');
                     return;
                 }
@@ -2904,7 +2902,7 @@
         $.holdReady(false);
     });
     function connect_container(dom_element) {
-        if($(dom_element).length > 0) {
+        if ($(dom_element).length > 0) {
             var html = $(dom_element).html();
             var match = /^\s*\<[\s\S]*\>\s*$/.exec(html);
             if (match || html == '') {
@@ -2970,7 +2968,7 @@
         azexo_loaded = true;
         $('.az-container').each(function() {
             var container = connect_container(this);
-            if(container)
+            if (container)
                 azexo_containers.push(container);
         });
         if (window.azexo_editor) {
@@ -3050,7 +3048,7 @@
 
                         window.azexo_title['Save container'] = t('Generate HTML and JS for all elements which placed in current container element.');
                         var container = connect_container(container_dom);
-                        if(container) {
+                        if (container) {
                             $(textarea).data('azexo_composer', container);
 
                             container.save_container = function() {
@@ -4568,6 +4566,32 @@
 //
 //
 //
+    function SectionElement(parent, parse) {
+        SectionElement.baseclass.apply(this, arguments);
+    }
+    register_element('az_section', true, SectionElement);
+    mixin(SectionElement.prototype, {
+        name: t('Section'),
+        icon: 'fa fa-square-o',
+        description: t('Bootstrap grid container'),
+        category: t('Layout'),
+        params: [
+        ].concat(SectionElement.prototype.params),
+        is_container: true,
+        disallowed_elements: ['az_section'],
+        get_button: function() {
+            return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
+        },
+        render: function($, p, fp) {
+            this.dom_element = $('<div class="az-element az-section ' + this.attrs['el_class'] + ' " style="' + this.attrs['style'] + '"></div>');
+            this.dom_content_element = $('<div class="az-ctnr ' + p + 'container"></div>').appendTo(this.dom_element);
+            SectionElement.baseclass.prototype.render.apply(this, arguments);
+        },
+    });
+//
+//
+//
+
     function RowElement(parent, parse) {
         RowElement.baseclass.apply(this, arguments);
         this.columns = '';
@@ -4580,7 +4604,7 @@
     mixin(RowElement.prototype, {
         name: t('Row'),
         icon: 'fa fa-table',
-        description: t('One row to implement a table layout with responsive ability. You can choose number of columns and thier widths. Used by default.'),
+        description: t('One row to implement a Bootstrap grid layout with responsive ability. You can choose number of columns and thier widths. Used by default.'),
         category: t('Layout'),
         params: [
             make_param_type({
@@ -7033,6 +7057,12 @@
                 javascript += FormDataElement.name + ".prototype.form_elements = {};\n";
                 javascript += register_form_data_element.toString() + "\n";
 
+
+                if (SectionElement.prototype.base in bases) {
+                    javascript += SectionElement.toString() + "\n";
+                    javascript += register_element.name + "('" + SectionElement.prototype.base + "', true, " + SectionElement.name + ");\n";
+                    javascript += get_element_params_js(SectionElement);
+                }
 
                 if (RowElement.prototype.base in bases) {
                     javascript += RowElement.toString() + "\n";
