@@ -2177,8 +2177,8 @@
                             if (!_.isUndefined(el)) {
                                 $(el.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                                 update_controls(el);
-                                return false;
                             }
+                            return false;
                         });
                         $(element.controls).find('span').trigger('click');
                     });
