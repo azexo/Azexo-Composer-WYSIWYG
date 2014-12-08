@@ -1733,8 +1733,10 @@
             for (var id in BaseElement.prototype.elements) {
                 if (BaseElement.prototype.elements[id].prototype.hidden)
                     continue;
-                if (disallowed_elements.indexOf(BaseElement.prototype.elements[id].prototype.base) >= 0)
-                    continue;
+                if (container.base != 'az_popup') {
+                    if (disallowed_elements.indexOf(BaseElement.prototype.elements[id].prototype.base) >= 0)
+                        continue;
+                }
                 if (BaseElement.prototype.elements[id].prototype.category in tabs) {
                     tabs[BaseElement.prototype.elements[id].prototype.category].push(BaseElement.prototype.elements[id]);
                 } else {

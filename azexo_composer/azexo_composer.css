@@ -535,6 +535,7 @@ div.controls > .control {
     height: auto;
     left: 50%;
     top: 50%;
+    width: 100%;
     z-index: 210;
     -moz-transform: translate(-50%, -50%);
     -o-transform: translate(-50%, -50%);
@@ -546,6 +547,11 @@ div.controls > .control {
 .az-popup > img, .az-popup > span {
     cursor: pointer;
 }
+
+.az-popup-close {
+    cursor: pointer;
+}
+
 
 .affix, .ax-affix {
     position: fixed;

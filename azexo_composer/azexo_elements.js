@@ -569,9 +569,7 @@
                             element.children[i].trigger_start_in_animation();
                         }
                     }
-
-                    $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(function() {
-                        var backdrop = this;
+                    var close = function () {
                         setTimeout(function() {
                             $(backdrop).remove();
                             $(element.dom_content_element).addClass(p + 'hidden');
@@ -581,7 +579,9 @@
                                 element.children[i].trigger_start_out_animation();
                             }
                         }
-                    });
+                    };
+                    $('.az-popup-close').click(close);
+                    var backdrop = $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(close);
                     return false;
                 }
                 $(this.dom_element).find('.open-popup').click(open_popup);
@@ -621,7 +621,7 @@
                     default:
                         break;
                 }
-                this.dom_content_element = $('<div class="' + p + 'container az-popup-ctnr az-ctnr ' + p + 'hidden"></div>').appendTo(this.dom_element);
+                this.dom_content_element = $('<div class=" az-popup-ctnr az-ctnr ' + p + 'hidden"><div class="az-popup-close"></div></div>').appendTo(this.dom_element);
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
