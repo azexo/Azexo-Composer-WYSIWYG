@@ -532,7 +532,8 @@ div.controls > .control {
 
 .az-popup-ctnr {
     position: fixed;
-    height: auto;
+    height: 100%;
+    overflow-y: scroll;
     left: 50%;
     top: 50%;
     width: 100%;
