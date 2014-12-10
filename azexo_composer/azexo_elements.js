@@ -586,7 +586,7 @@
                             close();
                         }
                     });
-                    $('.az-popup-close').click(close);
+                    $(element.dom_content_element).find('.az-popup-close').click(close);
                     var backdrop = $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(close);
                     return false;
                 }
