@@ -4726,10 +4726,10 @@
                     $(controls).find('.' + p + 'popover .set-columns-layout').each(function() {
                         $(this).click({object: element}, element.click_set_columns);
                     });
-                    $(controls).find('.' + p + 'popover').mouseleave(function() {
+                    $(element.dom_element).mouseleave(function() {
                         $(columns)[fp + 'popover']('hide');
                         $(columns).css('display', '');
-                    });
+                    });                    
                 });
             }
         },
