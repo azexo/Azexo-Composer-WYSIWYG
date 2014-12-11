@@ -2980,7 +2980,7 @@
                 $('body').prepend('<div id="azexo-clipboard" style="display:none"></div>');
             }
         }
-        $('body').keydown(function(event) {
+        $('body').on('keydown.azexo', function(event) {
             if (event.ctrlKey && event.altKey) {
                 $('#az-admin-modal').remove();
                 var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Admin area") + '</h4></div>';
