@@ -582,6 +582,7 @@
                                 element.children[i].trigger_start_out_animation();
                             }
                         }
+                        return false;
                     };
                     $(document).on('keyup.az_popup', function(e) {
                         if (e.keyCode == 27) {
