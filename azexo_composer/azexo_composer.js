@@ -7264,6 +7264,7 @@
             $(dom).find('.ui-resizable').removeClass('ui-resizable');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
             $(dom).find('.az-element.az-container > .az-ctnr').empty();
+            $(dom).find('.az-element.az-cms-element').empty();            
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
 
             var javascript = '';
