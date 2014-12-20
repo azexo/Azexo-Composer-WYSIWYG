@@ -565,11 +565,7 @@
                 function open_popup() {
                     document.body.style.overflow = 'hidden';
                     $(element.dom_content_element).removeClass(p + 'hidden');
-                    for (var i = 0; i < element.children.length; i++) {
-                        if ('trigger_start_in_animation' in element.children[i]) {
-                            element.children[i].trigger_start_in_animation();
-                        }
-                    }
+                    element.trigger_start_in_animation();
                     var close = function() {
                         setTimeout(function() {
                             $(backdrop).remove();
@@ -577,11 +573,7 @@
                             document.body.style.overflow = '';
                             $(document).off('keyup.az_popup');
                         }, element.attrs['hiding_pause']);
-                        for (var i = 0; i < element.children.length; i++) {
-                            if ('trigger_start_out_animation' in element.children[i]) {
-                                element.children[i].trigger_start_out_animation();
-                            }
-                        }
+                        element.trigger_start_out_animation();
                         return false;
                     };
                     $(document).on('keyup.az_popup', function(e) {

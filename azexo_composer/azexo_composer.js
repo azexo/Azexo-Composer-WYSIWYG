@@ -2299,6 +2299,20 @@
         render: function($, p, fp) {
             $(this.dom_element).attr('data-az-id', this.id);
         },
+        trigger_start_in_animation: function() {
+            for (var i = 0; i < this.children.length; i++) {
+                if ('trigger_start_in_animation' in this.children[i]) {
+                    this.children[i].trigger_start_in_animation();
+                }
+            }
+        },
+        trigger_start_out_animation: function() {
+            for (var i = 0; i < this.children.length; i++) {
+                if ('trigger_start_out_animation' in this.children[i]) {
+                    this.children[i].trigger_start_out_animation();
+                }
+            }
+        },
         update_data: function() {
             $(this.dom_element).attr('data-azb', this.base);
             for (var i = 0; i < this.params.length; i++) {
@@ -3652,22 +3666,14 @@
             if (this.attrs['an_start'] == 'trigger') {
                 this.start_in_animation();
             } else {
-                for (var i = 0; i < this.children.length; i++) {
-                    if ('trigger_start_in_animation' in this.children[i]) {
-                        this.children[i].trigger_start_in_animation();
-                    }
-                }
+                AnimatedElement.baseclass.prototype.trigger_start_in_animation.apply(this, arguments);
             }
         },
         trigger_start_out_animation: function() {
             if (this.attrs['an_start'] == 'trigger') {
                 this.start_out_animation();
             } else {
-                for (var i = 0; i < this.children.length; i++) {
-                    if ('trigger_start_out_animation' in this.children[i]) {
-                        this.children[i].trigger_start_out_animation();
-                    }
-                }
+                AnimatedElement.baseclass.prototype.trigger_start_out_animation.apply(this, arguments);
             }
         },
         animation_letters: function() {
@@ -4573,7 +4579,7 @@
     function SectionElement(parent, parse) {
         SectionElement.baseclass.apply(this, arguments);
     }
-    register_element('az_section', true, SectionElement);
+    register_animated_element('az_section', true, SectionElement);
     mixin(SectionElement.prototype, {
         name: t('Section'),
         icon: 'fa fa-square-o',
@@ -5953,11 +5959,7 @@
                                 var id = $(item).attr('data-az-id');
                                 var el = azexo_elements.get_element(id);
                                 if (!_.isUndefined(el)) {
-                                    for (var j = 0; j < el.children.length; j++) {
-                                        if ('trigger_start_out_animation' in el.children[j]) {
-                                            el.children[j].trigger_start_out_animation();
-                                        }
-                                    }
+                                    el.trigger_start_out_animation();
                                 }
                             }
                         }
@@ -5967,11 +5969,7 @@
                                 var id = $(item).attr('data-az-id');
                                 var el = azexo_elements.get_element(id);
                                 if (!_.isUndefined(el)) {
-                                    for (var j = 0; j < el.children.length; j++) {
-                                        if ('trigger_start_in_animation' in el.children[j]) {
-                                            el.children[j].trigger_start_in_animation();
-                                        }
-                                    }
+                                    el.trigger_start_in_animation();
                                 }
                             }
                         }
@@ -6419,22 +6417,14 @@
                         var id = $(event.target).attr('data-az-id');
                         var el = azexo_elements.get_element(id);
                         if (!_.isUndefined(el)) {
-                            for (var j = 0; j < el.children.length; j++) {
-                                if ('trigger_start_out_animation' in el.children[j]) {
-                                    el.children[j].trigger_start_in_animation();
-                                }
-                            }
+                            el.trigger_start_out_animation();
                         }
                     }, false);
                     element.dom_element.get(0).addEventListener("impress:stepleave", function(event) {
                         var id = $(event.target).attr('data-az-id');
                         var el = azexo_elements.get_element(id);
                         if (!_.isUndefined(el)) {
-                            for (var j = 0; j < el.children.length; j++) {
-                                if ('trigger_start_in_animation' in el.children[j]) {
-                                    el.children[j].trigger_start_out_animation();
-                                }
-                            }
+                            el.trigger_start_in_animation();
                         }
                     }, false);
                     $(element.dom_element).find('> .' + p + 'pagination > li > .' + p + 'prev').click(function() {
@@ -7009,6 +6999,10 @@
                 javascript += get_class_method_js(BaseElement, 'add_js', true);
                 javascript += get_class_method_js(BaseElement, 'add_external_js', true);
                 javascript += get_class_method_js(BaseElement, 'get_my_container', true);
+                if ('an_start' in attributes) {
+                    javascript += get_class_method_js(BaseElement, 'trigger_start_in_animation', true);
+                    javascript += get_class_method_js(BaseElement, 'trigger_start_out_animation', true);
+                }
                 javascript += register_element.toString() + "\n";
                 javascript += UnknownElement.toString() + "\n";
                 javascript += register_element.name + "('az_unknown', true, " + UnknownElement.name + ");\n";
