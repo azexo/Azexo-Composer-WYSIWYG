@@ -567,17 +567,19 @@
                     opened = true;
                     document.body.style.overflow = 'hidden';
                     $(element.dom_content_element).removeClass(p + 'hidden');
-                    element.trigger_start_in_animation();
+                    if ('trigger_start_in_animation' in element)
+                        element.trigger_start_in_animation();
                     var close = function() {
                         if (opened) {
                             opened = false;
                             setTimeout(function() {
-                                $(backdrop).remove();
+                                $(element.backdrop).remove();
                                 $(element.dom_content_element).addClass(p + 'hidden');
                                 document.body.style.overflow = '';
                                 $(document).off('keyup.az_popup');
                             }, element.attrs['hiding_pause']);
-                            element.trigger_start_out_animation();
+                            if ('trigger_start_out_animation' in element)
+                                element.trigger_start_out_animation();
                         }
                         return false;
                     };
@@ -587,7 +589,7 @@
                         }
                     });
                     $(element.dom_content_element).find('.az-popup-close').click(close);
-                    var backdrop = $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(close);
+                    element.backdrop = $('<div class="' + p + 'modal-backdrop ' + p + 'in"></div>').appendTo(element.dom_element).click(close);
                     return false;
                 }
                 $(this.dom_element).find('.open-popup').click(open_popup);
