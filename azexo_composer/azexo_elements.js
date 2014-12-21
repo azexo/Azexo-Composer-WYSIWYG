@@ -562,18 +562,23 @@
             showed: function($, p, fp) {
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
+                var opened = false;
                 function open_popup() {
+                    opened = true;
                     document.body.style.overflow = 'hidden';
                     $(element.dom_content_element).removeClass(p + 'hidden');
                     element.trigger_start_in_animation();
                     var close = function() {
-                        setTimeout(function() {
-                            $(backdrop).remove();
-                            $(element.dom_content_element).addClass(p + 'hidden');
-                            document.body.style.overflow = '';
-                            $(document).off('keyup.az_popup');
-                        }, element.attrs['hiding_pause']);
-                        element.trigger_start_out_animation();
+                        if (opened) {
+                            opened = false;
+                            setTimeout(function() {
+                                $(backdrop).remove();
+                                $(element.dom_content_element).addClass(p + 'hidden');
+                                document.body.style.overflow = '';
+                                $(document).off('keyup.az_popup');
+                            }, element.attrs['hiding_pause']);
+                            element.trigger_start_out_animation();
+                        }
                         return false;
                     };
                     $(document).on('keyup.az_popup', function(e) {
