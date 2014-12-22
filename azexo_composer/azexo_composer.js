@@ -7058,7 +7058,7 @@
 
                 if (SectionElement.prototype.base in bases) {
                     javascript += SectionElement.toString() + "\n";
-                    javascript += register_element.name + "('" + SectionElement.prototype.base + "', true, " + SectionElement.name + ");\n";
+                    javascript += register_animated_element.name + "('" + SectionElement.prototype.base + "', true, " + SectionElement.name + ");\n";
                     javascript += get_element_params_js(SectionElement);
                 }
 
