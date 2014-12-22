@@ -565,7 +565,10 @@
                 var opened = false;
                 function open_popup() {
                     opened = true;
-                    document.body.style.overflow = 'hidden';
+                    $.fn[fp + 'modal'].Constructor.prototype.$body = $(document.body);
+                    $.fn[fp + 'modal'].Constructor.prototype.checkScrollbar();
+                    $('body').addClass(p + 'modal-open');
+                    $.fn[fp + 'modal'].Constructor.prototype.setScrollbar();
                     $(element.dom_content_element).removeClass(p + 'hidden');
                     if ('trigger_start_in_animation' in element)
                         element.trigger_start_in_animation();
@@ -575,7 +578,8 @@
                             setTimeout(function() {
                                 $(element.backdrop).remove();
                                 $(element.dom_content_element).addClass(p + 'hidden');
-                                document.body.style.overflow = '';
+                                $('body').removeClass(p + 'modal-open');
+                                $.fn[fp + 'modal'].Constructor.prototype.resetScrollbar();
                                 $(document).off('keyup.az_popup');
                             }, element.attrs['hiding_pause']);
                             if ('trigger_start_out_animation' in element)
