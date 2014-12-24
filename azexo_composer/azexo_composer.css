@@ -537,7 +537,7 @@ div.controls > .control {
     overflow-y: scroll;
     left: 50%;
     top: 50%;
-    width: 100%;
+    width: 101%;
     z-index: 210;
     -moz-transform: translate(-50%, -50%);
     -o-transform: translate(-50%, -50%);
