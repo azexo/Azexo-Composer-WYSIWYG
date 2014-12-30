@@ -401,6 +401,7 @@
                 },
             ],
             show_settings_on_create: true,
+            style_selector: '> .' + p + 'btn',
             render: function($, p, fp) {
 
 

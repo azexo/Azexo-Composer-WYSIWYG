@@ -2008,6 +2008,7 @@
         disallowed_elements: [],
         show_parent_controls: false,
         highlighted: true,
+        style_selector: '',
         controls_position: function() {
             if (!this.is_container || this.has_content) {
                 var element_height = $(this.dom_element).height();
@@ -2276,6 +2277,9 @@
             }
             this.showed($, p, fp);
         },
+        get_hover_style: function() {
+            return "<style>.hover-style-" + this.id + ":hover " + this.style_selector + " { " + this.attrs['hover_style'] + " } </style>";
+        },
         showed: function($, p, fp) {
             if ('pos_left' in this.attrs && this.attrs['pos_left'] != '')
                 $(this.dom_element).css("left", this.attrs['pos_left']);
@@ -2292,7 +2296,7 @@
             if ('pos_zindex' in this.attrs && this.attrs['pos_zindex'] != '')
                 $(this.dom_element).css("z-index", this.attrs['pos_zindex']);
             if ('hover_style' in this.attrs && this.attrs['hover_style'] != '') {
-                $('head').append("<style>.hover-style-" + this.id + ":hover { " + this.attrs['hover_style'] + " } </style>");
+                $('head').append(this.get_hover_style());
                 $(this.dom_element).addClass('hover-style-' + this.id);
             }
         },
@@ -5602,8 +5606,8 @@
                     if (!('o_width' in element.attrs) || element.attrs['o_width'] == '')
                         element.attrs['o_width'] = width;
                     var ratio = width / element.attrs['o_width'];
-                    $(element.dom_element).css('font-size', ratio * 100 + '%');                    
-                    $(element.dom_content_element).css('height', element.attrs['height'] * ratio + 'px');                    
+                    $(element.dom_element).css('font-size', ratio * 100 + '%');
+                    $(element.dom_content_element).css('height', element.attrs['height'] * ratio + 'px');
                     update_font_sizes(element, ratio);
                 });
                 $(window).trigger('resize');
@@ -6986,7 +6990,7 @@
             function get_hover_styles(element) {
                 var hover_styles = '';
                 if (element.attrs['hover_style'] != '')
-                    hover_styles = "<style>.hover-style-" + element.id + ":hover { " + element.attrs['hover_style'] + " } </style>";
+                    hover_styles = element.get_hover_style();
                 for (var i = 0; i < element.children.length; i++) {
                     hover_styles = hover_styles + get_hover_styles(element.children[i]);
                 }
@@ -7037,6 +7041,7 @@
                 javascript += BaseElement.name + ".prototype.elements = {};\n";
                 javascript += BaseElement.name + ".prototype.tags = {};\n";
                 javascript += get_element_params_js(BaseElement);
+                javascript += get_class_method_js(BaseElement, 'get_hover_style', true);
                 javascript += get_class_method_js(BaseElement, 'showed', true);
                 javascript += get_class_method_js(BaseElement, 'render', true);
                 javascript += get_class_method_js(BaseElement, 'recursive_render', true);
