@@ -5397,6 +5397,20 @@
                 max: '10000',
                 value: '500',
             }),
+            make_param_type({
+                type: 'checkbox',
+                heading: t('Responsive?'),
+                param_name: 'responsive',
+                value: {
+                    'yes': t("Yes, please"),
+                },
+            }),
+            make_param_type({
+                type: 'integer_slider',
+                heading: t('Original width'),
+                param_name: 'o_width',
+                hidden: true,
+            }),
         ].concat(LayersElement.prototype.params),
         show_settings_on_create: true,
         is_container: true,
@@ -5437,6 +5451,7 @@
                     el.attrs['pos_width'] = parseInt($(dom_element).css("width")) / ($(element.dom_element).width() / 100) + "%";
                     el.attrs['pos_height'] = parseInt($(dom_element).css("height")) / ($(element.dom_element).height() / 100) + "%";
                     to_percents(dom_element);
+                    element.attrs['o_width'] = $(element.dom_element).width();
                     $(document).trigger("azexo_update_element", id);
                 }
                 function to_percents(dom_element) {
@@ -5559,6 +5574,40 @@
             LayersElement.baseclass.prototype.attach_children.apply(this, arguments);
             if (window.azexo_editor)
                 this.update_sortable();
+        },
+        showed: function($, p, fp) {
+            LayersElement.baseclass.prototype.showed.apply(this, arguments);
+            var element = this;
+            if (this.attrs['responsive'] == 'yes') {
+                function get_element_font_size(el, attr) {
+                    var v = '';
+                    var match = el.attrs[attr].match(/font-size[: ]*([\-\d\.]*)(px|%|em) *;/);
+                    if (match != null)
+                        v = match[1];
+                    return v;
+                }
+                function update_font_sizes(el, ratio) {
+                    //hover font size not updated !!!
+                    var fs = get_element_font_size(el, 'style');
+                    if (fs != '') {
+                        fs = fs * ratio;
+                        $(el.dom_element).css('font-size', fs + 'px');
+                    }
+                    for (var i = 0; i < el.children.length; i++)
+                        update_font_sizes(element.children[i], ratio);
+                }
+
+                $(window).resize(function() {
+                    var width = $(element.dom_element).width();
+                    if (!('o_width' in element.attrs) || element.attrs['o_width'] == '')
+                        element.attrs['o_width'] = width;
+                    var ratio = width / element.attrs['o_width'];
+                    $(element.dom_element).css('font-size', ratio * 100 + '%');                    
+                    $(element.dom_content_element).css('height', element.attrs['height'] * ratio + 'px');                    
+                    update_font_sizes(element, ratio);
+                });
+                $(window).trigger('resize');
+            }
         },
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-layers ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div id="' + this.id + '" class="az-ctnr"></div></div>');
@@ -6427,8 +6476,8 @@
                         var id = $(event.target).attr('data-az-id');
                         var el = azexo_elements.get_element(id);
                         if (!_.isUndefined(el)) {
-                            if('trigger_start_in_animation' in el)
-                            el.trigger_start_in_animation();
+                            if ('trigger_start_in_animation' in el)
+                                el.trigger_start_in_animation();
                         }
                     }, false);
                     $(element.dom_element).find('> .' + p + 'pagination > li > .' + p + 'prev').click(function() {
@@ -7096,6 +7145,7 @@
                     javascript += LayersElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + LayersElement.prototype.base + "', true, " + LayersElement.name + ");\n";
                     javascript += get_element_params_js(LayersElement);
+                    javascript += get_class_method_js(LayersElement, 'showed', true);
                 }
 
                 if (TabsElement.prototype.base in bases) {
