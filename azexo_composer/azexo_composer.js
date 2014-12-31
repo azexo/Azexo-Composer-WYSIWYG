@@ -4590,6 +4590,14 @@
         description: t('Bootstrap grid container'),
         category: t('Layout'),
         params: [
+            make_param_type({
+                type: 'checkbox',
+                heading: t('Fluid?'),
+                param_name: 'fluid',
+                value: {
+                    'yes': t("Yes, please"),
+                },
+            }),
         ].concat(SectionElement.prototype.params),
         is_container: true,
         disallowed_elements: ['az_section'],
@@ -4598,7 +4606,10 @@
         },
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-section ' + this.attrs['el_class'] + ' " style="' + this.attrs['style'] + '"></div>');
-            this.dom_content_element = $('<div class="az-ctnr ' + p + 'container"></div>').appendTo(this.dom_element);
+            if(this.attrs['fluid'] == 'yes')                
+                this.dom_content_element = $('<div class="az-ctnr ' + p + 'container-fluid"></div>').appendTo(this.dom_element);
+            else
+                this.dom_content_element = $('<div class="az-ctnr ' + p + 'container"></div>').appendTo(this.dom_element);
             SectionElement.baseclass.prototype.render.apply(this, arguments);
         },
     });
