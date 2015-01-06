@@ -50,6 +50,7 @@ div.azexo.az-container > .controls {
 }
 
 .azexo-editor div.az-container,
+.azexo-editor div.az-template, 
 /*.azexo-editor div.az-row,
 .azexo-editor div.az-grid,
 .azexo-editor div.az-tabs, 
@@ -72,6 +73,7 @@ div.azexo.az-container > .controls {
     margin-top: 23px !important;
 }
 div.az-container > .controls,
+div.az-template > .controls,
 div.az-row > .controls,
 div.az-section > .controls,
 div.az-grid > .controls,
@@ -329,7 +331,7 @@ div.controls > .control {
 
 
 .az-form > .controls >  .popover, .az-form > .controls >  .ax-popover {
-    min-width: 225px;
+    min-width: 256px;
 }
 
 .popover-title, .ax-popover-title {
@@ -644,3 +646,91 @@ div.modal-dialog, div.ax-modal-dialog {
 div.az-link {
     cursor: pointer;
 }
+
+.az-left-sidebar, .az-right-sidebar {
+    background-color: whitesmoke;
+    position: fixed;
+    top: 0px;
+    width: 300px;
+    height: 100%;
+    z-index: 5;
+    padding-top:50px;
+    padding-left:20px;
+    padding-right:20px;
+    transition: 0.2s;
+}
+.az-left-sidebar {
+    left: -300px;
+}
+.az-right-sidebar {
+    right: -300px;
+}
+
+.az-left-sidebar::after, .az-right-sidebar::after {
+    font: normal normal normal 14px/1 FontAwesome;
+    position: absolute;
+    bottom: 100px;
+    width: 50px;
+    height: 50px;
+    display: block;
+    background-color: whitesmoke;
+    vertical-align: middle;
+    line-height: 50px;
+    font-size: 25px;
+    text-align:center;
+}
+.az-left-sidebar::after {
+    content: "\f053"; 
+    right: -50px;
+}
+.az-right-sidebar::after {
+    content: "\f054"; 
+    left: -50px;
+}
+
+.az-left-sidebar:hover {
+    left: 0px;
+}
+.az-right-sidebar:hover {
+    right: 0px;
+}
+
+.editable-highlight, .editable-highlight:hover {
+    outline: 2px dashed gray;
+    cursor: pointer;
+}
+
+.az-nav-list {
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-bottom: 0;
+}
+ 
+.az-nav-list > li > a {
+  margin-left: -15px;
+  margin-right: -15px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+}
+ 
+.az-nav-list > li > a {
+  padding: 3px 15px;
+}
+
+#az-thumbnails {
+    overflow-y: scroll;
+    height: 600px;
+}
+
+.az-thumbnail {
+    height: 100px;
+    cursor: move;
+}
+
+#az-exporter::after {
+    content: "\f019"; 
+}
+#az-template-elements::after {
+    content: "\f1b2"; 
+}
+
+

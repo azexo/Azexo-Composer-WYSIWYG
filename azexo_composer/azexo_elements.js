@@ -1772,14 +1772,14 @@
 
 
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                var select = '<select name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" class="' + p + 'form-control" ' + required + '>';
+                var select = '<select name="' + this.attrs['name'] + '" class="' + p + 'form-control" ' + required + '>';
                 select += '<option value="">' + t('Please select') + '</option>';
                 var options = this.attrs['options'].split("\n");
                 for (var i = 0; i < options.length; i++) {
                     select += '<option value="' + options[i] + '">' + options[i] + '</option>';
                 }
                 select += '/<select>';
-                this.dom_element = $('<div class="az-element az-dropdown ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" ><label>' + this.attrs['name'] + '</label><div>' + select + '</div></div>');
+                this.dom_element = $('<div class="az-element az-dropdown ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" ><label>' + this.attrs['title'] + '</label><div>' + select + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -1793,7 +1793,7 @@
                     type: 'html',
                     heading: t('Options'),
                     param_name: 'options',
-                    description: t('Separated by new line.'),
+                    description: t('Name|Title separated by new line.'),
                 },
             ],
             hidden: true,
@@ -1804,9 +1804,9 @@
                 var inputs = '';
                 var options = this.attrs['options'].split("\n");
                 for (var i = 0; i < options.length; i++) {
-                    inputs += '<div class="' + p + 'checkbox"><label><input name="' + btoa(encodeURIComponent(options[i])) + '" type="checkbox" value="' + options[i] + '">' + options[i] + '</label></div>';
+                    inputs += '<div class="' + p + 'checkbox"><label><input name="' + options[i].split("|")[0] + '" type="checkbox" value="' + options[i].split("|")[0] + '">' + options[i].split("|")[1] + '</label></div>';
                 }
-                this.dom_element = $('<div class="az-element az-checkbox ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['name'] + '</label><div>' + inputs + '</div></div>');
+                this.dom_element = $('<div class="az-element az-checkbox ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['title'] + '</label><div>' + inputs + '</div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -1823,7 +1823,26 @@
 
 
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-textfield ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" placeholder="' + this.attrs['name'] + '" ' + required + '></div></div>');
+                this.dom_element = $('<div class="az-element az-textfield ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + this.attrs['name'] + '" type="text" placeholder="' + this.attrs['title'] + '" ' + required + '></div></div>');
+                this.baseclass.prototype.render.apply(this, arguments);
+            },
+        },
+        {
+            base: 'az_hidden',
+            name: t('Hidden data'),
+            icon: 'fa fa-ticket',
+            description: t('Hidden text field'),
+            params: [
+                {
+                    type: 'textfield',
+                    heading: t('Data'),
+                    param_name: 'data',
+                },
+            ],
+            hidden: true,
+            show_settings_on_create: true,
+            render: function($, p, fp) {
+                this.dom_element = $('<input name="' + this.attrs['name'] + '" type="hidden" value="' + this.attrs['data'] + '" >');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -1888,7 +1907,7 @@
 
 
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-number ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" ' + required + ' placeholder="' + this.attrs['name'] + '"></div><div class="slider"></div></div>');
+                this.dom_element = $('<div class="az-element az-number ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><input class="' + p + 'form-control" name="' + this.attrs['name'] + '" type="text" ' + required + ' placeholder="' + this.attrs['title'] + '"></div><div class="slider"></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -1939,7 +1958,7 @@
             render: function($, p, fp) {
 
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-date ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['name'] + '</label><div><input class="' + p + 'form-control" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" type="text" ' + required + '></div></div>');
+                this.dom_element = $('<div class="az-element az-date ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><label>' + this.attrs['title'] + '</label><div><input class="' + p + 'form-control" name="' + this.attrs['name'] + '" type="text" ' + required + '></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
@@ -1955,7 +1974,7 @@
             render: function($, p, fp) {
 
                 var required = (this.attrs['required'] == 'yes') ? 'required' : '';
-                this.dom_element = $('<div class="az-element az-textarea ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + btoa(encodeURIComponent(this.attrs['name'])) + '" " placeholder="' + this.attrs['name'] + '" ' + required + '></textarea></div></div>');
+                this.dom_element = $('<div class="az-element az-textarea ' + p + 'form-group' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + this.attrs['name'] + '" " placeholder="' + this.attrs['title'] + '" ' + required + '></textarea></div></div>');
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },
