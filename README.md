@@ -55,7 +55,11 @@ Released under the MIT and GPL (version 2 or later) Licenses.
 PRODUCTS FROM AZEXO
 ---------
 
-Azexo Composer already integrated with [WordPress / Drupal / Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. Also it can be used as editor of [HTML](http://codecanyon.net/user/azexo/portfolio?ref=azexo) templates. If you purchase this products you get:
+Azexo Composer already integrated with [WordPress / Drupal / Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. 
+
+If you need make HTML page(s) via Azexo Composer and export them into ZIP archive (all used files (images, js, css) provided via ZIP archive) - you can try this [product](http://codecanyon.net/user/azexo/portfolio?ref=azexo).
+
+If you purchase this products you get:
 * High quality and tested implementation
 * Lifetime support
 * Lifetime updates with new features and bug fixes
