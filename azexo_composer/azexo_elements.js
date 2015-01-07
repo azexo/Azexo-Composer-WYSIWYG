@@ -1933,7 +1933,7 @@
 
                 this.baseclass.prototype.showed.apply(this, arguments);
                 var element = this;
-                this.add_css('datetimepicker/jquery.datetimepicker.css', function() {
+                this.add_css('datetimepicker/jquery.datetimepicker.css', 'datetimepicker' in $.fn, function() {
                 });
                 this.add_js({
                     path: 'datetimepicker/jquery.datetimepicker.js',

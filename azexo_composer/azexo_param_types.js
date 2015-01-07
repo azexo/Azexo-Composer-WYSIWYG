@@ -290,7 +290,7 @@
             $(img).attr('height', height);
         return img;
     }
-    
+
     var icons = [];
     if ('azexo_icons' in window)
         icons = window.azexo_icons;
@@ -383,6 +383,9 @@
                                 if (_.isObject(tinymce)) {
                                     var tinymce_config = {
                                         theme: "modern",
+                                        force_br_newlines: false,
+                                        force_p_newlines: false,
+                                        forced_root_block : '',
                                         plugins: [
                                             "advlist autolink link image lists charmap print preview hr anchor pagebreak",
                                             "searchreplace wordcount visualblocks visualchars insertdatetime media nonbreaking",
