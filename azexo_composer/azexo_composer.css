@@ -695,7 +695,7 @@ div.az-link {
     right: 0px;
 }
 
-.editable-highlight, .editable-highlight:hover {
+.editable-highlight, .editable-highlight:hover, .styleable-highlight, .styleable-highlight:hover {
     outline: 2px dashed gray;
     cursor: pointer;
 }

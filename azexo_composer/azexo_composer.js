@@ -1343,8 +1343,8 @@
                         return false;
                     }
                 }
-                callback.call(element, values);
                 $('#az-editor-modal')[fp + 'modal']("hide");
+                callback.call(element, values);
                 return false;
             });
             $('#az-editor-modal')[fp + 'modal']('show');
@@ -1581,6 +1581,7 @@
         elements_instances_by_an_name: {},
         template_elements_loaded: false,
         cms_elements_loaded: false,
+        edit_stack: [],
         try_render_unknown_elements: function() {
             if (this.template_elements_loaded && this.cms_elements_loaded) {
                 for (var id in azexo_elements.elements_instances) {
@@ -1607,6 +1608,16 @@
             }
         },
         create_template_elements: function(elements) {
+            var editable = [];
+            if ('azexo_editable' in window)
+                editable = window.azexo_editable;
+            var styleable = [];
+            if ('azexo_styleable' in window)
+                styleable = window.azexo_styleable;
+            var icons = BaseParamType.prototype.param_types['icon'].prototype.icons.map(function(item, i, arr) {
+                return item.replace(/^/, '.').replace(/ /, '.')
+            });
+            var icon_selector = icons.join(', ');
             for (var path in elements) {
                 var name = elements[path].name;
                 var template = elements[path].html;
@@ -1619,9 +1630,7 @@
                     this.content = this.template;
                 }
                 register_element(name, false, TemplateElement);
-                var editable = [];
-                if ('azexo_editable' in window)
-                    editable = window.azexo_editable;
+
                 mixin(TemplateElement.prototype, {
                     name: name,
                     icon: 'fa fa-cube',
@@ -1634,26 +1643,49 @@
                     has_content: true,
                     category: 'Template-elements',
                     editable: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', '.az-editable'].concat(editable),
+                    styleable: ['.az-styleable'].concat(styleable),
                     show_controls: function() {
                         if (window.azexo_editor) {
                             TemplateElement.baseclass.prototype.show_controls.apply(this, arguments);
-                            for (var i = 0; i < this.editable.length; i++) {
-                                $(this.dom_element).find(this.editable[i]).mouseenter(function() {
-                                    $(this).addClass('editable-highlight');
-                                });
-                                $(this.dom_element).find(this.editable[i]).mouseleave(function() {
-                                    $(this).removeClass('editable-highlight');
-                                });
-                                $(this.dom_element).find(this.editable[i]).click(function() {
-                                    var node = this;
-                                    var params = [];
-                                    var image = '';
-                                    if ($(node).prop("tagName") != 'IMG') {
+                            var editor_opener = function () {
+                                if(azexo_elements.edit_stack.length > 0) {
+                                    var args = azexo_elements.edit_stack.shift();
+                                    open_editor(args.node, args.edit, args.style, editor_opener);
+                                }                                                
+                            }
+                            function open_editor(node, edit, style, callback) {
+                                var params = [];
+                                var image = '';
+                                var link = '';
+                                var icon = '';
+                                var content = $.trim($(node).text());
+                                if (content != '') {
+                                    content = $(node).html();
+                                }
+                                if (edit) {
+                                    if ($(node).is(icon_selector)) {
+                                        for (var i = 0; i < icons.length; i++) {
+                                            if ($(node).is(icons[i])) {
+                                                icon = icons[i].split('.');
+                                                icon.shift();
+                                                icon = icon.join(' ');
+                                                break;
+                                            }
+                                        }
                                         params.push(make_param_type({
-                                            type: 'textarea',
-                                            heading: t('Content'),
-                                            param_name: 'content',
+                                            type: 'icon',
+                                            heading: t('Icon'),
+                                            param_name: 'icon',
                                         }));
+                                    }
+                                    if ($(node).prop("tagName") != 'IMG') {
+                                        if (content != '') {
+                                            params.push(make_param_type({
+                                                type: 'textarea',
+                                                heading: t('Content'),
+                                                param_name: 'content',
+                                            }));
+                                        }
                                     } else {
                                         image = $(node).attr('src');
                                         params.push(make_param_type({
@@ -1663,7 +1695,6 @@
                                             description: t('Select image from media library.'),
                                         }));
                                     }
-                                    var link = '';
                                     if ($(node).prop("tagName") == 'A') {
                                         link = $(node).attr('href');
                                         params.push(make_param_type({
@@ -1673,6 +1704,8 @@
                                             description: t('Conent link (url).'),
                                         }));
                                     }
+                                }
+                                if (style) {
                                     params.push(make_param_type({
                                         type: 'textfield',
                                         heading: t('Content classes'),
@@ -1686,28 +1719,91 @@
                                         description: t('Style options.'),
                                         tab: t('Style')
                                     }));
-                                    $(node).removeClass('editable-highlight');
-                                    var classes = $(node).attr('class');
-                                    if (typeof classes === typeof undefined || classes === false) {
-                                        classes = '';
-                                    }
-                                    var styles = $(node).attr('style');
-                                    if (typeof styles === typeof undefined || styles === false) {
-                                        styles = '';
-                                    }
-                                    BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'content': $(node).html(), 'link': link, 'image': image, 'el_class': classes, 'style': styles}}, function(values) {
+                                }
+                                $(node).removeClass('editable-highlight');
+                                $(node).removeClass('styleable-highlight');
+                                $(node).removeClass(icon);
+                                var classes = $(node).attr('class');
+                                $(node).addClass(icon);
+                                if (typeof classes === typeof undefined || classes === false) {
+                                    classes = '';
+                                }
+                                var styles = $(node).attr('style');
+                                if (typeof styles === typeof undefined || styles === false) {
+                                    styles = '';
+                                }
+                                BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
+                                    if (edit) {
+                                        if (icon != '') {
+                                            $(node).removeClass(icon);
+                                            values['el_class'] = values['el_class'] + ' ' + values['icon'];
+                                        }
                                         if ($(node).prop("tagName") == 'A') {
                                             $(node).attr('href', values['link']);
                                         }
                                         if ($(node).prop("tagName") == 'IMG') {
                                             $(node).attr('src', values['image']);
                                         } else {
-                                            $(node).html(values['content']);
+                                            if (content != '' && values['content'] != '') {
+                                                $(node).html(values['content']);
+                                            }
                                         }
+                                    }
+                                    if (style) {
                                         $(node).attr('class', values['el_class']);
                                         $(node).attr('style', values['style']);
-                                    });
-                                    return false;
+                                    }
+                                    callback();
+                                });
+                            }
+                            for (var i = 0; i < this.styleable.length; i++) {
+                                $(this.dom_element).find(this.styleable[i]).mouseenter(function() {
+                                    $(this).addClass('styleable-highlight');
+                                });
+                                $(this.dom_element).find(this.styleable[i]).mouseleave(function() {
+                                    $(this).removeClass('styleable-highligpushht');
+                                });
+                                $(this.dom_element).find(this.styleable[i]).click(function(e) {
+                                    if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: false,
+                                            style: true,
+                                        });                                        
+                                        editor_opener();
+                                        return false;
+                                    } else {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: false,
+                                            style: true,
+                                        });                                        
+                                    }
+                                });
+                            }
+                            for (var i = 0; i < this.editable.length; i++) {
+                                $(this.dom_element).find(this.editable[i]).mouseenter(function() {
+                                    $(this).addClass('editable-highlight');
+                                });
+                                $(this.dom_element).find(this.editable[i]).mouseleave(function() {
+                                    $(this).removeClass('editable-highlight');
+                                });
+                                $(this.dom_element).find(this.editable[i]).click(function(e) {
+                                    if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: true,
+                                            style: true,
+                                        });
+                                        editor_opener();                                            
+                                        return false;
+                                    } else {
+                                        azexo_elements.edit_stack.push({
+                                            node: this,
+                                            edit: true,
+                                            style: true,
+                                        });
+                                    }
                                 });
                             }
                         }
@@ -2425,7 +2521,7 @@
         },
         get_hover_style: function() {
             if ('hover_style' in this.attrs)
-                return "<style>.hover-style-" + this.id + ":hover " + this.style_selector + " { " + this.attrs['hover_style'] + " } </style>";
+                return '<style id="hover-style-' + this.id + '">.hover-style-' + this.id + ':hover ' + this.style_selector + ' { ' + this.attrs['hover_style'] + '} </style>';
             else
                 return '';
         },
@@ -2445,6 +2541,7 @@
             if ('pos_zindex' in this.attrs && this.attrs['pos_zindex'] != '')
                 $(this.dom_element).css("z-index", this.attrs['pos_zindex']);
             if ('hover_style' in this.attrs && this.attrs['hover_style'] != '') {
+                $('head').find('#hover-style-' + this.id).remove();
                 $('head').append(this.get_hover_style());
                 $(this.dom_element).addClass('hover-style-' + this.id);
             }
@@ -4791,7 +4888,7 @@
             }),
         ].concat(SectionElement.prototype.params),
         is_container: true,
-        disallowed_elements: ['az_section'],
+//        disallowed_elements: ['az_section'], - section is useful for popup element which can be placed anywhere
         get_button: function() {
             return '<div class="' + p + 'well ' + p + 'text-center ' + p + 'text-overflow" data-az-element="' + this.base + '" style="width:100%;"><i class="' + p + 'text-primary ' + this.icon + '"></i><div>' + this.name + '</div><div class="' + p + 'text-muted ' + p + 'small">' + this.description + '</div></div>';
         },
@@ -5730,6 +5827,7 @@
         showed: function($, p, fp) {
             LayersElement.baseclass.prototype.showed.apply(this, arguments);
             var element = this;
+            $(window).off('resize.az_layers' + element.id);
             if (this.attrs['responsive'] == 'yes') {
                 function get_element_font_size(el, attr) {
                     var v = '';
@@ -5749,7 +5847,7 @@
                         update_font_sizes(element.children[i], ratio);
                 }
 
-                $(window).resize(function() {
+                $(window).on('resize.az_layers' + element.id, function() {
                     var width = $(element.dom_element).width();
                     if (!('o_width' in element.attrs) || element.attrs['o_width'] == '')
                         element.attrs['o_width'] = width;
@@ -8293,8 +8391,11 @@
             attributes = attributes + this.name + '"' + this.value + '" ';
         });
         make_absolute_urls(dom);
+        $(dom).find('.azexo-backend, #azexo-backend').remove();
         var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
+
         var dom = $('<div>' + original_head + '</div>');
+        $(dom).find('.azexo-backend, #azexo-backend').remove();
 
 //        remove_css(dom, 'bootstrap.min.css');
 //        remove_js(dom, 'jquery.min.js');

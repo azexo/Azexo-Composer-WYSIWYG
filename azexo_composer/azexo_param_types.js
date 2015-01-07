@@ -290,6 +290,10 @@
             $(img).attr('height', height);
         return img;
     }
+    
+    var icons = [];
+    if ('azexo_icons' in window)
+        icons = window.azexo_icons;
 
     var azexo_param_types = [
         {
@@ -1103,7 +1107,7 @@
                 p + 'glyphicon ' + p + 'glyphicon-cloud-upload',
                 p + 'glyphicon ' + p + 'glyphicon-tree-conifer',
                 p + 'glyphicon ' + p + 'glyphicon-tree-deciduous',
-            ],
+            ].concat(icons),
             get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
