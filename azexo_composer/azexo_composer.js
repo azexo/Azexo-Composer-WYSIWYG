@@ -1652,6 +1652,7 @@
                     has_content: true,
                     section: section,
                     category: 'Template-elements',
+                    is_template_element: true,
                     editable: ['.az-editable'].concat(editable),
                     styleable: ['.az-styleable'].concat(styleable),
                     show_controls: function () {
@@ -7577,8 +7578,8 @@
             function check_dinamic(element) {
                 if (element.constructor.prototype.hasOwnProperty('showed')) {
                     var exception = false;
-                    if ('is_cms_element' in element)
-                        exception = true;
+                    if ('is_cms_element' in element || 'is_template_element' in element)
+                        exception = true;                    
                     switch (element.base) {
                         case 'az_container':
                             if (element.parent == null)
