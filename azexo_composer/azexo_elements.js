@@ -1760,7 +1760,7 @@
             description: t('Form dropdown field'),
             params: [
                 {
-                    type: 'html',
+                    type: 'rawtext',
                     heading: t('Options'),
                     param_name: 'options',
                     description: t('Separated by new line.'),
@@ -1790,7 +1790,7 @@
             description: t('Form Checkbox field'),
             params: [
                 {
-                    type: 'html',
+                    type: 'rawtext',
                     heading: t('Options'),
                     param_name: 'options',
                     description: t('Name|Title separated by new line.'),

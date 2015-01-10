@@ -717,12 +717,24 @@ div.az-link {
 }
 
 #az-thumbnails {
+    display:none;
     overflow-y: scroll;
-    height: 600px;
+    height: 100%;
+    width: 300px;
+    position: absolute;
+    right: 300px;
+    top: 0px;
+    background-color: whitesmoke;
+    padding: 10px;
 }
 
+#az-template-elements.az-thumbnails::after {
+    left: -350px;
+}
+
+
 .az-thumbnail {
-    height: 100px;
+    height: 50px;
     cursor: move;
     margin-bottom: 10px;
 }
