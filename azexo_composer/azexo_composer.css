@@ -747,3 +747,28 @@ div.az-link {
 }
 
 
+#az-template-elements-welcome {
+    background-color: whitesmoke;
+    position: fixed;
+    bottom: 100px;
+    right: 100px;
+    width: 600px;
+    z-index: 5;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: left;
+}
+
+#az-exporter-welcome {
+    background-color: whitesmoke;
+    position: fixed;
+    bottom: 100px;
+    left: 100px;
+    width: 300px;
+    z-index: 5;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: left;
+}
