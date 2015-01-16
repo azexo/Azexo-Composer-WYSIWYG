@@ -685,6 +685,7 @@
             callback('');
         }
     }
+    // -- exporter ---
     function azexo_export(site, callback) {
         if (window.azexo_online) {
             if ('ajaxurl' in window) {
@@ -711,6 +712,212 @@
                         site: site,
                     },
                     cache: false,
+                    context: this
+                }).done(function(data) {
+                    callback(data);
+                });
+            }
+        } else {
+            callback('');
+        }
+    }
+    function azexo_get_sites(callback) {
+        if ('ajaxurl' in window) {
+            $.ajax({
+                type: 'POST',
+                url: window.ajaxurl,
+                data: {
+                    action: 'azexo_get_sites',
+                    url: window.location.href,
+                },
+                dataType: "json",
+                cache: false,
+                context: this
+            }).done(function(data) {
+                callback(data);
+            });
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: window.azexo_baseurl + 'ajax.php',
+                data: {
+                    action: 'get_sites',
+                },
+                dataType: "json",
+                cache: false,
+                context: this
+            }).done(function(data) {
+                callback(data);
+            });
+        }
+    }
+    function azexo_load_site(name, callback) {
+        if ('ajaxurl' in window) {
+            $.ajax({
+                type: 'POST',
+                url: window.ajaxurl,
+                data: {
+                    action: 'azexo_load_site',
+                    url: window.location.href,
+                    name: name,
+                },
+                cache: false,
+            }).done(function(data) {
+                callback(data);
+            }).fail(function() {
+                callback('');
+            });
+        } else {
+            var url = window.azexo_baseurl + '../azexo_sites/' + name;
+            $.ajax({
+                url: url,
+                cache: false,
+            }).done(function(data) {
+                callback(data);
+            }).fail(function() {
+                callback('');
+            });
+        }
+    }
+    function azexo_save_site(name, site) {
+        if ('ajaxurl' in window) {
+            $.ajax({
+                type: 'POST',
+                url: window.ajaxurl,
+                data: {
+                    action: 'azexo_save_site',
+                    url: window.location.href,
+                    name: name,
+                    site: site,
+                },
+                cache: false,
+                context: this
+            }).done(function(data) {
+            });
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: window.azexo_baseurl + 'ajax.php',
+                data: {
+                    action: 'save_site',
+                    name: name,
+                    site: site,
+                },
+                cache: false,
+                context: this
+            }).done(function(data) {
+            });
+        }
+    }
+    function azexo_delete_site(name) {
+        if ('ajaxurl' in window) {
+            $.ajax({
+                type: 'POST',
+                url: window.ajaxurl,
+                data: {
+                    action: 'azexo_delete_site',
+                    url: window.location.href,
+                    name: name,
+                },
+                cache: false,
+                context: this
+            }).done(function(data) {
+            });
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: window.azexo_baseurl + 'ajax.php',
+                data: {
+                    action: 'delete_site',
+                    name: name,
+                },
+                cache: false,
+                context: this
+            }).done(function(data) {
+            });
+        }
+    }
+    function azexo_ftp_get_list(host, username, password, directory, callback) {
+        if (window.azexo_online) {
+            if ('ajaxurl' in window) {
+                $.ajax({
+                    type: 'POST',
+                    url: window.ajaxurl,
+                    data: {
+                        action: 'azexo_ftp_get_list',
+                        host: host,
+                        username: username,
+                        password: password,
+                        directory: directory,
+                    },
+                    cache: false,
+                    dataType: "json",
+                    context: this
+                }).done(function(data) {
+                    callback(data);
+                });
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: window.azexo_baseurl + 'ajax.php',
+                    data: {
+                        action: 'ftp_get_list',
+                        host: host,
+                        username: username,
+                        password: password,
+                        directory: directory,
+                    },
+                    cache: false,
+                    dataType: "json",
+                    context: this
+                }).done(function(data) {
+                    callback(data);
+                });
+            }
+        } else {
+            callback('');
+        }
+    }
+    function azexo_ftp_upload(site, site_path, files, host, username, password, directory, callback) {
+        if (window.azexo_online) {
+            if ('ajaxurl' in window) {
+                $.ajax({
+                    type: 'POST',
+                    url: window.ajaxurl,
+                    data: {
+                        action: 'azexo_ftp_upload',
+                        url: window.location.href,
+                        site: site,
+                        site_path: site_path,
+                        files: files,
+                        host: host,
+                        username: username,
+                        password: password,
+                        directory: directory,
+                    },
+                    cache: false,
+                    dataType: "json",
+                    context: this
+                }).done(function(data) {
+                    callback(data);
+                });
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: window.azexo_baseurl + 'ajax.php',
+                    data: {
+                        action: 'ftp_upload',
+                        url: window.location.href,
+                        site: site,
+                        site_path: site_path,
+                        files: files,
+                        host: host,
+                        username: username,
+                        password: password,
+                        directory: directory,
+                    },
+                    cache: false,
+                    dataType: "json",
                     context: this
                 }).done(function(data) {
                     callback(data);
@@ -1607,10 +1814,8 @@
                         for (var i = 0; i < el.children.length; i++) {
                             el.children[i].recursive_render();
                         }
-                        $(el.dom_element).empty();
-                        for (var i = 0; i < el.children.length; i++) {
-                            $(el.dom_element).append(el.children[i].dom_element);
-                        }
+                        $(el.dom_content_element).empty();
+                        el.attach_children();
                         if (window.azexo_editor)
                             el.update_sortable();
                         el.recursive_showed();
@@ -1892,8 +2097,8 @@
                     }
                     current['_'].push(elements[path]);
                 }
-                var panel = $('<div id="az-template-elements" class="az-right-sidebar"></div>').appendTo('body');
-                var welcome = $('<div id="az-template-elements-welcome">' + t('Advanced mode: click on plus-buttons.') + '<br>' + t('Simplest mode: drag and drop elements from right panel.') + '</div>').appendTo(panel);
+                var panel = $('<div id="az-template-elements" class="az-left-sidebar"></div>').appendTo('body');
+                var welcome = $('<div id="az-template-elements-welcome">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
                 $(panel).hover(function() {
                     $(welcome).remove();
                 });
@@ -1920,11 +2125,11 @@
                                         items: '.az-thumbnail',
                                         connectWith: '.az-ctnr',
                                         start: function(event, ui) {
-                                            $(panel).css('right', '0px');
+                                            $(panel).css('left', '0px');
                                             $(thumbnails).css('overflow-y', 'visible');
                                         },
                                         stop: function(event, ui) {
-                                            $(panel).css('right', '');
+                                            $(panel).css('left', '');
                                             $(panel).removeClass('az-thumbnails');
                                             $(thumbnails).css('overflow-y', 'scroll');
                                             $(thumbnails).css('display', 'none');
@@ -2843,8 +3048,11 @@
             if (_.isNull(matches)) {
                 if (content.length == 0) {
                     return;
-                } else {
-                    this.parse_shortcode('[az_row][az_column width="1/1"][az_text]' + content + '[/az_text][/az_column][/az_row]');
+                } else {                    
+                    if(content.substring(0, 1) == '[' && content.slice(-1) == ']')
+                        this.parse_shortcode('[az_unknown]' + content + '[/az_unknown]');
+                    else
+                        this.parse_shortcode('[az_row][az_column width="1/1"][az_text]' + content + '[/az_text][/az_column][/az_row]');
                 }
             }
             _.each(matches, function(raw) {
@@ -3005,13 +3213,6 @@
 
                 this.detach_children();
                 this.attach_children();
-
-//            for (var i = length; i < this.children.length; i++) {
-//                this.children[i].recursive_render();
-//            }
-//            for (var i = length; i < this.children.length; i++) {
-//                $(this.dom_content_element).append(this.children[i].dom_element);
-//            }
                 this.update_empty();
                 this.update_sortable();
                 this.recursive_showed();
@@ -3302,7 +3503,11 @@
         var form = null;
         azexo_get_settings_form(function(data) {
             if (data.length > 0 && data != '0' && data != 'false') {
-                form = $(data);
+                form = $(data).on('keydown.azexo', function(event) {
+                    if (event.keyCode == 13) {
+                        $('#az-admin-modal').find('.save').click();
+                    }
+                });
                 $(modal).find('.' + p + 'modal-body').append(form);
                 if (window.azexo_editor) {
                     $('<button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Logout") + '</button>').appendTo('#az-admin-modal .modal-footer').click(function() {
@@ -8298,10 +8503,64 @@
     var original_head = '';
     var original_body = '';
     var original_body_attributes = '';
-    var exporter = {};
     var site_containers = {};
     var site_pages = {};
+    var site_settings = {host: '', username: '', password: '', directory: '.'};
     function enable_exporter() {
+        function make_absolute_urls(dom) {
+            $(dom).find('link[href]').each(function() {
+                $(this).attr('href', toAbsoluteURL($(this).attr('href')));
+            });
+            $(dom).find('script[src]').each(function() {
+                $(this).attr('src', toAbsoluteURL($(this).attr('src')));
+            });
+            $(dom).find('img[src]').each(function() {
+                $(this).attr('src', toAbsoluteURL($(this).attr('src')));
+            });
+        }
+        function get_page_html(containers, loader, title) {
+            var js = {};
+            var css = {};
+            var dom = $('<div>' + original_body + '</div>');
+            for (var i = 0; i < containers.length; i++) {
+                var container = containers[i];
+                var type = container.attrs['container'].split('/')[0];
+                var name = container.attrs['container'].split('/')[1];
+                var element = $(dom).find('.az-container[data-az-type="' + type + '"][data-az-name="' + name + '"]');
+                $(element).empty();
+                $(element).append(container.get_hover_styles(container));
+                if (loader) {
+                    var azexo_online = window.azexo_online;
+                    window.azexo_online = false;
+                    $(element).append(container.get_loader());
+                    window.azexo_online = azexo_online;
+                }
+                $(element).append(container.get_html());
+                js = $.extend(js, containers[i].js);
+                css = $.extend(css, containers[i].css);
+            }
+            var attributes = '';
+            $.each(original_body_attributes, function() {
+                attributes = attributes + this.name + '"' + this.value + '" ';
+            });
+            make_absolute_urls(dom);
+            $(dom).find('.azexo-backend').remove();
+            var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
+
+            var dom = $('<div>' + original_head + '</div>');
+            $(dom).find('.azexo-backend').remove();
+
+            $(dom).find('title').text(title);
+            make_absolute_urls(dom);
+            for (var url in js) {
+                $(dom).append('<script src="' + toAbsoluteURL(url) + '"></script>');
+            }
+            for (var url in css) {
+                $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
+            }
+            var page_head = '<head>' + $(dom).html() + '</head>';
+            return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
+        }
         if ($('#az-exporter').length == 0) {
             window.links_select = function(input, delimiter) {
                 var options = {};
@@ -8316,12 +8575,14 @@
             original_head = $('head').html();
             original_body = $('body').html();
             original_body_attributes = $('body').prop("attributes");
-            var panel = $('<div id="az-exporter" class="az-left-sidebar ' + p + 'text-center"></div>').appendTo('body');
-            var welcome = $('<div id="az-exporter-welcome">' + t('Manage and export your site via left panel.') + '</div>').appendTo(panel);
+            var panel = $('<div id="az-exporter" class="az-right-sidebar ' + p + 'text-center"></div>').appendTo('body');
+            var welcome = $('<div id="az-exporter-welcome">' + t('Manage and export your site via right panel.') + '</div>').appendTo(panel);
             $(panel).hover(function() {
                 $(welcome).remove();
             });
-            var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-sm"></div>').appendTo(panel);
+            $('<hr>').appendTo(panel);
+            $('<h4>' + t('Current site') + '</h4>').appendTo(panel);
+            var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(panel);
             $('<hr>').appendTo(panel);
             function switch_page(name) {
                 for (var i = 0; i < azexo_containers.length; i++) {
@@ -8330,31 +8591,40 @@
                     $(site_containers[name][i].dom_element).appendTo(parent);
                 }
                 azexo_containers = site_containers[name];
+                for (var i = 0; i < azexo_containers.length; i++) {
+                    if ('to_recursive_showed' in azexo_containers[i]) {
+                        azexo_containers[i].recursive_showed();
+                        delete azexo_containers[i].to_recursive_show;
+                    }
+                }
                 $(name_input).val(name);
                 $(title_input).val(site_pages[name].title);
+            }
+            function create_container(type_name) {
+                var container = new ContainerElement(null, false);
+                container.saveable = false;
+                container.rendered = true;
+                container.attrs['container'] = type_name;
+                container.html_content = true;
+                container.loaded_container = container.attrs['container'];
+
+                container.render($, p, fp);
+                $(container.dom_element).attr('data-az-id', container.id);
+                $(container.dom_element).addClass('azexo-editor');
+                $(container.dom_element).addClass('azexo');
+                container.show_controls();
+                container.update_sortable();
+                container.showed($, p, fp);
+                return container;
             }
             $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Add page') + '</button>').appendTo(buttons).click(function() {
                 var name = window.prompt(t('Please enter page name'), '');
                 if (name != '' && name != null) {
                     site_containers[name] = [];
                     for (var i = 0; i < azexo_containers.length; i++) {
-                        var container = new ContainerElement(null, false);
-                        container.saveable = false;
-                        container.rendered = true;
-                        site_containers[name].push(container);
-                        container.attrs['container'] = azexo_containers[i].attrs['container'];
-                        container.html_content = true;
-                        container.loaded_container = container.attrs['container'];
-
-                        container.render($, p, fp);
-                        $(container.dom_element).attr('data-az-id', container.id);
-                        $(container.dom_element).addClass('azexo-editor');
-                        $(container.dom_element).addClass('azexo');
-                        container.show_controls();
-                        container.update_sortable();
-                        container.showed($, p, fp);
+                        site_containers[name].push(create_container(azexo_containers[i].attrs['container']));
                     }
-                    add_page(name);
+                    add_page(name, name);
                     switch_page(name);
                 }
                 return false;
@@ -8370,12 +8640,16 @@
                 }
                 return false;
             });
-            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('Export') + '</button>').appendTo(buttons).click(function() {
+            function get_export_site() {
                 var site = {};
                 for (var name in site_containers) {
                     var html = get_page_html(site_containers[name], true, site_pages[name].title);
                     site[name] = btoa(enc(encodeURIComponent(html)));
                 }
+                return site;
+            }
+            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('ZIP download') + '</button>').appendTo(buttons).click(function() {
+                var site = get_export_site();
                 azexo_add_js({
                     path: 'js/json2.min.js',
                     loaded: 'JSON' in window,
@@ -8388,12 +8662,11 @@
                 });
                 return false;
             });
-            site_containers['home'] = azexo_containers;
-            $('<h3>' + t('Pages') + '</h3>').appendTo(panel);
+            $('<h4>' + t('Current site pages') + '</h4>').appendTo(panel);
             var pages = $('<div class="' + p + 'list-group"></div>').appendTo(panel);
             $('<hr>').appendTo(panel);
             var form = $('<div class="' + p + 'text-left"></div>').appendTo(panel);
-            $('<h3>' + t('Page settings') + '</h3>').appendTo(form);
+            $('<h4>' + t('Current page settings') + '</h4>').appendTo(form);
             var name_input = $('<div class="' + p + 'form-group"><label>' + t('File name') + '</label><div><input class="' + p + 'form-control" name="name" type="text"></div><p class="' + p + 'help-block">' + t('"html"-extension will be added during export process') + '</p></div>').appendTo(form).find('input').change(function() {
                 var name = $(pages).find('.' + p + 'active').text();
                 var new_name = $(this).val();
@@ -8407,13 +8680,13 @@
                 var name = $(pages).find('.' + p + 'active').text();
                 site_pages[name].title = $(this).val();
             });
-
-            add_page('home');
-            $(name_input).val('home');
-            $(title_input).val('home');
-            function add_page(name) {
+            site_containers['index'] = azexo_containers;
+            add_page('index', 'Home');
+            $(name_input).val('index');
+            $(title_input).val('Home');
+            function add_page(name, title) {
                 $(pages).find('a').removeClass(p + 'active');
-                site_pages[name] = {name: name, title: name};
+                site_pages[name] = {title: title};
                 $('<a href="#" class="' + p + 'list-group-item ' + p + 'active">' + name + '</a>').appendTo(pages).click(function() {
                     if (!$(this).hasClass(p + 'active')) {
                         $(pages).find('a').removeClass(p + 'active');
@@ -8423,63 +8696,206 @@
                     return false;
                 });
             }
+            //sites management
+            var sites_panel = $('<div class="panel panel-default"><div class="panel-heading" role="tab" id="sites-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#sites-collapse" aria-expanded="false" aria-controls="collapseOne" class="collapsed">' + t('Choose a site for edit') + '</a></h4></div><div id="sites-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="sites-heading" aria-expanded="false"><div class="panel-body"></div></div></div>').prependTo(panel).find('.panel-body');
+            $('<hr>').appendTo(sites_panel);
+            var sites_buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(sites_panel);
+            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('New') + '</button>').appendTo(sites_buttons).click(function() {
+                var name = window.prompt(t('Please enter site name'), '');
+                if (name != '' && name != null) {
+                    $('<option value="' + name + '">' + name + '</option>').appendTo(select_site);
+                    $(select_site).find('option[value="' + name + '"]').prop('selected', 'selected');
+                    site_containers = {};
+                    site_pages = {};
+                    $(pages).empty();
+                    site_containers['index'] = [];
+                    for (var i = 0; i < azexo_containers.length; i++) {
+                        site_containers['index'].push(create_container(azexo_containers[i].attrs['container']));
+                    }
+                    add_page('index', 'Home');
+                    switch_page('index');
+                    $(save_button).click();
+                }
+            });
+            $('<button class="' + p + 'btn ' + p + 'btn-danger">' + t('Delete') + '</button>').appendTo(sites_buttons).click(function() {
+                azexo_delete_site($(select_site).find('option:selected').val());
+                $(select_site).find('option:selected').remove();
+                $(select_site).trigger('change');
+            });
+            var save_button = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t('Save') + '</button>').appendTo(buttons).click(function() {
+                var site = {};
+                site.settings = site_settings;                
+                site.current_page = $(name_input).val();
+                site.pages = {};
+                for (var page_name in site_containers) {
+                    if (site_pages[page_name] != null && site_containers[page_name] != null) {
+                        site.pages[page_name] = site_pages[page_name];
+                        site_pages[page_name].containers = {};
+                        for (var i = 0; i < site_containers[page_name].length; i++) {
+                            var c = site_containers[page_name][i].attrs['container'];
+                            site_pages[page_name].containers[c] = btoa(enc(encodeURIComponent(site_containers[page_name][i].get_children_shortcode())));
+                        }
+                    }
+                }
+                azexo_add_js({
+                    path: 'js/json2.min.js',
+                    loaded: 'JSON' in window,
+                    callback: function() {
+                        azexo_save_site($(select_site).find('option:selected').val(), JSON.stringify(site));
+                    }
+                });
+            });
+            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons).click(function() {
+                $('#az-ftp-modal').remove();
+                var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
+                var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button></div>';
+                var modal = $('<div id="az-ftp-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-sm"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
+                var body = $(modal).find('.' + p + 'modal-body');
+                var host_input = $('<div class="' + p + 'form-group"><label>' + t("Host") + '</label><div><input class="' + p + 'form-control" name="host" type="text" value="' + site_settings['host'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                var username_input = $('<div class="' + p + 'form-group"><label>' + t("Username") + '</label><div><input class="' + p + 'form-control" name="username" type="text" value="' + site_settings['username'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                var password_input = $('<div class="' + p + 'form-group"><label>' + t("Password") + '</label><div><input class="' + p + 'form-control" name="password" type="text" value="' + site_settings['password'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                var directory_input = $('<div class="' + p + 'form-group"><label>' + t("Directory") + '</label><div><input class="' + p + 'form-control" name="directory" type="text" value="' + site_settings['directory'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                var connect = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t("Choose upload directory") + '</button>').appendTo(body).click(function() {
+                    site_settings['host'] = $(host_input).val();
+                    site_settings['username'] = $(username_input).val();
+                    site_settings['password'] = $(password_input).val();
+                    function show_directory(directory, list) {
+                        $(browser).empty().show();
+                        $(messages).empty().hide();
+                        $(directory_input).val(directory);
+                        site_settings['directory'] = directory;
+                        if (directory != '.') {
+                            var arr = directory.split('/');
+                            arr.pop();
+                            var dir = arr.join('/')
+                            $('<li class="az-directory">..</li>').appendTo(browser).click(function() {
+                                azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], dir, function(data) {
+                                    show_directory(dir, data);
+                                });
+                            });
+                            for (var i = 0; i < list.length; i++) {
+                                list[i] = list[i].replace(directory + '/', '');
+                            }
+                        }
+                        for (var i = 0; i < list.length; i++) {
+                            var path = directory + '/' + list[i];
+                            (function(path) {
+                                $('<li class="glyphicon glyphicon-folder-close">' + list[i] + '</li>').appendTo(browser).click(function() {
+                                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], path, function(data) {
+                                        show_directory(path, data);
+                                    });
+                                });
+                            })(path);
+                        }
+                    }
+                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], function(data) {
+                        if (_.isArray(data)) {
+                            $(connect).hide();
+                            show_directory(site_settings['directory'], data);
+                        } else {
+                            alert(data);
+                        }
+                    });
+                });
+                $(body).find('input').change(function() {
+                    site_settings['host'] = $(host_input).val();
+                    site_settings['username'] = $(username_input).val();
+                    site_settings['password'] = $(password_input).val();
+                    site_settings['directory'] = $(directory_input).val();
+                    if (site_settings['host'] != '' && site_settings['username'] != '' && site_settings['password'] != '') {
+                        $(connect).show();
+                        $(upload).show();
+                    } else {
+                        $(connect).hide();
+                        $(upload).hide();
+                    }
+                })
+                var browser = $('<ul class="az-browser"></ul>').appendTo(body).hide();
+                $('<hr>').appendTo(body);
+                var upload = $('<button class="' + p + 'btn ' + p + 'btn-success">' + t("Upload current site") + '</button>').appendTo(body).click(function() {
+                    var site = get_export_site();
+                    $(browser).empty().hide();
+                    $(messages).empty().show();
+                    azexo_add_js({
+                        path: 'js/json2.min.js',
+                        loaded: 'JSON' in window,
+                        callback: function() {
+                            var upload_process = function(data) {
+                                if (data['errors'].length > 0) {
+                                    for (var i = 0; i < data['errors'].length; i++)
+                                        $(messages).append('<div class="' + p + 'alert ' + p + 'alert-danger" >' + data['errors'][i] + '</div>');
+                                } else {
+                                    if (data['uploaded'].length > 0) {
+                                        $(messages).append('<div class="' + p + 'alert ' + p + 'alert-info">' + data['uploaded'][0] + ' uploaded</div>');
+                                    }
+                                    if (data['count'] > 0) {
+                                        azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], upload_process);
+                                    } else {
+                                        $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
+                                    }
+                                }
+                            }
+                            azexo_ftp_upload(JSON.stringify(site), '', JSON.stringify([]), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], upload_process);
+                        }
+                    });
+                });
+                $(body).find('input').trigger('change');
+                $('<hr>').appendTo(body);
+                var messages = $('<div class="az-messages"></div>').appendTo(body).hide();
+                $('#az-ftp-modal')[fp + 'modal']('show');
+            }
+            );
+            var select_site = $('<select class="' + p + 'form-control"></select>').prependTo(sites_panel).change(function() {
+                load_site($(this).find('option:selected').val());
+            });
+            function load_site(name) {
+                azexo_load_site(name, function(data) {
+                    var site = $.parseJSON(data);
+                    site_containers = {};
+                    site_pages = site.pages;
+                    site_settings = site.settings; 
+                    $(pages).empty();
+                    for (var page_name in site.pages) {
+                        site_containers[page_name] = new Array(azexo_containers.length);
+                        for (var c in site.pages[page_name].containers) {
+                            var container = create_container(c);
+                            container.parse_shortcode(decodeURIComponent(enc(atob(site.pages[page_name].containers[c]))));
+                            for (var i = 0; i < container.children.length; i++) {
+                                container.children[i].recursive_render();
+                            }
+                            $(container.dom_content_element).empty();
+                            container.attach_children();
+                            container.update_empty();
+                            container.update_sortable();
+                            container.to_recursive_showed = true;
+
+                            for (var i = 0; i < azexo_containers.length; i++) {
+                                if (azexo_containers[i].attrs['container'] == c) {
+                                    site_containers[page_name][i] = container;
+                                    break;
+                                }
+                            }
+                        }
+                        add_page(page_name, site.pages[page_name].title);
+                    }
+                    switch_page(site.current_page);
+                    $(pages).find('a').removeClass(p + 'active');
+                    $(pages).find('a:contains("' + site.current_page + '")').addClass(p + 'active');
+                });
+            }
+            azexo_get_sites(function(names) {
+                for (var i = 0; i < names.length; i++) {
+                    $('<option value="' + names[i] + '">' + names[i] + '</option>').appendTo(select_site);
+                }
+                if (names.length == 0) {
+                    $('<option value="My site">My site</option>').appendTo(select_site);
+                } else {
+                    load_site($(select_site).find('option:selected').val());
+                }
+            });
             if (!window.azexo_editor)
                 $(panel).hide();
         }
-    }
-    function make_absolute_urls(dom) {
-        $(dom).find('link[href]').each(function() {
-            $(this).attr('href', toAbsoluteURL($(this).attr('href')));
-        });
-        $(dom).find('script[src]').each(function() {
-            $(this).attr('src', toAbsoluteURL($(this).attr('src')));
-        });
-        $(dom).find('img[src]').each(function() {
-            $(this).attr('src', toAbsoluteURL($(this).attr('src')));
-        });
-    }
-    function get_page_html(containers, loader, title) {
-        var js = {};
-        var css = {};
-        var dom = $('<div>' + original_body + '</div>');
-        for (var i = 0; i < containers.length; i++) {
-            var container = containers[i];
-            var type = container.attrs['container'].split('/')[0];
-            var name = container.attrs['container'].split('/')[1];
-            var element = $(dom).find('.az-container[data-az-type="' + type + '"][data-az-name="' + name + '"]');
-            $(element).empty();
-            $(element).append(container.get_hover_styles(container));
-            if (loader) {
-                var azexo_online = window.azexo_online;
-                window.azexo_online = false;
-                $(element).append(container.get_loader());
-                window.azexo_online = azexo_online;
-            }
-            $(element).append(container.get_html());
-            js = $.extend(js, containers[i].js);
-            css = $.extend(css, containers[i].css);
-        }
-        var attributes = '';
-        $.each(original_body_attributes, function() {
-            attributes = attributes + this.name + '"' + this.value + '" ';
-        });
-        make_absolute_urls(dom);
-        $(dom).find('.azexo-backend').remove();
-        var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
-
-        var dom = $('<div>' + original_head + '</div>');
-        $(dom).find('.azexo-backend').remove();
-
-        $(dom).find('title').text(title);
-        make_absolute_urls(dom);
-        for (var url in js) {
-            $(dom).append('<script src="' + toAbsoluteURL(url) + '"></script>');
-        }
-        for (var url in css) {
-            $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
-        }
-        var page_head = '<head>' + $(dom).html() + '</head>';
-        return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
     }
 
 })(window.jQuery, false, '', '', {}, {}, {}, null, [], {});

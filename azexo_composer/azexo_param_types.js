@@ -163,14 +163,14 @@
         } else {
             function refresh_value(preview, input) {
                 var value = [];
-                _.each($(preview).find('img'), function (img) {
-                    value.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(img).attr('src').split('filemanager')[1]));
+                _.each($(preview).find('> div'), function (img) {
+                    value.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(img).attr('data-src').split('filemanager')[1]));
                 });
                 value = value.join(delimiter);
                 $(input).val(value);
             }
             $(input).css('display', 'none');
-            var preview = $('<span id="images-preview"></span>').insertAfter(input);
+            var preview = $('<div id="images-preview"></div>').insertAfter(input);
             var images = [];
             if (delimiter == '')
                 images = [$(input).val()];
@@ -179,7 +179,7 @@
             for (var i = 0; i < images.length; i++) {
                 if (images[i] != '') {
                     var img = render_image(images[i], 100, 100);
-                    $(img).appendTo(preview).click(function () {
+                    $(img).appendTo(preview).append('<div class="delete"></div>').click(function () {
                         $(this).remove();
                         refresh_value(preview, input);
                     });
@@ -198,15 +198,17 @@
             var intervalID = setInterval(function () {
                 if ($(filemanager_input).val() != '') {
                     var srcs = [];
-                    _.each($(preview).find('img'), function (img) {
-                        srcs.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(img).attr('src').split('filemanager')[1]));
+                    _.each($(preview).find('> div'), function (img) {
+                        srcs.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(img).attr('data-src').split('filemanager')[1]));
                     });
                     if (_.indexOf(srcs, $(filemanager_input).val()) < 0) {
+                        if (delimiter == '')
+                            srcs = [];
                         srcs.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(filemanager_input).val().split('filemanager')[1]));
                         var img = render_image(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(filemanager_input).val().split('filemanager')[1]), 100, 100);
                         if (delimiter == '')
                             $(preview).empty();
-                        $(img).appendTo(preview).click(function () {
+                        $(img).appendTo(preview).append('<div class="delete"></div>').click(function () {
                             $(this).remove();
                             refresh_value(preview, input);
                         });
@@ -219,7 +221,7 @@
                 clearInterval(intervalID);
             });
             $(input).parent().find('#images-preview').sortable({
-                items: 'img',
+                items: '> div',
                 placeholder: 'az-sortable-placeholder',
                 forcePlaceholderSize: true,
                 over: function (event, ui) {
@@ -283,11 +285,11 @@
             width = width + 'px';
         if ($.isNumeric(height))
             height = height + 'px';
-        var img = $('<img src="' + value + '" alt="">');
+        var img = $('<div style="background-image: url(' + encodeURI(value) + ');" data-src="' + value + '" ></div>');
         if (width.length > 0)
-            $(img).attr('width', width);
+            $(img).css('width', width);
         if (height.length > 0)
-            $(img).attr('height', height);
+            $(img).css('height', height);
         return img;
     }
 
@@ -592,7 +594,7 @@
                 }
                 var bg_image = $(this.dom_element).find('[name="bg_image"]').val();
                 if (bg_image) {
-                    style += 'background-image: url(' + bg_image + ');';
+                    style += 'background-image: url(' + encodeURI(bg_image) + ');';
                 }
                 var background_style = $(this.dom_element).find('select[name="background_style"] > option:selected').val();
                 if (background_style.match(/repeat/)) {
@@ -798,7 +800,7 @@
                 if (match == null)
                     v = '';
                 else
-                    v = match[1];
+                    v = decodeURI(match[1]);
                 output += '<input id="' + this.bg_image_id + '" name="bg_image" class="' + p + 'form-control" type="text" value="' + v + '">';
 
                 match = value.match(/background-repeat[: ]*([-\w]*) *;/);

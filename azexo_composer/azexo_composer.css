@@ -525,8 +525,31 @@ div.controls > .control {
     max-height: 500px;
 }
 
-#images-preview img {
-    margin: 5px;
+#images-preview {
+    margin-top: 10px;
+}
+
+#images-preview > div {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: inline-block;
+    position: relative;
+    cursor: move;
+}
+
+#images-preview .delete {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 0px;
+    top: 0px;
+    background-color: red;
+    z-index: 3;
+    display: inline-block;
+    cursor: pointer;
 }
 
 .az-element .modal-backdrop, .az-element .ax-modal-backdrop {
@@ -651,7 +674,7 @@ div.az-link {
     background-color: whitesmoke;
     position: fixed;
     top: 0px;
-    width: 300px;
+    width: 400px;
     height: 100%;
     z-index: 5;
     padding-top:50px;
@@ -660,10 +683,10 @@ div.az-link {
     transition: 0.2s;
 }
 .az-left-sidebar {
-    left: -300px;
+    left: -400px;
 }
 .az-right-sidebar {
-    right: -300px;
+    right: -400px;
 }
 
 .az-left-sidebar::after, .az-right-sidebar::after {
@@ -701,35 +724,42 @@ div.az-link {
 }
 
 .az-nav-list {
-  padding-left: 15px;
-  padding-right: 15px;
-  margin-bottom: 0;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 0;
 }
- 
+
 .az-nav-list > li > a {
-  margin-left: -15px;
-  margin-right: -15px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+    margin-left: -15px;
+    margin-right: -15px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
 }
- 
+
 .az-nav-list > li > a {
-  padding: 3px 15px;
+    padding: 3px 15px;
+}
+#az-template-elements {
+    width: 200px;
+    left: -200px;
+}
+#az-template-elements:hover {
+    left: 0px;
 }
 
 #az-thumbnails {
     display:none;
     overflow-y: scroll;
     height: 100%;
-    width: 300px;
+    width: 200px;
     position: absolute;
-    right: 300px;
+    left: 200px;
     top: 0px;
-    background-color: whitesmoke;
+    background-color: grey;
     padding: 10px;
 }
 
 #az-template-elements.az-thumbnails::after {
-    left: -350px;
+    right: -250px;
 }
 
 
@@ -739,9 +769,14 @@ div.az-link {
     margin-bottom: 10px;
 }
 
+#az-exporter {
+    padding-top: 20px;
+}
+
 #az-exporter::after {
     content: "\f019"; 
 }
+
 #az-template-elements::after {
     content: "\f1b2"; 
 }
@@ -751,7 +786,7 @@ div.az-link {
     background-color: whitesmoke;
     position: fixed;
     bottom: 100px;
-    right: 100px;
+    left: 100px;
     width: 600px;
     z-index: 5;
     padding: 20px;
@@ -764,11 +799,38 @@ div.az-link {
     background-color: whitesmoke;
     position: fixed;
     bottom: 100px;
-    left: 100px;
+    right: 100px;
     width: 300px;
     z-index: 5;
     padding: 20px;
     font-size: 20px;
     font-weight: bold;
     text-align: left;
+}
+
+ul.az-browser, .az-messages {
+    height: 200px;
+    overflow-y: scroll;
+}
+
+ul.az-browser {
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+ul.az-browser li {
+    cursor: pointer;
+    display: block;
+    margin: 5px;    
+}
+
+ul.az-browser li::before {
+    margin-right: 10px;
+}
+
+
+.az-messages div{
+    padding: 5px;
+    margin-bottom: 2px;
+    font-size: 10px;    
 }
