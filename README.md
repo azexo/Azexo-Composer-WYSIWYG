@@ -57,7 +57,7 @@ PRODUCTS FROM AZEXO
 
 Azexo Composer already integrated with [WordPress / Drupal / Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. 
 
-If you need make HTML page(s) via Azexo Composer and export them into ZIP archive (including all used files: images, js, css) - you can try this [product](http://codecanyon.net/item/azexo-composer-page-builder-for-html-templates/8074732?ref=azexo).
+If you need make HTML page(s) via Azexo Composer and export them into via ZIP archive or FTP (including all used files: images, js, css) - you can try this [product](http://codecanyon.net/item/azexo-composer-page-builder-for-html-templates/8074732?ref=azexo) (idea from this [project](https://github.com/designmodo/startup-demo)).
 
 If you purchase this products you get:
 * High quality and tested implementation
