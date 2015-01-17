@@ -225,7 +225,7 @@
                     callback('');
                 });
             } else {
-                if (azexo_exporter) {
+                if ('azexo_exporter' in window) {
                     callback('');
                     return;
                 }
@@ -242,7 +242,7 @@
                 });
             }
         } else {
-            if (azexo_exporter) {
+            if ('azexo_exporter' in window) {
                 callback('');
                 return;
             }
@@ -3407,7 +3407,7 @@
         azexo_login(function(data) {
             window.azexo_editor = data;
             toggle_editor_controls();
-            if (!data && azexo_exporter)
+            if (!data && 'azexo_exporter' in window)
                 open_settings_form();
         });
     }
@@ -3426,7 +3426,7 @@
     }
     onReadyFirst(function() {
         azexo_load();
-        if (azexo_exporter)
+        if ('azexo_exporter' in window)
             enable_exporter();
         $.holdReady(false);
     });
