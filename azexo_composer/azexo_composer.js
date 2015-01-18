@@ -1837,6 +1837,36 @@
             for (var path in elements) {
                 var name = elements[path].name;
                 var template = elements[path].html;
+
+                if ('ajaxurl' in window) {
+                    function template_element_urls(dom) {
+                        function update_url(url) {
+                            if (url.indexOf("azexo_elements") == 0) {
+                                return window.azexo_baseurl + '../' + url;
+                            }
+                            return url;
+                        }
+                        $(dom).find('link[href]').each(function() {
+                            $(this).attr('href', update_url($(this).attr('href')));
+                        });
+                        $(dom).find('script[src]').each(function() {
+                            $(this).attr('src', update_url($(this).attr('src')));
+                        });
+                        $(dom).find('img[src]').each(function() {
+                            $(this).attr('src', update_url($(this).attr('src')));
+                        });
+                        $(dom).find('[style*="background-image"]').each(function() {
+                            var style = $(this).attr('style').replace(/background-image[: ]*url\(([^\)]+)\) *;/, function(match, url) {
+                                return match.replace(url, encodeURI(update_url(decodeURI(url))));
+                            });
+                            $(this).attr('style', style);
+                        });
+                    }
+                    template = $('<div>' + template + '</div>');
+                    template_element_urls(template);
+                    template = $(template).html();
+                }
+
                 var thumbnail = '';
                 if ('thumbnail' in elements[path])
                     thumbnail = elements[path].thumbnail;
@@ -2084,90 +2114,92 @@
             this.template_elements_loaded = true;
             make_azexo_extend();
             this.try_render_unknown_elements();
-            if (window.azexo_editor && Object.keys(elements).length > 0) {
-                var menu = {'_': []};
-                for (var path in elements) {
-                    var folders = path.split('|');
-                    folders.pop();
-                    var current = menu;
-                    for (var i = 0; i < folders.length; i++) {
-                        if (!(folders[i] in current))
-                            current[folders[i]] = {'_': []};
-                        current = current[folders[i]];
-                    }
-                    current['_'].push(elements[path]);
-                }
-                var panel = $('<div id="az-template-elements" class="az-left-sidebar"></div>').appendTo('body');
-                var welcome = $('<div id="az-template-elements-welcome">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
-                $(panel).hover(function() {
-                    $(welcome).remove();
-                });
-                $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
-                $('<hr>').appendTo(panel);
-                function build_menu(item) {
-                    if (Object.keys(item).length === 1 && ('_' in item))
-                        return null;
-                    var m = $('<ul class="' + p + 'nav az-nav-list"></ul>');
-                    for (var name in item) {
-                        if (name != '_') {
-                            var li = $('<li></li>').appendTo(m);
-                            var it = item[name];
-                            (function(it) {
-                                $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
-                                    var menu_item = this;
-                                    $(thumbnails).empty();
-                                    $(thumbnails).css('display', 'block');
-                                    $(panel).addClass('az-thumbnails');
-                                    for (var i = 0; i < it['_'].length; i++) {
-                                        $('<div class="az-thumbnail" data-az-base="' + it['_'][i].name + '" style="background-image: url(' + encodeURI(it['_'][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
-                                    }
-                                    $(thumbnails).sortable({
-                                        items: '.az-thumbnail',
-                                        connectWith: '.az-ctnr',
-                                        start: function(event, ui) {
-                                            $(panel).css('left', '0px');
-                                            $(thumbnails).css('overflow-y', 'visible');
-                                        },
-                                        stop: function(event, ui) {
-                                            $(panel).css('left', '');
-                                            $(panel).removeClass('az-thumbnails');
-                                            $(thumbnails).css('overflow-y', 'scroll');
-                                            $(thumbnails).css('display', 'none');
-                                        },
-                                        update: function(event, ui) {
-                                            var container = azexo_elements.get_element($(ui.item).parent().closest('[data-az-id]').attr('data-az-id'));
-                                            var postition = 0;
-                                            var children = $(ui.item).parent().find('[data-az-id], .az-thumbnail');
-                                            for (var i = 0; i < children.length; i++) {
-                                                if ($(children[i]).hasClass('az-thumbnail')) {
-                                                    postition = i;
-                                                    break;
-                                                }
-                                            }
-                                            var element = azexo_elements.create_element(container, $(ui.item).attr('data-az-base'), postition, function() {
-                                            });
-                                            $(ui.item).detach();
-                                            $(menu_item).click();
-                                        },
-                                        placeholder: 'az-sortable-placeholder',
-                                        forcePlaceholderSize: true,
-                                        over: function(event, ui) {
-                                            ui.placeholder.attr('class', ui.helper.attr('class'));
-                                            ui.placeholder.removeClass('ui-sortable-helper');
-                                            ui.placeholder.addClass('az-sortable-placeholder');
-                                        }
-                                    });
-                                    return false;
-                                });
-                            })(it);
-                            $(li).append(build_menu(item[name]));
+            $(function() {
+                if (window.azexo_editor && Object.keys(elements).length > 0) {
+                    var menu = {'_': []};
+                    for (var path in elements) {
+                        var folders = path.split('|');
+                        folders.pop();
+                        var current = menu;
+                        for (var i = 0; i < folders.length; i++) {
+                            if (!(folders[i] in current))
+                                current[folders[i]] = {'_': []};
+                            current = current[folders[i]];
                         }
+                        current['_'].push(elements[path]);
                     }
-                    return m;
+                    var panel = $('<div id="az-template-elements" class="az-left-sidebar"></div>').appendTo('body');
+                    var welcome = $('<div id="az-template-elements-welcome">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
+                    $(panel).hover(function() {
+                        $(welcome).remove();
+                    });
+                    $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
+                    $('<hr>').appendTo(panel);
+                    function build_menu(item) {
+                        if (Object.keys(item).length === 1 && ('_' in item))
+                            return null;
+                        var m = $('<ul class="' + p + 'nav az-nav-list"></ul>');
+                        for (var name in item) {
+                            if (name != '_') {
+                                var li = $('<li></li>').appendTo(m);
+                                var it = item[name];
+                                (function(it) {
+                                    $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
+                                        var menu_item = this;
+                                        $(thumbnails).empty();
+                                        $(thumbnails).css('display', 'block');
+                                        $(panel).addClass('az-thumbnails');
+                                        for (var i = 0; i < it['_'].length; i++) {
+                                            $('<div class="az-thumbnail" data-az-base="' + it['_'][i].name + '" style="background-image: url(' + encodeURI(it['_'][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
+                                        }
+                                        $(thumbnails).sortable({
+                                            items: '.az-thumbnail',
+                                            connectWith: '.az-ctnr',
+                                            start: function(event, ui) {
+                                                $(panel).css('left', '0px');
+                                                $(thumbnails).css('overflow-y', 'visible');
+                                            },
+                                            stop: function(event, ui) {
+                                                $(panel).css('left', '');
+                                                $(panel).removeClass('az-thumbnails');
+                                                $(thumbnails).css('overflow-y', 'scroll');
+                                                $(thumbnails).css('display', 'none');
+                                            },
+                                            update: function(event, ui) {
+                                                var container = azexo_elements.get_element($(ui.item).parent().closest('[data-az-id]').attr('data-az-id'));
+                                                var postition = 0;
+                                                var children = $(ui.item).parent().find('[data-az-id], .az-thumbnail');
+                                                for (var i = 0; i < children.length; i++) {
+                                                    if ($(children[i]).hasClass('az-thumbnail')) {
+                                                        postition = i;
+                                                        break;
+                                                    }
+                                                }
+                                                var element = azexo_elements.create_element(container, $(ui.item).attr('data-az-base'), postition, function() {
+                                                });
+                                                $(ui.item).detach();
+                                                $(menu_item).click();
+                                            },
+                                            placeholder: 'az-sortable-placeholder',
+                                            forcePlaceholderSize: true,
+                                            over: function(event, ui) {
+                                                ui.placeholder.attr('class', ui.helper.attr('class'));
+                                                ui.placeholder.removeClass('ui-sortable-helper');
+                                                ui.placeholder.addClass('az-sortable-placeholder');
+                                            }
+                                        });
+                                        return false;
+                                    });
+                                })(it);
+                                $(li).append(build_menu(item[name]));
+                            }
+                        }
+                        return m;
+                    }
+                    $(panel).append(build_menu(menu));
+                    var thumbnails = $('<div id="az-thumbnails"></div>').appendTo(panel);
                 }
-                $(panel).append(build_menu(menu));
-                var thumbnails = $('<div id="az-thumbnails"></div>').appendTo(panel);
-            }
+            });
         },
         create_cms_elements: function(elements) {
             for (var key in elements) {
@@ -3048,8 +3080,8 @@
             if (_.isNull(matches)) {
                 if (content.length == 0) {
                     return;
-                } else {                    
-                    if(content.substring(0, 1) == '[' && content.slice(-1) == ']')
+                } else {
+                    if (content.substring(0, 1) == '[' && content.slice(-1) == ']')
                         this.parse_shortcode('[az_unknown]' + content + '[/az_unknown]');
                     else
                         this.parse_shortcode('[az_row][az_column width="1/1"][az_text]' + content + '[/az_text][/az_column][/az_row]');
@@ -3447,6 +3479,7 @@
                 container.dom_content_element = $(dom_element);
                 $(container.dom_element).css('display', '');
                 $(container.dom_element).addClass('azexo');
+                $(container.dom_element).addClass('az-ctnr');
                 container.parse_html(container.dom_content_element);
                 container.html_content = true;
                 container.loaded_container = container.attrs['container'];
@@ -3478,6 +3511,7 @@
                 $(container.dom_element).attr('style', $(dom_element).attr('style'));
                 $(container.dom_element).css('display', '');
                 $(container.dom_element).addClass('azexo');
+                $(container.dom_element).addClass('az-ctnr');
                 var type = $(dom_element).attr('data-az-type');
                 var name = $(dom_element).attr('data-az-name');
                 $(dom_element).replaceWith(container.dom_element);
@@ -7587,7 +7621,8 @@
                 javascript += "var " + azexo_elements_name + " = new " + AZEXOElements.name + "();\n";
                 javascript += "var " + scroll_magic_name + " = null;\n";
                 javascript += "window.azexo_editor = false;\n";
-                javascript += "window.azexo_exported = " + window.azexo_exporter.toString() + ";\n";
+                if ('azexo_exporter' in window)
+                    javascript += "window.azexo_exported = " + window.azexo_exporter.toString() + ";\n";
                 javascript += "var " + azexo_containers_name + " = [];\n";
                 javascript += "var " + azexo_containers_loaded_name + " = {};\n";
                 javascript += connect_container.toString() + "\n";
@@ -8517,6 +8552,12 @@
             $(dom).find('img[src]').each(function() {
                 $(this).attr('src', toAbsoluteURL($(this).attr('src')));
             });
+            $(dom).find('[style*="background-image"]').each(function() {
+                var style = $(this).attr('style').replace(/background-image[: ]*url\(([^\)]+)\) *;/, function(match, url) {
+                    return match.replace(url, encodeURI(toAbsoluteURL(decodeURI(url))));
+                });
+                $(this).attr('style', style);
+            });
         }
         function get_page_html(containers, loader, title) {
             var js = {};
@@ -8724,7 +8765,7 @@
             });
             var save_button = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t('Save') + '</button>').appendTo(buttons).click(function() {
                 var site = {};
-                site.settings = site_settings;                
+                site.settings = site_settings;
                 site.current_page = $(name_input).val();
                 site.pages = {};
                 for (var page_name in site_containers) {
@@ -8853,7 +8894,7 @@
                     var site = $.parseJSON(data);
                     site_containers = {};
                     site_pages = site.pages;
-                    site_settings = site.settings; 
+                    site_settings = site.settings;
                     $(pages).empty();
                     for (var page_name in site.pages) {
                         site_containers[page_name] = new Array(azexo_containers.length);
