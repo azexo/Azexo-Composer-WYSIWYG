@@ -3438,7 +3438,9 @@
                 delete window.azexo_editor;
         azexo_login(function(data) {
             window.azexo_editor = data;
-            toggle_editor_controls();
+            $(function() {
+                toggle_editor_controls();
+            })
             if (!data && 'azexo_exporter' in window)
                 open_settings_form();
         });
@@ -3572,7 +3574,7 @@
         });
         if (window.azexo_editor) {
             if ($('#azexo-clipboard').length == 0) {
-                $('body').prepend('<div id="azexo-clipboard" style="display:none"></div>');
+                $('body').prepend('<div id="azexo-clipboard" class="azexo-backend" style="display:none"></div>');
             }
         }
         $('body').on('keydown.azexo', function(event) {
@@ -7997,18 +7999,25 @@
         showed: function($, p, fp) {
             ContainerElement.baseclass.prototype.showed.apply(this, arguments);
             var element = this;
-            this.add_js({
-                path: 'jquery-waypoints/waypoints.min.js',
-                loaded: 'waypoint' in $.fn,
-                callback: function() {
-                    $(element.dom_element).waypoint(function(direction) {
-                        if (!element.rendered) {
-                            element.rendered = true;
-                            element.load_container();
-                        }
-                    }, {offset: '100%', triggerOnce: true});
-                    $(document).trigger('scroll');
-                }});
+            if (this.parent == null) {
+                if (!element.rendered) {
+                    element.rendered = true;
+                    element.load_container();
+                }
+            } else {
+                this.add_js({
+                    path: 'jquery-waypoints/waypoints.min.js',
+                    loaded: 'waypoint' in $.fn,
+                    callback: function() {
+                        $(element.dom_element).waypoint(function(direction) {
+                            if (!element.rendered) {
+                                element.rendered = true;
+                                element.load_container();
+                            }
+                        }, {offset: '100%', triggerOnce: true});
+                        $(document).trigger('scroll');
+                    }});
+            }
         },
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-container"><div class="az-ctnr"></div></div>');
@@ -8586,11 +8595,18 @@
             });
             make_absolute_urls(dom);
             $(dom).find('.azexo-backend').remove();
+            $(dom).find('.ui-sortable').removeClass('ui-sortable');
+            if('azexo_export_filter' in window) {
+                window.azexo_export_filter(dom);
+            }
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
             $(dom).find('.azexo-backend').remove();
-
+            if('azexo_export_filter' in window) {
+                window.azexo_export_filter(dom);
+            }
+            
             $(dom).find('title').text(title);
             make_absolute_urls(dom);
             for (var url in js) {
@@ -8722,9 +8738,6 @@
                 site_pages[name].title = $(this).val();
             });
             site_containers['index'] = azexo_containers;
-            add_page('index', 'Home');
-            $(name_input).val('index');
-            $(title_input).val('Home');
             function add_page(name, title) {
                 $(pages).find('a').removeClass(p + 'active');
                 site_pages[name] = {title: title};
@@ -8737,6 +8750,9 @@
                     return false;
                 });
             }
+            add_page('index', 'Home');
+            $(name_input).val('index');
+            $(title_input).val('Home');
             //sites management
             var sites_panel = $('<div class="panel panel-default"><div class="panel-heading" role="tab" id="sites-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#sites-collapse" aria-expanded="false" aria-controls="collapseOne" class="collapsed">' + t('Choose a site for edit') + '</a></h4></div><div id="sites-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="sites-heading" aria-expanded="false"><div class="panel-body"></div></div></div>').prependTo(panel).find('.panel-body');
             $('<hr>').appendTo(sites_panel);
@@ -8861,6 +8877,7 @@
                         path: 'js/json2.min.js',
                         loaded: 'JSON' in window,
                         callback: function() {
+                            var count = 0;
                             var upload_process = function(data) {
                                 if (data['errors'].length > 0) {
                                     for (var i = 0; i < data['errors'].length; i++)
@@ -8870,6 +8887,9 @@
                                         $(messages).append('<div class="' + p + 'alert ' + p + 'alert-info">' + data['uploaded'][0] + ' uploaded</div>');
                                     }
                                     if (data['count'] > 0) {
+                                        if (count == 0)
+                                            count = data['count'];
+                                        $(progress).show().find('.progress-bar').css('width', ((count - data['count']) / count * 100) + '%');
                                         azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], upload_process);
                                     } else {
                                         $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
@@ -8882,6 +8902,7 @@
                 });
                 $(body).find('input').trigger('change');
                 $('<hr>').appendTo(body);
+                var progress = $('<div class="progress"><div class="progress-bar" role="progressbar"></div></div>').appendTo(body).hide();
                 var messages = $('<div class="az-messages"></div>').appendTo(body).hide();
                 $('#az-ftp-modal')[fp + 'modal']('show');
             }
