@@ -225,10 +225,6 @@
                     callback('');
                 });
             } else {
-                if ('azexo_exporter' in window) {
-                    callback('');
-                    return;
-                }
                 type = (type === '') ? 'default' : type;
                 var url = window.azexo_baseurl + '../azexo_containers/' + type + '/' + name;
                 $.ajax({
@@ -242,10 +238,6 @@
                 });
             }
         } else {
-            if ('azexo_exporter' in window) {
-                callback('');
-                return;
-            }
             type = (type === '') ? 'default' : type;
             azexo_add_js({
                 path: '../azexo_containers/' + type + '/' + name + '.js',
@@ -8501,10 +8493,10 @@
         if ('azexo_extend' in window) {
             for (var base in window.azexo_extend) {
                 var element = window.azexo_extend[base];
-                var params = {};
+                var params = [];
                 if ('params' in element)
                     params = element.params;
-                element.params = {};
+                delete element.params;
                 var reigstered_element = BaseElement.prototype.elements[base];
                 if (!('extended' in reigstered_element)) {
                     reigstered_element.extended = true;
