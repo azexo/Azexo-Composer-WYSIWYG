@@ -2673,38 +2673,44 @@
                             var offset = $(element.dom_element).offset();
                             offset.top = offset.top - parseInt($(element.dom_element).css('margin-top'));
                             $(element.parent.controls).offset(offset);
-                            offset.left = offset.left + $(element.parent.controls).width();
+                            offset.left = offset.left + $(element.parent.controls).width()-1;
                             $(element.controls).offset(offset);
                         }
                         $(element.dom_element).off('mouseenter').on('mouseenter', function() {
+                            $(element.dom_element).data('hover', true);
                             if ($(element.dom_element).parents('.azexo-editor').length > 0) {
                                 $(element.parent.controls).css('display', 'block');
                                 update_controls(element);
                             }
                         });
                         $(element.dom_element).off('mouseleave').on('mouseleave', function() {
+                            $(element.dom_element).data('hover', false);
                             if ($(element.dom_element).parents('.azexo-editor').length > 0) {
                                 $(element.controls).css('display', '');
                             }
                         });
                         setInterval(function() {
                             if ($(element.dom_element).parents('.azexo-editor').length > 0) {
-                                if (!$(element.dom_element).is(':hover') && !$(element.parent.controls).is(':hover')) {
+                                if(!$(element.dom_element).data('hover') && !$(element.parent.controls).data('hover')) {
                                     $(element.controls).css('display', '');
                                 }
-                                if ($(element.dom_element).is(':hover')) {
+                                if ($(element.dom_element).data('hover')) {
                                     update_controls(element);
                                     $(element.controls).css('visibility', 'visibile');
                                     $(element.controls).css('opacity', '1');
                                 }
-                                var e = azexo_elements.get_element($(element.parent.controls).attr('data-az-cid'));
+                                var e = azexo_elements.get_element($(element.parent.controls).closest('[data-az-cid]').attr('data-az-cid'));
                                 if (!_.isUndefined(e))
                                     $(element.parent.controls).css('display', $(e.controls).css('display'));
                                 if (_.isUndefined($(element.parent.controls).data('spc'))) {
                                     $(element.parent.controls).off('mouseenter').on('mouseenter', function() {
+                                        $(element.parent.controls).data('hover', true);
                                         var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
                                         if (!_.isUndefined(el))
                                             $(el.controls).css('display', 'block');
+                                    });
+                                    $(element.parent.controls).off('mouseleave').on('mouseleave', function() {
+                                        $(element.parent.controls).data('hover', false);
                                     });
                                     $(element.parent.controls).data('spc', true);
                                 }
@@ -7605,12 +7611,10 @@
                 javascript += UnknownElement.name + ".prototype.has_content = true;\n";
 
                 javascript += "window.azexo_baseurl = '" + window.azexo_baseurl + "';\n";
-//                if ('ajaxurl' in window)
-//                    javascript += "window.ajaxurl = '" + window.ajaxurl + "';\n";
+                if ('ajaxurl' in window)
+                    javascript += "window.ajaxurl = '" + toAbsoluteURL(window.ajaxurl) + "';\n";
                 if ('azexo_lang' in window)
                     javascript += "window.azexo_lang = '" + window.azexo_lang + "';\n";
-                if ('recaptcha_publickey' in window)
-                    javascript += "window.recaptcha_publickey = '" + window.recaptcha_publickey + "';\n";
                 javascript += "window.azexo_online = (window.location.protocol == 'http:' || window.location.protocol == 'https:');\n";
                 javascript += "var " + azexo_elements_name + " = new " + AZEXOElements.name + "();\n";
                 javascript += "var " + scroll_magic_name + " = null;\n";
@@ -7764,7 +7768,14 @@
                     javascript += get_class_method_js(ScrollMenuElement, 'showed', true);
                 }
 
-                if (FormElement.prototype.base in bases) {
+                if (FormElement.prototype.base in bases) {                    
+                    javascript += get_alert.toString() + "\n";
+                    if('azexo_form_submit_type' in window)
+                        javascript += "window.azexo_form_submit_type = '" + window.azexo_form_submit_type + "';\n";
+                    if('azexo_form_submit_name' in window)
+                        javascript += "window.azexo_form_submit_name = '" + window.azexo_form_submit_name + "';\n";
+                    if ('recaptcha_publickey' in window)
+                        javascript += "window.recaptcha_publickey = '" + window.recaptcha_publickey + "';\n";                    
                     javascript += azexo_submit_form.toString() + "\n";
                     javascript += FormElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + FormElement.prototype.base + "', true, " + FormElement.name + ");\n";
@@ -7878,6 +7889,7 @@
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
             $(dom).find('.az-element.az-container > .az-ctnr').empty();
             $(dom).find('.az-element.az-cms-element').empty();
+            $(dom).find('.g-recaptcha').empty();
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
             return $(dom).html();
         },
@@ -8302,7 +8314,13 @@
         show_submissions: function() {
             var element = this;
             var container = element.get_my_container();
-            azexo_load_submissions(container.attrs['container'].split('/')[0], container.attrs['container'].split('/')[1], element.attrs['name'], function(data) {
+            var type = container.attrs['container'].split('/')[0];
+            if('azexo_form_submit_type' in window)
+                type = window.azexo_form_submit_type;
+            var name = container.attrs['container'].split('/')[1];
+            if('azexo_form_submit_name' in window)
+                name = window.azexo_form_submit_name;
+            azexo_load_submissions(type, name, element.attrs['name'], function(data) {
                 $('#az-form-modal').remove();
                 var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + element.attrs['name'] + ' ' + t(" submissions") + '</h4></div>';
                 var footer = '<div class="' + p + 'modal-footer"></div>';
@@ -8310,24 +8328,28 @@
 
                 var columns = {};
                 for (var dt in data) {
-                    var submission = $.parseJSON(data[dt]);
-                    for (var key in submission) {
-                        if (!(key in columns))
-                            columns[key] = true;
-                    }
+                    if(data[dt] != '') {
+                        var submission = $.parseJSON(data[dt]);
+                        for (var key in submission) {
+                            if (!(key in columns))
+                                columns[key] = true;
+                        }
+                    }   
                 }
                 var rows = [];
                 for (var dt in data) {
-                    var submission = $.parseJSON(data[dt]);
-                    var row = {};
-                    for (var key in columns) {
-                        if (key in submission) {
-                            row[key] = submission[key];
-                        } else {
-                            row[key] = '';
+                    if(data[dt] != '') {
+                        var submission = $.parseJSON(data[dt]);
+                        var row = {};
+                        for (var key in columns) {
+                            if (key in submission) {
+                                row[key] = submission[key];
+                            } else {
+                                row[key] = '';
+                            }
                         }
+                        rows.push(row);
                     }
-                    rows.push(row);
                 }
 
                 var table = $('<table></table>');
@@ -8363,26 +8385,24 @@
             FormElement.baseclass.prototype.showed.apply(this, arguments);
             var element = this;
             if (this.attrs['action'] == '') {
-                this.add_external_js('http://www.google.com/recaptcha/api/js/recaptcha_ajax.js', function() {
-                    if ('recaptcha_publickey' in window) {
-                        Recaptcha.create(window.recaptcha_publickey, 'captcha_' + element.id,
-                                {
-                                    theme: "clean",
-                                }
-                        );
-                    } else {
-                        azexo_get_recaptcha_publickey(function(data) {
-                            Recaptcha.create(data, 'captcha_' + element.id,
-                                    {
-                                        theme: "clean",
-                                    }
-                            );
-                        });
-                    }
+                if ('recaptcha_publickey' in window) {
+                    $(element.dom_element).find('.g-recaptcha').attr('data-sitekey', window.recaptcha_publickey);
+                } else {
+                    azexo_get_recaptcha_publickey(function(data) {
+                        $(element.dom_element).find('.g-recaptcha').attr('data-sitekey', data);
+                    });
+                }
+                this.add_external_js('https://www.google.com/recaptcha/api.js', function() {
                 });
                 $(element.dom_element).submit(function() {
                     var container = element.get_my_container();
-                    azexo_submit_form(container.attrs['container'].split('/')[0], container.attrs['container'].split('/')[1], element.attrs['name'], $(element.dom_element).serialize(), function(data) {
+                    var type = container.attrs['container'].split('/')[0];
+                    if('azexo_form_submit_type' in window)
+                        type = window.azexo_form_submit_type;
+                    var name = container.attrs['container'].split('/')[1];
+                    if('azexo_form_submit_name' in window)
+                        name = window.azexo_form_submit_name;
+                    azexo_submit_form(type, name, element.attrs['name'], $(element.dom_element).serialize(), function(data) {
                         if (data) {
                             (element.dom_element).prepend(get_alert(element.attrs['submited_message']));
                         }
@@ -8395,7 +8415,7 @@
             var element = this;
             this.dom_element = $('<form action="' + this.attrs['action'] + '" method="post" class="az-element az-form ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '" role="form" enctype="multipart/form-data"></form>');
             this.dom_content_element = $('<div class="az-ctnr"></div>').appendTo(this.dom_element);
-            $('<div class="' + p + 'form-group"><div id="captcha_' + this.id + '"></div></div>').appendTo(this.dom_element);
+            $('<div class="' + p + 'form-group"><div class="g-recaptcha"></div></div>').appendTo(this.dom_element);
             $('<div class="' + p + 'form-group"><button class="' + p + 'btn ' + p + 'btn-lg ' + p + 'btn-primary" type="submit">' + this.attrs['submit_title'] + '</button></div>').appendTo(this.dom_element);
             FormElement.baseclass.prototype.render.apply(this, arguments);
         },
