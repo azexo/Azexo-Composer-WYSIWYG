@@ -829,7 +829,7 @@
             });
         }
     }
-    function azexo_ftp_get_list(host, username, password, directory, callback) {
+    function azexo_ftp_get_list(host, username, password, port, directory, callback) {
         if (window.azexo_online) {
             if ('ajaxurl' in window) {
                 $.ajax({
@@ -840,6 +840,7 @@
                         host: host,
                         username: username,
                         password: password,
+                        port: port,
                         directory: directory,
                     },
                     cache: false,
@@ -857,6 +858,7 @@
                         host: host,
                         username: username,
                         password: password,
+                        port: port,
                         directory: directory,
                     },
                     cache: false,
@@ -870,7 +872,7 @@
             callback('');
         }
     }
-    function azexo_ftp_upload(site, site_path, files, host, username, password, directory, callback) {
+    function azexo_ftp_upload(site, site_path, files, host, username, password, port, directory, callback) {
         if (window.azexo_online) {
             if ('ajaxurl' in window) {
                 $.ajax({
@@ -885,6 +887,7 @@
                         host: host,
                         username: username,
                         password: password,
+                        port: port,
                         directory: directory,
                     },
                     cache: false,
@@ -906,6 +909,7 @@
                         host: host,
                         username: username,
                         password: password,
+                        port: port,
                         directory: directory,
                     },
                     cache: false,
@@ -1989,11 +1993,17 @@
                                 if (typeof classes === typeof undefined || classes === false) {
                                     classes = '';
                                 }
-                                var styles = $(node).attr('style');
-                                if (typeof styles === typeof undefined || styles === false) {
-                                    styles = '';
+                                var styles = '';
+                                for (var name in node.style) {
+                                    if ($.isNumeric(name)) {                                        
+                                        styles = styles + node.style[name] + ': ' + node.style.getPropertyValue(node.style[name]) + '; ';
+                                    }                                            
                                 }
-                                styles = rgb2hex(styles);
+                                styles = rgb2hex(styles);                                
+                                styles = styles.replace(/\-value\: /g, ': ');
+                                styles = styles.replace('border-top-color', 'border-color');
+                                styles = styles.replace('border-top-left-radius', 'border-radius');
+                                styles = styles.replace('border-top-style', 'border-style');
                                 BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
                                     if (edit) {
                                         if (icon != '') {
@@ -2673,7 +2683,7 @@
                             var offset = $(element.dom_element).offset();
                             offset.top = offset.top - parseInt($(element.dom_element).css('margin-top'));
                             $(element.parent.controls).offset(offset);
-                            offset.left = offset.left + $(element.parent.controls).width()-1;
+                            offset.left = offset.left + $(element.parent.controls).width() - 1;
                             $(element.controls).offset(offset);
                         }
                         $(element.dom_element).off('mouseenter').on('mouseenter', function() {
@@ -2691,7 +2701,7 @@
                         });
                         setInterval(function() {
                             if ($(element.dom_element).parents('.azexo-editor').length > 0) {
-                                if(!$(element.dom_element).data('hover') && !$(element.parent.controls).data('hover')) {
+                                if (!$(element.dom_element).data('hover') && !$(element.parent.controls).data('hover')) {
                                     $(element.controls).css('display', '');
                                 }
                                 if ($(element.dom_element).data('hover')) {
@@ -6659,7 +6669,7 @@
             var type = 'panel-default';
             if (this.parent.attrs['type'] != '')
                 type = this.parent.attrs['type'];
-            this.dom_element = $('<div class="az-element az-slide ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+            this.dom_element = $('<div class="az-element az-slide az-ctnr ' + this.attrs['el_class'] + ' ' + p + 'clearfix" style="' + this.attrs['style'] + '"></div>');
             this.dom_content_element = this.dom_element;
             SlideElement.baseclass.prototype.render.apply(this, arguments);
         },
@@ -7297,7 +7307,7 @@
             this.parent.update_dom();
         },
         render: function($, p, fp) {
-            this.dom_element = $('<div id="' + this.id + '" class="az-element az-step step ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
+            this.dom_element = $('<div id="' + this.id + '" class="az-element az-step az-ctnr step ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
             $(this.dom_element).css('width', this.attrs['width']);
             $(this.dom_element).css('height', this.attrs['height']);
             $(this.dom_element).attr('data-x', this.attrs['x']);
@@ -7768,14 +7778,14 @@
                     javascript += get_class_method_js(ScrollMenuElement, 'showed', true);
                 }
 
-                if (FormElement.prototype.base in bases) {                    
+                if (FormElement.prototype.base in bases) {
                     javascript += get_alert.toString() + "\n";
-                    if('azexo_form_submit_type' in window)
+                    if ('azexo_form_submit_type' in window)
                         javascript += "window.azexo_form_submit_type = '" + window.azexo_form_submit_type + "';\n";
-                    if('azexo_form_submit_name' in window)
+                    if ('azexo_form_submit_name' in window)
                         javascript += "window.azexo_form_submit_name = '" + window.azexo_form_submit_name + "';\n";
                     if ('recaptcha_publickey' in window)
-                        javascript += "window.recaptcha_publickey = '" + window.recaptcha_publickey + "';\n";                    
+                        javascript += "window.recaptcha_publickey = '" + window.recaptcha_publickey + "';\n";
                     javascript += azexo_submit_form.toString() + "\n";
                     javascript += FormElement.toString() + "\n";
                     javascript += register_animated_element.name + "('" + FormElement.prototype.base + "', true, " + FormElement.name + ");\n";
@@ -8315,10 +8325,10 @@
             var element = this;
             var container = element.get_my_container();
             var type = container.attrs['container'].split('/')[0];
-            if('azexo_form_submit_type' in window)
+            if ('azexo_form_submit_type' in window)
                 type = window.azexo_form_submit_type;
             var name = container.attrs['container'].split('/')[1];
-            if('azexo_form_submit_name' in window)
+            if ('azexo_form_submit_name' in window)
                 name = window.azexo_form_submit_name;
             azexo_load_submissions(type, name, element.attrs['name'], function(data) {
                 $('#az-form-modal').remove();
@@ -8328,17 +8338,17 @@
 
                 var columns = {};
                 for (var dt in data) {
-                    if(data[dt] != '') {
+                    if (data[dt] != '') {
                         var submission = $.parseJSON(data[dt]);
                         for (var key in submission) {
                             if (!(key in columns))
                                 columns[key] = true;
                         }
-                    }   
+                    }
                 }
                 var rows = [];
                 for (var dt in data) {
-                    if(data[dt] != '') {
+                    if (data[dt] != '') {
                         var submission = $.parseJSON(data[dt]);
                         var row = {};
                         for (var key in columns) {
@@ -8397,10 +8407,10 @@
                 $(element.dom_element).submit(function() {
                     var container = element.get_my_container();
                     var type = container.attrs['container'].split('/')[0];
-                    if('azexo_form_submit_type' in window)
+                    if ('azexo_form_submit_type' in window)
                         type = window.azexo_form_submit_type;
                     var name = container.attrs['container'].split('/')[1];
-                    if('azexo_form_submit_name' in window)
+                    if ('azexo_form_submit_name' in window)
                         name = window.azexo_form_submit_name;
                     azexo_submit_form(type, name, element.attrs['name'], $(element.dom_element).serialize(), function(data) {
                         if (data) {
@@ -8561,7 +8571,7 @@
     var original_body_attributes = '';
     var site_containers = {};
     var site_pages = {};
-    var site_settings = {host: '', username: '', password: '', directory: '.'};
+    var site_settings = {host: '', username: '', password: '', port: '21', directory: '.'};
     function enable_exporter() {
         function make_absolute_urls(dom) {
             $(dom).find('link[href]').each(function() {
@@ -8608,17 +8618,17 @@
             make_absolute_urls(dom);
             $(dom).find('.azexo-backend').remove();
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
-            if('azexo_export_filter' in window) {
+            if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
             }
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
             $(dom).find('.azexo-backend').remove();
-            if('azexo_export_filter' in window) {
+            if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
             }
-            
+
             $(dom).find('title').text(title);
             make_absolute_urls(dom);
             for (var url in js) {
@@ -8822,12 +8832,14 @@
                 var body = $(modal).find('.' + p + 'modal-body');
                 var host_input = $('<div class="' + p + 'form-group"><label>' + t("Host") + '</label><div><input class="' + p + 'form-control" name="host" type="text" value="' + site_settings['host'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
                 var username_input = $('<div class="' + p + 'form-group"><label>' + t("Username") + '</label><div><input class="' + p + 'form-control" name="username" type="text" value="' + site_settings['username'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
-                var password_input = $('<div class="' + p + 'form-group"><label>' + t("Password") + '</label><div><input class="' + p + 'form-control" name="password" type="text" value="' + site_settings['password'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                var password_input = $('<div class="' + p + 'form-group"><label>' + t("Password") + '</label><div><input class="' + p + 'form-control" name="password" type="password" value="' + site_settings['password'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                var port_input = $('<div class="' + p + 'form-group"><label>' + t("Port") + '</label><div><input class="' + p + 'form-control" name="port" type="text" value="' + site_settings['port'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
                 var directory_input = $('<div class="' + p + 'form-group"><label>' + t("Directory") + '</label><div><input class="' + p + 'form-control" name="directory" type="text" value="' + site_settings['directory'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
                 var connect = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t("Choose upload directory") + '</button>').appendTo(body).click(function() {
                     site_settings['host'] = $(host_input).val();
                     site_settings['username'] = $(username_input).val();
                     site_settings['password'] = $(password_input).val();
+                    site_settings['port'] = $(port_input).val();
                     function show_directory(directory, list) {
                         $(browser).empty().show();
                         $(messages).empty().hide();
@@ -8837,8 +8849,8 @@
                             var arr = directory.split('/');
                             arr.pop();
                             var dir = arr.join('/')
-                            $('<li class="az-directory">..</li>').appendTo(browser).click(function() {
-                                azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], dir, function(data) {
+                            $('<li class="az-directory">' + t('< Up one level') + '</li>').appendTo(browser).click(function() {
+                                azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], dir, function(data) {
                                     show_directory(dir, data);
                                 });
                             });
@@ -8850,14 +8862,14 @@
                             var path = directory + '/' + list[i];
                             (function(path) {
                                 $('<li class="glyphicon glyphicon-folder-close">' + list[i] + '</li>').appendTo(browser).click(function() {
-                                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], path, function(data) {
+                                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], path, function(data) {
                                         show_directory(path, data);
                                     });
                                 });
                             })(path);
                         }
                     }
-                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], function(data) {
+                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], function(data) {
                         if (_.isArray(data)) {
                             $(connect).hide();
                             show_directory(site_settings['directory'], data);
@@ -8870,8 +8882,9 @@
                     site_settings['host'] = $(host_input).val();
                     site_settings['username'] = $(username_input).val();
                     site_settings['password'] = $(password_input).val();
+                    site_settings['port'] = $(port_input).val();
                     site_settings['directory'] = $(directory_input).val();
-                    if (site_settings['host'] != '' && site_settings['username'] != '' && site_settings['password'] != '') {
+                    if (site_settings['host'] != '' && site_settings['username'] != '' && site_settings['password'] != '' && site_settings['port'] != '') {
                         $(connect).show();
                         $(upload).show();
                     } else {
@@ -8902,13 +8915,14 @@
                                         if (count == 0)
                                             count = data['count'];
                                         $(progress).show().find('.progress-bar').css('width', ((count - data['count']) / count * 100) + '%');
-                                        azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], upload_process);
+                                        azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
                                     } else {
+                                        $(progress).show().find('.progress-bar').css('width', '100%');
                                         $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
                                     }
                                 }
                             }
-                            azexo_ftp_upload(JSON.stringify(site), '', JSON.stringify([]), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['directory'], upload_process);
+                            azexo_ftp_upload(JSON.stringify(site), '', JSON.stringify([]), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
                         }
                     });
                 });
