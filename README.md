@@ -57,7 +57,7 @@ PRODUCTS FROM AZEXO
 
 Azexo Composer already integrated with [WordPress / Drupal / Joomla](http://codecanyon.net/user/azexo/portfolio?ref=azexo) CMS. 
 
-If you need fully automatic selling system of your HTML templates (export via ZIP archive or FTP including all used files: images, js, css) with powerfull drag and drop builder - you can try this [product](http://codecanyon.net/item/azexo-composer-page-builder-for-html-templates/8074732?ref=azexo) (idea from this [project](https://github.com/designmodo/startup-demo)).
+If you need fully automatic selling system of your HTML templates (export via ZIP archive or FTP including all used files: images, js, css) with powerfull drag and drop builder - you can try this [product](http://codecanyon.net/item/azexo-composer-page-builder-for-html-templates/8074732?ref=azexo) (idea from this [project](https://github.com/designmodo/startup-demo)). Also this product can be used as static sites project management system inside agency.
 
 If you purchase this products you get:
 * High quality and tested implementation
