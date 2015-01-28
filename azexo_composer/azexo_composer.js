@@ -1541,6 +1541,8 @@
                 for (var i = 0; i < params.length; i++) {
                     params[i].closed();
                 }
+                $(window).scrollTop(scrollTop);
+                $(window).off('scroll.az-editor-modal');
             });
             $('#az-editor-modal').find('.save').click(function() {
                 var values = {};
@@ -1560,6 +1562,10 @@
             });
             $('#az-editor-modal').find('[data-dismiss="modal"]').click(function() {
                 azexo_elements.edit_stack = [];
+            });
+            var scrollTop = $(window).scrollTop();
+            $(window).on('scroll.az-editor-modal', function(){
+                $(window).scrollTop(scrollTop);
             });
             $('#az-editor-modal')[fp + 'modal']('show');
         },
@@ -8824,112 +8830,119 @@
                     }
                 });
             });
+            var uploading = false;
             $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons).click(function() {
-                $('#az-ftp-modal').remove();
-                var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
-                var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button></div>';
-                var modal = $('<div id="az-ftp-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-sm"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
-                var body = $(modal).find('.' + p + 'modal-body');
-                var host_input = $('<div class="' + p + 'form-group"><label>' + t("Host") + '</label><div><input class="' + p + 'form-control" name="host" type="text" value="' + site_settings['host'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
-                var username_input = $('<div class="' + p + 'form-group"><label>' + t("Username") + '</label><div><input class="' + p + 'form-control" name="username" type="text" value="' + site_settings['username'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
-                var password_input = $('<div class="' + p + 'form-group"><label>' + t("Password") + '</label><div><input class="' + p + 'form-control" name="password" type="password" value="' + site_settings['password'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
-                var port_input = $('<div class="' + p + 'form-group"><label>' + t("Port") + '</label><div><input class="' + p + 'form-control" name="port" type="text" value="' + site_settings['port'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
-                var directory_input = $('<div class="' + p + 'form-group"><label>' + t("Directory") + '</label><div><input class="' + p + 'form-control" name="directory" type="text" value="' + site_settings['directory'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
-                var connect = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t("Choose upload directory") + '</button>').appendTo(body).click(function() {
-                    site_settings['host'] = $(host_input).val();
-                    site_settings['username'] = $(username_input).val();
-                    site_settings['password'] = $(password_input).val();
-                    site_settings['port'] = $(port_input).val();
-                    function show_directory(directory, list) {
-                        $(browser).empty().show();
-                        $(messages).empty().hide();
-                        $(directory_input).val(directory);
-                        site_settings['directory'] = directory;
-                        if (directory != '.') {
-                            var arr = directory.split('/');
-                            arr.pop();
-                            var dir = arr.join('/')
-                            $('<li class="az-directory">' + t('< Up one level') + '</li>').appendTo(browser).click(function() {
-                                azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], dir, function(data) {
-                                    show_directory(dir, data);
-                                });
-                            });
-                            for (var i = 0; i < list.length; i++) {
-                                list[i] = list[i].replace(directory + '/', '');
-                            }
-                        }
-                        for (var i = 0; i < list.length; i++) {
-                            var path = directory + '/' + list[i];
-                            (function(path) {
-                                $('<li class="glyphicon glyphicon-folder-close">' + list[i] + '</li>').appendTo(browser).click(function() {
-                                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], path, function(data) {
-                                        show_directory(path, data);
+                if(!uploading) {
+                    $('#az-ftp-modal').remove();
+                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
+                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button></div>';
+                    var modal = $('<div id="az-ftp-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-sm"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
+                    var body = $(modal).find('.' + p + 'modal-body');
+                    var host_input = $('<div class="' + p + 'form-group"><label>' + t("Host") + '</label><div><input class="' + p + 'form-control" name="host" type="text" value="' + site_settings['host'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                    var username_input = $('<div class="' + p + 'form-group"><label>' + t("Username") + '</label><div><input class="' + p + 'form-control" name="username" type="text" value="' + site_settings['username'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                    var password_input = $('<div class="' + p + 'form-group"><label>' + t("Password") + '</label><div><input class="' + p + 'form-control" name="password" type="password" value="' + site_settings['password'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                    var port_input = $('<div class="' + p + 'form-group"><label>' + t("Port") + '</label><div><input class="' + p + 'form-control" name="port" type="text" value="' + site_settings['port'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                    var directory_input = $('<div class="' + p + 'form-group"><label>' + t("Directory") + '</label><div><input class="' + p + 'form-control" name="directory" type="text" value="' + site_settings['directory'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
+                    var connect = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t("Choose upload directory") + '</button>').appendTo(body).click(function() {
+                        site_settings['host'] = $(host_input).val();
+                        site_settings['username'] = $(username_input).val();
+                        site_settings['password'] = $(password_input).val();
+                        site_settings['port'] = $(port_input).val();
+                        function show_directory(directory, list) {
+                            $(browser).empty().show();
+                            $(messages).empty().hide();
+                            $(directory_input).val(directory);
+                            site_settings['directory'] = directory;
+                            if (directory != '.') {
+                                var arr = directory.split('/');
+                                arr.pop();
+                                var dir = arr.join('/')
+                                $('<li class="az-directory">' + t('< Up one level') + '</li>').appendTo(browser).click(function() {
+                                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], dir, function(data) {
+                                        show_directory(dir, data);
                                     });
                                 });
-                            })(path);
-                        }
-                    }
-                    azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], function(data) {
-                        if (_.isArray(data)) {
-                            $(connect).hide();
-                            show_directory(site_settings['directory'], data);
-                        } else {
-                            alert(data);
-                        }
-                    });
-                });
-                $(body).find('input').change(function() {
-                    site_settings['host'] = $(host_input).val();
-                    site_settings['username'] = $(username_input).val();
-                    site_settings['password'] = $(password_input).val();
-                    site_settings['port'] = $(port_input).val();
-                    site_settings['directory'] = $(directory_input).val();
-                    if (site_settings['host'] != '' && site_settings['username'] != '' && site_settings['password'] != '' && site_settings['port'] != '') {
-                        $(connect).show();
-                        $(upload).show();
-                    } else {
-                        $(connect).hide();
-                        $(upload).hide();
-                    }
-                })
-                var browser = $('<ul class="az-browser"></ul>').appendTo(body).hide();
-                $('<hr>').appendTo(body);
-                var upload = $('<button class="' + p + 'btn ' + p + 'btn-success">' + t("Upload current site") + '</button>').appendTo(body).click(function() {
-                    var site = get_export_site();
-                    $(browser).empty().hide();
-                    $(messages).empty().show();
-                    azexo_add_js({
-                        path: 'js/json2.min.js',
-                        loaded: 'JSON' in window,
-                        callback: function() {
-                            var count = 0;
-                            var upload_process = function(data) {
-                                if (data['errors'].length > 0) {
-                                    for (var i = 0; i < data['errors'].length; i++)
-                                        $(messages).append('<div class="' + p + 'alert ' + p + 'alert-danger" >' + data['errors'][i] + '</div>');
-                                } else {
-                                    if (data['uploaded'].length > 0) {
-                                        $(messages).append('<div class="' + p + 'alert ' + p + 'alert-info">' + data['uploaded'][0] + ' uploaded</div>');
-                                    }
-                                    if (data['count'] > 0) {
-                                        if (count == 0)
-                                            count = data['count'];
-                                        $(progress).show().find('.progress-bar').css('width', ((count - data['count']) / count * 100) + '%');
-                                        azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
-                                    } else {
-                                        $(progress).show().find('.progress-bar').css('width', '100%');
-                                        $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
-                                    }
+                                for (var i = 0; i < list.length; i++) {
+                                    list[i] = list[i].replace(directory + '/', '');
                                 }
                             }
-                            azexo_ftp_upload(JSON.stringify(site), '', JSON.stringify([]), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
+                            for (var i = 0; i < list.length; i++) {
+                                var path = directory + '/' + list[i];
+                                (function(path) {
+                                    $('<li class="glyphicon glyphicon-folder-close">' + list[i] + '</li>').appendTo(browser).click(function() {
+                                        azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], path, function(data) {
+                                            show_directory(path, data);
+                                        });
+                                    });
+                                })(path);
+                            }
                         }
+                        azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], function(data) {
+                            if (_.isArray(data)) {
+                                $(connect).hide();
+                                show_directory(site_settings['directory'], data);
+                            } else {
+                                alert(data);
+                            }
+                        });
                     });
-                });
-                $(body).find('input').trigger('change');
-                $('<hr>').appendTo(body);
-                var progress = $('<div class="progress"><div class="progress-bar" role="progressbar"></div></div>').appendTo(body).hide();
-                var messages = $('<div class="az-messages"></div>').appendTo(body).hide();
+                    $(body).find('input').change(function() {
+                        site_settings['host'] = $(host_input).val();
+                        site_settings['username'] = $(username_input).val();
+                        site_settings['password'] = $(password_input).val();
+                        site_settings['port'] = $(port_input).val();
+                        site_settings['directory'] = $(directory_input).val();
+                        if (site_settings['host'] != '' && site_settings['username'] != '' && site_settings['password'] != '' && site_settings['port'] != '') {
+                            $(connect).show();
+                            $(upload).show();
+                        } else {
+                            $(connect).hide();
+                            $(upload).hide();
+                        }
+                    })
+                    var browser = $('<ul class="az-browser"></ul>').appendTo(body).hide();
+                    $('<hr>').appendTo(body);
+                    var upload = $('<button class="' + p + 'btn ' + p + 'btn-success">' + t("Upload current site") + '</button>').appendTo(body).click(function() {
+                        var site = get_export_site();
+                        $(browser).empty().hide();
+                        $(messages).empty().show();
+                        azexo_add_js({
+                            path: 'js/json2.min.js',
+                            loaded: 'JSON' in window,
+                            callback: function() {
+                                var count = 0;
+                                var upload_process = function(data) {
+                                    if (data['errors'].length > 0) {
+                                        for (var i = 0; i < data['errors'].length; i++)
+                                            $(messages).append('<div class="' + p + 'alert ' + p + 'alert-danger" >' + data['errors'][i] + '</div>');
+                                        uploading = false;
+                                    } else {
+                                        if (data['uploaded'].length > 0) {
+                                            $(messages).append('<div class="' + p + 'alert ' + p + 'alert-info">' + data['uploaded'][0] + ' uploaded</div>');
+                                        }
+                                        if (data['count'] > 0) {
+                                            if (count == 0)
+                                                count = data['count'];
+                                            $(progress).show().find('.progress-bar').css('width', ((count - data['count']) / count * 100) + '%');
+                                            uploading = true;
+                                            azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
+                                        } else {
+                                            $(progress).show().find('.progress-bar').css('width', '100%');
+                                            $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
+                                            uploading = false;
+                                        }
+                                    }                                    
+                                }
+                                uploading = true;
+                                azexo_ftp_upload(JSON.stringify(site), '', JSON.stringify([]), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
+                            }
+                        });
+                    });
+                    $(body).find('input').trigger('change');
+                    $('<hr>').appendTo(body);
+                    var progress = $('<div class="progress"><div class="progress-bar" role="progressbar"></div></div>').appendTo(body).hide();
+                    var messages = $('<div class="az-messages"></div>').appendTo(body).hide();
+                }
                 $('#az-ftp-modal')[fp + 'modal']('show');
             }
             );
