@@ -834,3 +834,7 @@ ul.az-browser li::before {
     margin-bottom: 2px;
     font-size: 10px;    
 }
+
+.ace_editor * {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+}
