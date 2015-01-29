@@ -3,7 +3,7 @@ Azexo-Composer-WYSIWYG
 
 jQuery drag and drop HTML builder - compile Bootstrap based HTML and JS. Builder extract required JS code (about 0% - 15%) from itself and provide it with resulting HTML to allow initialization a third party JS libraries on frontend. Generated HTML contain "data" attributes which store JS libraries settings and helpers to allow parse document structure by editor.
 
-Demo: http://azexo.com/azexo_composer/
+Demo: http://azexo.com/site_builder/
 
 **How to use in example.html**
 
