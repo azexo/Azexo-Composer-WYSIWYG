@@ -729,14 +729,12 @@ div.az-link {
     margin-bottom: 0;
 }
 
-.az-nav-list > li > a {
+.nav.az-nav-list > li > a {
+    padding: 3px 15px;
     margin-left: -15px;
     margin-right: -15px;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
-}
-
-.az-nav-list > li > a {
-    padding: 3px 15px;
+    display: inline;
 }
 #az-template-elements {
     width: 200px;

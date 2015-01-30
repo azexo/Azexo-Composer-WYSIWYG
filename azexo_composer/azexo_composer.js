@@ -1920,7 +1920,17 @@
                                         $(args.node).css('outline-color', '');
                                         $(args.node).css('outline-width', '');
                                         $(args.node).css('outline-style', '');
-                                        open_editor(args.node, args.edit, args.style, editor_opener);
+                                        open_editor(args.node, args.edit, args.style, function(){
+                                            if (azexo_elements.edit_stack.length > 0) {
+                                                var s1 = $(args.node).width()*$(args.node).height();
+                                                var s2 = $(azexo_elements.edit_stack[0].node).width()*$(azexo_elements.edit_stack[0].node).height();
+                                                if(s2/s1 < 2) {
+                                                    editor_opener();
+                                                } else {
+                                                    azexo_elements.edit_stack = [];
+                                                }
+                                            }                                            
+                                        });
                                     }, 500);
                                 }
                             }
@@ -1983,13 +1993,17 @@
                                         param_name: 'el_class',
                                         description: t('If you wish to style particular content element differently, then use this field to add a class name and then refer to it in your css file.')
                                     }));
-                                    params.push(make_param_type({
+                                    var param_type = make_param_type({
                                         type: 'style',
                                         heading: t('Content style'),
                                         param_name: 'style',
                                         description: t('Style options.'),
                                         tab: t('Style')
-                                    }));
+                                    });
+                                    if(edit)
+                                        params.push(param_type);
+                                    else
+                                        params.unshift(param_type);
                                 }
                                 $(node).removeClass('editable-highlight');
                                 $(node).removeClass('styleable-highlight');
