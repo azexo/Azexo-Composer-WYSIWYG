@@ -723,7 +723,7 @@ div.az-link {
     cursor: pointer;
 }
 
-.az-nav-list {
+.nav.az-nav-list {
     padding-left: 15px;
     padding-right: 15px;
     margin-bottom: 0;
