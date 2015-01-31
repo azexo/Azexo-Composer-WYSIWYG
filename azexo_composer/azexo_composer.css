@@ -725,17 +725,26 @@ div.az-link {
 
 .nav.az-nav-list {
     padding-left: 15px;
-    padding-right: 15px;
     margin-bottom: 0;
+    display: none;
 }
 
 .nav.az-nav-list > li > a {
     padding: 3px 15px;
     margin-left: -15px;
-    margin-right: -15px;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
-    display: inline;
+    display: block;
 }
+
+#az-template-elements li:hover > .nav.az-nav-list {
+    display: block;
+}
+
+#az-template-elements > .nav.az-nav-list {
+    display: block;
+}
+
+
 #az-template-elements {
     width: 200px;
     left: -200px;

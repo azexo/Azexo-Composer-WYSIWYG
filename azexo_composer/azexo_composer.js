@@ -2174,14 +2174,25 @@
                                         for (var i = 0; i < it['_'].length; i++) {
                                             $('<div class="az-thumbnail" data-az-base="' + it['_'][i].name + '" style="background-image: url(' + encodeURI(it['_'][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
                                         }
+                                        $(panel).off('mouseleave').on('mouseleave', function(){
+                                            if(!dnd) {
+                                                $(panel).css('left', '');
+                                                $(panel).removeClass('az-thumbnails');
+                                                $(thumbnails).css('overflow-y', 'scroll');
+                                                $(thumbnails).css('display', 'none');                                            
+                                            }
+                                        });
+                                        var dnd = false;
                                         $(thumbnails).sortable({
                                             items: '.az-thumbnail',
                                             connectWith: '.az-ctnr',
                                             start: function(event, ui) {
+                                                dnd = true;
                                                 $(panel).css('left', '0px');
                                                 $(thumbnails).css('overflow-y', 'visible');
                                             },
                                             stop: function(event, ui) {
+                                                dnd = false;
                                                 $(panel).css('left', '');
                                                 $(panel).removeClass('az-thumbnails');
                                                 $(thumbnails).css('overflow-y', 'scroll');
