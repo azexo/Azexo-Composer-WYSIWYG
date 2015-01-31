@@ -65,17 +65,15 @@
             ],
             is_container: true,
             show_settings_on_create: true,
-            showed: function($, p, fp) {
-                this.baseclass.prototype.showed.apply(this, arguments);
-                var element = this;
-                $(element.dom_element).click(function() {
-                    window.open(element.attrs['link'], element.attrs['link_target']);
-                    return false;
-                });
+            show_controls: function() {
+                if (window.azexo_editor) {
+                    this.baseclass.prototype.show_controls.apply(this, arguments);
+                    $(this.dom_content_element).click(function(){return false});
+                }
             },
             render: function($, p, fp) {
                 this.dom_element = $('<div class="az-element az-link ' + this.attrs['el_class'] + '"></div>');
-                this.dom_content_element = $('<div class="az-ctnr"></div>').appendTo(this.dom_element);
+                this.dom_content_element = $('<a href="' + this.attrs['link'] + '" class="az-ctnr" target="' + this.attrs['link_target'] + '"></a>').appendTo(this.dom_element);
                 this.baseclass.prototype.render.apply(this, arguments);
             },
         },

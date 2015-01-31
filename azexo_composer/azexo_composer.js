@@ -8648,6 +8648,7 @@
             });
             make_absolute_urls(dom);
             $(dom).find('.azexo-backend').remove();
+            $(dom).find('.azexo-editor').removeClass('azexo-editor');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);

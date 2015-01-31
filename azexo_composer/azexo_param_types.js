@@ -1160,7 +1160,10 @@
                 var param = this;
                 $(icons).selectable({
                     stop: function () {
-                        var icon = $(param.dom_element).find('.ui-selected').attr('class').replace('ui-selectee', '').replace('ui-selected', '');
+                        var icon = '';
+                        var c = $(param.dom_element).find('.ui-selected').attr('class');
+                        if(c)
+                            icon = c.replace('ui-selectee', '').replace('ui-selected', '');
                         $(param.dom_element).find('input[name="' + param.param_name + '"]').val($.trim(icon));
                     }
                 });
