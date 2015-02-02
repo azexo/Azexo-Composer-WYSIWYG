@@ -2137,7 +2137,7 @@
             make_azexo_extend();
             this.try_render_unknown_elements();
             $(function() {
-                if (window.azexo_editor && Object.keys(elements).length > 0) {
+                if (window.azexo_editor && Object.keys(elements).length > 0 && azexo_containers.length > 0) {
                     var menu = {'_': []};
                     for (var path in elements) {
                         var folders = path.split('|');
@@ -3664,6 +3664,7 @@
                         window.azexo_title['Save container'] = t('Generate HTML and JS for all elements which placed in current container element.');
                         var container = connect_container(container_dom);
                         if (container) {
+                            azexo_containers.push(container);
                             $(textarea).data('azexo_composer', container);
 
                             container.save_container = function() {
