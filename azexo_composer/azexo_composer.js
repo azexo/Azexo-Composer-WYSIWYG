@@ -1564,7 +1564,7 @@
                 azexo_elements.edit_stack = [];
             });
             var scrollTop = $(window).scrollTop();
-            $(window).on('scroll.az-editor-modal', function(){
+            $(window).on('scroll.az-editor-modal', function() {
                 $(window).scrollTop(scrollTop);
             });
             $('#az-editor-modal')[fp + 'modal']('show');
@@ -1920,16 +1920,16 @@
                                         $(args.node).css('outline-color', '');
                                         $(args.node).css('outline-width', '');
                                         $(args.node).css('outline-style', '');
-                                        open_editor(args.node, args.edit, args.style, function(){
+                                        open_editor(args.node, args.edit, args.style, function() {
                                             if (azexo_elements.edit_stack.length > 0) {
-                                                var s1 = $(args.node).width()*$(args.node).height();
-                                                var s2 = $(azexo_elements.edit_stack[0].node).width()*$(azexo_elements.edit_stack[0].node).height();
-                                                if(s2/s1 < 2) {
+                                                var s1 = $(args.node).width() * $(args.node).height();
+                                                var s2 = $(azexo_elements.edit_stack[0].node).width() * $(azexo_elements.edit_stack[0].node).height();
+                                                if (s2 / s1 < 2) {
                                                     editor_opener();
                                                 } else {
                                                     azexo_elements.edit_stack = [];
                                                 }
-                                            }                                            
+                                            }
                                         });
                                     }, 500);
                                 }
@@ -2000,7 +2000,7 @@
                                         description: t('Style options.'),
                                         tab: t('Style')
                                     });
-                                    if(edit)
+                                    if (edit)
                                         params.push(param_type);
                                     else
                                         params.unshift(param_type);
@@ -2015,11 +2015,11 @@
                                 }
                                 var styles = '';
                                 for (var name in node.style) {
-                                    if ($.isNumeric(name)) {                                        
+                                    if ($.isNumeric(name)) {
                                         styles = styles + node.style[name] + ': ' + node.style.getPropertyValue(node.style[name]) + '; ';
-                                    }                                            
+                                    }
                                 }
-                                styles = rgb2hex(styles);                                
+                                styles = rgb2hex(styles);
                                 styles = styles.replace(/\-value\: /g, ': ');
                                 styles = styles.replace('border-top-color', 'border-color');
                                 styles = styles.replace('border-top-left-radius', 'border-radius');
@@ -2166,7 +2166,7 @@
                                 var li = $('<li></li>').appendTo(m);
                                 var it = item[name];
                                 (function(it) {
-                                    $('<a href="#">' + name + '</a>').appendTo(li).click(function() {                                                                                
+                                    $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
                                         var menu_item = this;
                                         $(thumbnails).empty();
                                         $(thumbnails).css('display', 'block');
@@ -2180,15 +2180,15 @@
                                                 } else {
                                                     get_all_thumbnails(item[name]);
                                                 }
-                                            }                                            
+                                            }
                                         }
-                                        get_all_thumbnails(it);                                        
-                                        $(panel).off('mouseleave').on('mouseleave', function(){
-                                            if(!dnd) {
+                                        get_all_thumbnails(it);
+                                        $(panel).off('mouseleave').on('mouseleave', function() {
+                                            if (!dnd) {
                                                 $(panel).css('left', '');
                                                 $(panel).removeClass('az-thumbnails');
                                                 $(thumbnails).css('overflow-y', 'scroll');
-                                                $(thumbnails).css('display', 'none');                                            
+                                                $(thumbnails).css('display', 'none');
                                             }
                                         });
                                         var dnd = false;
@@ -8663,7 +8663,6 @@
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
             }
-            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
@@ -8680,6 +8679,8 @@
             for (var url in css) {
                 $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
             }
+            $(dom).append("<script type='text/javascript'> window.ajaxurl = '" + toAbsoluteURL(window.ajaxurl) + "'; </script>");
+            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');
             var page_head = '<head>' + $(dom).html() + '</head>';
             return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
         }
@@ -8824,21 +8825,24 @@
             var sites_panel = $('<div class="panel panel-default"><div class="panel-heading" role="tab" id="sites-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#sites-collapse" aria-expanded="false" aria-controls="collapseOne" class="collapsed">' + t('Choose a site for edit') + '</a></h4></div><div id="sites-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="sites-heading" aria-expanded="false"><div class="panel-body"></div></div></div>').prependTo(panel).find('.panel-body');
             $('<hr>').appendTo(sites_panel);
             var sites_buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(sites_panel);
-            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('New') + '</button>').appendTo(sites_buttons).click(function() {
+            function add_site(name) {
+                $('<option value="' + name + '">' + name + '</option>').appendTo(select_site);
+                $(select_site).find('option[value="' + name + '"]').prop('selected', 'selected');
+                site_containers = {};
+                site_pages = {};
+                $(pages).empty();
+                site_containers['index'] = [];
+                for (var i = 0; i < azexo_containers.length; i++) {
+                    site_containers['index'].push(create_container(azexo_containers[i].attrs['container']));
+                }
+                add_page('index', 'Home');
+                switch_page('index');
+                $(save_button).click();                
+            }
+            var new_button = $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('New') + '</button>').appendTo(sites_buttons).click(function() {
                 var name = window.prompt(t('Please enter site name'), '');
                 if (name != '' && name != null) {
-                    $('<option value="' + name + '">' + name + '</option>').appendTo(select_site);
-                    $(select_site).find('option[value="' + name + '"]').prop('selected', 'selected');
-                    site_containers = {};
-                    site_pages = {};
-                    $(pages).empty();
-                    site_containers['index'] = [];
-                    for (var i = 0; i < azexo_containers.length; i++) {
-                        site_containers['index'].push(create_container(azexo_containers[i].attrs['container']));
-                    }
-                    add_page('index', 'Home');
-                    switch_page('index');
-                    $(save_button).click();
+                    add_site(name);
                 }
             });
             $('<button class="' + p + 'btn ' + p + 'btn-danger">' + t('Delete') + '</button>').appendTo(sites_buttons).click(function() {
@@ -8871,7 +8875,7 @@
             });
             var uploading = false;
             $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons).click(function() {
-                if(!uploading) {
+                if (!uploading) {
                     $('#az-ftp-modal').remove();
                     var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
                     var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button></div>';
@@ -8970,7 +8974,7 @@
                                             $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
                                             uploading = false;
                                         }
-                                    }                                    
+                                    }
                                 }
                                 uploading = true;
                                 azexo_ftp_upload(JSON.stringify(site), '', JSON.stringify([]), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
@@ -9028,18 +9032,25 @@
                 for (var i = 0; i < names.length; i++) {
                     $('<option value="' + names[i] + '">' + names[i] + '</option>').appendTo(select_site);
                 }
-                if (names.length == 0) {
-                    $('<option value="My site">My site</option>').appendTo(select_site);
-                } else {
-                    var current_site = $(select_site).find('option:selected').val();
-                    var params = window.location.search.replace('?','').split('&');
-                    for(var i = 0; i < params.length; i++ ){
-                        var param = params[i].split('=');
-                        if(param[0] == 'current_site') {
-                            current_site = param[1];
-                        }
+                var current_site = 'My site';
+                if($(select_site).find('option:selected').length > 0)
+                    current_site = $(select_site).find('option:selected').val();
+                var params = window.location.search.replace('?', '').split('&');
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i].split('=');
+                    if (param[0] == 'current_site') {
+                        current_site = decodeURIComponent(param[1]);
                     }
-                    load_site(decodeURIComponent(current_site));
+                }
+                if(current_site == 'create-new-site') {
+                    $(new_button).click();
+                } else {
+                    if ($(select_site).find('[value="' + current_site + '"]').length == 0) {
+                        add_site(current_site);
+                    } else {
+                        $(select_site).find('option[value="' + current_site + '"]').prop('selected', 'selected');
+                        load_site(current_site);
+                    }                                        
                 }
             });
             if (!window.azexo_editor)
