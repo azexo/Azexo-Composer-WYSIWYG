@@ -1,4 +1,4 @@
-#az-exporter *, #az-thumbnails *, #az-template-elements * {
+#az-editor-tabs, #az-exporter *, #az-thumbnails *, #az-template-elements * {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
 }
 
@@ -437,6 +437,7 @@ div.controls > .control {
 #az-editor-tabs .icons > span {
     width: 5%;
     font-size: 2em;
+    cursor: pointer;
 }
 #az-editor-tabs .icons .ui-selected {
     color: green; 

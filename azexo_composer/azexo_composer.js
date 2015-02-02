@@ -2166,14 +2166,23 @@
                                 var li = $('<li></li>').appendTo(m);
                                 var it = item[name];
                                 (function(it) {
-                                    $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
+                                    $('<a href="#">' + name + '</a>').appendTo(li).click(function() {                                                                                
                                         var menu_item = this;
                                         $(thumbnails).empty();
                                         $(thumbnails).css('display', 'block');
                                         $(panel).addClass('az-thumbnails');
-                                        for (var i = 0; i < it['_'].length; i++) {
-                                            $('<div class="az-thumbnail" data-az-base="' + it['_'][i].name + '" style="background-image: url(' + encodeURI(it['_'][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
+                                        function get_all_thumbnails(item) {
+                                            for (var name in item) {
+                                                if (name == '_') {
+                                                    for (var i = 0; i < item[name].length; i++) {
+                                                        $('<div class="az-thumbnail" data-az-base="' + item[name][i].name + '" style="background-image: url(' + encodeURI(item[name][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
+                                                    }
+                                                } else {
+                                                    get_all_thumbnails(item[name]);
+                                                }
+                                            }                                            
                                         }
+                                        get_all_thumbnails(it);                                        
                                         $(panel).off('mouseleave').on('mouseleave', function(){
                                             if(!dnd) {
                                                 $(panel).css('left', '');
@@ -8600,6 +8609,7 @@
     var original_head = '';
     var original_body = '';
     var original_body_attributes = '';
+    var site_name = '';
     var site_containers = {};
     var site_pages = {};
     var site_settings = {host: '', username: '', password: '', port: '21', directory: '.'};
@@ -8653,6 +8663,7 @@
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
             }
+            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
@@ -8682,6 +8693,8 @@
             }
             for (var i = 0; i < azexo_containers.length; i++) {
                 azexo_containers[i].saveable = false;
+                $(azexo_containers[i].controls).remove();
+                azexo_containers[i].show_controls();
             }
             original_head = $('head').html();
             original_body = $('body').html();
@@ -8978,6 +8991,7 @@
             function load_site(name) {
                 azexo_load_site(name, function(data) {
                     var site = $.parseJSON(data);
+                    site_name = name;
                     site_containers = {};
                     site_pages = site.pages;
                     site_settings = site.settings;
@@ -9017,7 +9031,15 @@
                 if (names.length == 0) {
                     $('<option value="My site">My site</option>').appendTo(select_site);
                 } else {
-                    load_site($(select_site).find('option:selected').val());
+                    var current_site = $(select_site).find('option:selected').val();
+                    var params = window.location.search.replace('?','').split('&');
+                    for(var i = 0; i < params.length; i++ ){
+                        var param = params[i].split('=');
+                        if(param[0] == 'current_site') {
+                            current_site = param[1];
+                        }
+                    }
+                    load_site(decodeURIComponent(current_site));
                 }
             });
             if (!window.azexo_editor)
