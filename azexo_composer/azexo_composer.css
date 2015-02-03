@@ -820,6 +820,11 @@ div.az-link {
     text-align: left;
 }
 
+#az-exporter .btn-toolbar .btn-group {
+    float: none;
+    margin-bottom: 5px;
+}
+
 ul.az-browser, .az-messages {
     height: 200px;
     overflow-y: scroll;

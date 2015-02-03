@@ -8613,7 +8613,7 @@
     var site_name = '';
     var site_containers = {};
     var site_pages = {};
-    var site_settings = {host: '', username: '', password: '', port: '21', directory: '.'};
+    var site_settings = {theme: [], host: '', username: '', password: '', port: '21', directory: '.'};
     function enable_exporter() {
         function make_absolute_urls(dom) {
             $(dom).find('link[href]').each(function() {
@@ -8631,6 +8631,22 @@
                 });
                 $(this).attr('style', style);
             });
+        }
+        function make_theme_styles(settings) {
+            var styles = '<style>';
+            for (var i = 0; i < settings.length; i++) {
+                var v = settings[i].value;
+                if (settings[i].type == 'integer_slider') {
+                    v += 'px';
+                }
+                if (settings[i].type == 'image') {
+                    v = 'url("' + v + '")';
+                }
+                if('selector' in settings[i] && 'property' in settings[i]) 
+                    styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ';}';
+            }
+            styles += '</style>';
+            return styles;
         }
         function get_page_html(containers, loader, title) {
             var js = {};
@@ -8682,6 +8698,7 @@
             }
             $(dom).append("<script type='text/javascript'> window.ajaxurl = '" + toAbsoluteURL(window.ajaxurl) + "'; </script>");
             $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');
+            $(dom).append(make_theme_styles(site_settings.theme));
             var page_head = '<head>' + $(dom).html() + '</head>';
             return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
         }
@@ -8708,7 +8725,10 @@
             });
             $('<hr>').appendTo(panel);
             $('<h4>' + t('Current site') + '</h4>').appendTo(panel);
-            var buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(panel);
+            var toolbar = $('<div class="' + p + 'btn-toolbar"></div>').appendTo(panel);
+            var buttons1 = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(toolbar);
+            var buttons2 = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(toolbar);
+            var buttons3 = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(toolbar);
             $('<hr>').appendTo(panel);
             function switch_page(name) {
                 for (var i = 0; i < azexo_containers.length; i++) {
@@ -8743,7 +8763,7 @@
                 container.showed($, p, fp);
                 return container;
             }
-            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Add page') + '</button>').appendTo(buttons).click(function() {
+            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Add page') + '</button>').appendTo(buttons1).click(function() {
                 var name = window.prompt(t('Please enter page name'), '');
                 if (name != '' && name != null) {
                     site_containers[name] = [];
@@ -8755,7 +8775,7 @@
                 }
                 return false;
             });
-            $('<button class="' + p + 'btn ' + p + 'btn-danger">' + t('Remove page') + '</button>').appendTo(buttons).click(function() {
+            $('<button class="' + p + 'btn ' + p + 'btn-danger">' + t('Remove page') + '</button>').appendTo(buttons1).click(function() {
                 if ($(pages).find('a').length > 1) {
                     var name = $(pages).find('.' + p + 'active').text();
                     $(pages).find('.' + p + 'active').remove();
@@ -8774,7 +8794,7 @@
                 }
                 return site;
             }
-            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('ZIP download') + '</button>').appendTo(buttons).click(function() {
+            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('ZIP download') + '</button>').appendTo(buttons2).click(function() {
                 var site = get_export_site();
                 azexo_add_js({
                     path: 'js/json2.min.js',
@@ -8838,7 +8858,7 @@
                 }
                 add_page('index', 'Home');
                 switch_page('index');
-                $(save_button).click();                
+                $(save_button).click();
             }
             var new_button = $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('New') + '</button>').appendTo(sites_buttons).click(function() {
                 var name = window.prompt(t('Please enter site name'), '');
@@ -8851,7 +8871,7 @@
                 $(select_site).find('option:selected').remove();
                 $(select_site).trigger('change');
             });
-            var save_button = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t('Save') + '</button>').appendTo(buttons).click(function() {
+            var save_button = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t('Save') + '</button>').appendTo(buttons2).click(function() {
                 var site = {};
                 site.settings = site_settings;
                 site.current_page = $(name_input).val();
@@ -8875,7 +8895,7 @@
                 });
             });
             var uploading = false;
-            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons).click(function() {
+            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons2).click(function() {
                 if (!uploading) {
                     $('#az-ftp-modal').remove();
                     var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
@@ -9000,6 +9020,8 @@
                     site_containers = {};
                     site_pages = site.pages;
                     site_settings = site.settings;
+                    $(theme_styles).empty();
+                    $(theme_styles).append(make_theme_styles(site_settings.theme));
                     $(pages).empty();
                     for (var page_name in site.pages) {
                         site_containers[page_name] = new Array(azexo_containers.length);
@@ -9034,7 +9056,7 @@
                     $('<option value="' + names[i] + '">' + names[i] + '</option>').appendTo(select_site);
                 }
                 var current_site = 'My site';
-                if($(select_site).find('option:selected').length > 0)
+                if ($(select_site).find('option:selected').length > 0)
                     current_site = $(select_site).find('option:selected').val();
                 var params = window.location.search.replace('?', '').split('&');
                 for (var i = 0; i < params.length; i++) {
@@ -9043,7 +9065,7 @@
                         current_site = decodeURIComponent(param[1]);
                     }
                 }
-                if(current_site == 'create-new-site') {
+                if (current_site == 'create-new-site') {
                     $(new_button).click();
                 } else {
                     if ($(select_site).find('[value="' + current_site + '"]').length == 0) {
@@ -9051,8 +9073,58 @@
                     } else {
                         $(select_site).find('option[value="' + current_site + '"]').prop('selected', 'selected');
                         load_site(current_site);
-                    }                                        
+                    }
                 }
+            });            
+            var theme_styles = $('<div></div>').appendTo(panel);
+            function make_theme_dialog(settings, callback) {
+                var params = [];
+                var values = {};
+                for (var i = 0; i < settings.length; i++) {
+                    params.push(make_param_type(settings[i]));
+                    values[settings[i].param_name] = settings[i].value;
+                }
+                BaseParamType.prototype.show_editor(params, {name: 'Theme', attrs: values}, function(values) {
+                    for (var i = 0; i < settings.length; i++) {
+                        settings[i].value = values[settings[i].param_name];
+                    }
+                    callback(settings);
+                });
+            }
+            function make_theme_configuration_dialog(configuration, callback) {
+                var params = [];
+                params.push(make_param_type({
+                    type: 'javascript',
+                    heading: t('Configuration'),
+                    param_name: 'configuration',
+                    value: configuration,
+                }));
+                BaseParamType.prototype.show_editor(params, {name: 'Theme configuration', attrs: {configuration: configuration}}, function(values){
+                    callback(values['configuration']);
+                });
+            }            
+            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Theme') + '</button>').appendTo(buttons3).click(function() {                
+                make_theme_dialog(site_settings.theme, function(new_theme){
+                    site_settings.theme = new_theme;
+                    $(theme_styles).empty();
+                    $(theme_styles).append(make_theme_styles(site_settings.theme));
+                })
+                return false;
+            });
+            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Configuration') + '</button>').appendTo(buttons3).click(function() {                
+                azexo_add_js({
+                    path: 'js/json2.min.js',
+                    loaded: 'JSON' in window,
+                    callback: function() {
+                        var configuration = JSON.stringify(site_settings.theme, null, "\t");
+                        make_theme_configuration_dialog(configuration, function(new_configuration){                            
+                            site_settings.theme = $.parseJSON(new_configuration);
+                            $(theme_styles).empty();
+                            $(theme_styles).append(make_theme_styles(site_settings.theme));
+                        });                        
+                    }
+                });                                
+                return false;
             });
             if (!window.azexo_editor)
                 $(panel).hide();
