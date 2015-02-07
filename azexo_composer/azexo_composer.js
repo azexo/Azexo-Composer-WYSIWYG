@@ -1832,6 +1832,12 @@
             var styleable = [];
             if ('azexo_styleable' in window)
                 styleable = window.azexo_styleable;
+            var sortable = [];
+            if ('azexo_sortable' in window)
+                sortable = window.azexo_sortable;
+            var synchronizable = [];
+            if ('azexo_synchronizable' in window)
+                synchronizable = window.azexo_synchronizable;
             var icons = BaseParamType.prototype.param_types['icon'].prototype.icons.map(function(item, i, arr) {
                 return item.replace(/^/, '.').replace(/ /, '.')
             });
@@ -1900,6 +1906,8 @@
                     is_template_element: true,
                     editable: ['.az-editable'].concat(editable),
                     styleable: ['.az-styleable'].concat(styleable),
+                    sortable: ['.az-sortable'].concat(sortable),
+                    synchronizable: ['.az-synchronizable'].concat(synchronizable),
                     show_controls: function() {
                         if (window.azexo_editor) {
                             var element = this;
@@ -2046,65 +2054,205 @@
                                         $(node).attr('style', values['style']);
                                     }
                                     element.attrs['content'] = $(element.dom_content_element).html();
+                                    synchronize();
+                                    able();
                                     callback();
                                 });
                             }
-                            for (var i = 0; i < this.styleable.length; i++) {
-                                $(this.dom_element).find(this.styleable[i]).mouseenter(function() {
-                                    $(this).addClass('styleable-highlight');
-                                });
-                                $(this.dom_element).find(this.styleable[i]).mouseleave(function() {
-                                    $(this).removeClass('styleable-highlight');
-                                });
-                                $(this.dom_element).find(this.styleable[i]).click(function(e) {
-                                    if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
-                                        azexo_elements.edit_stack.push({
-                                            node: this,
-                                            edit: false,
-                                            style: true,
-                                        });
-//                                        if (azexo_elements.edit_stack.length > 1) {
-//                                            alert(t('You clicked on ' + azexo_elements.edit_stack.length + ' nested elements. Editor will be opened for each one by one.'));
-//                                        }
-                                        editor_opener();
-                                        return false;
-                                    } else {
-                                        azexo_elements.edit_stack.push({
-                                            node: this,
-                                            edit: false,
-                                            style: true,
-                                        });
-                                    }
-                                });
+                            function synchronize() {
+                                sortable_disable();
+                                for (var i = 0; i < element.synchronizable.length; i++) {
+                                    $(element.dom_content_element).find(element.synchronizable[i]).each(function() {
+                                        $(this).find('.editable-highlight').removeClass('editable-highlight');
+                                        $(this).find('.styleable-highlight').removeClass('styleable-highlight');
+                                        $(this).find('.sortable-highlight').removeClass('sortable-highlight');
+                                        $(this).find('[class=""]').removeAttr('class');
+                                        $(this).find('[style=""]').removeAttr('style');
+                                        var synchronized = $(this).data('synchronized');
+                                        if (synchronized) {
+                                            for (var i = 0; i < synchronized.length; i++) {
+                                                $(synchronized[i]).html($(this).html());
+                                            }
+                                        }
+                                        if ($(this).data('current-state')) {
+                                            $(document).trigger("azexo_synchronize", {from_node: this, old_state: $(this).data('current-state'), new_state: $(this).html()});
+                                        } else {
+                                            $(document).trigger("azexo_synchronize", {from_node: this, old_state: $(this).html(), new_state: $(this).html()});
+                                        }
+                                        $(this).data('current-state', $(this).html());
+                                        element.attrs['content'] = $(element.dom_content_element).html();
+                                    });
+                                }
+                                able();
                             }
-                            for (var i = 0; i < this.editable.length; i++) {
-                                $(this.dom_element).find(this.editable[i]).mouseenter(function() {
-                                    $(this).addClass('editable-highlight');
-                                });
-                                $(this.dom_element).find(this.editable[i]).mouseleave(function() {
-                                    $(this).removeClass('editable-highlight');
-                                });
-                                $(this.dom_element).find(this.editable[i]).click(function(e) {
-                                    if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
-                                        azexo_elements.edit_stack.push({
-                                            node: this,
-                                            edit: true,
-                                            style: true,
-                                        });
-//                                        if (azexo_elements.edit_stack.length > 1) {
-//                                            alert(t('You clicked on ' + azexo_elements.edit_stack.length + ' nested elements. Editor will be opened for each one by one.'));
-//                                        }
-                                        editor_opener();
-                                        return false;
-                                    } else {
-                                        azexo_elements.edit_stack.push({
-                                            node: this,
-                                            edit: true,
-                                            style: true,
-                                        });
+                            $(document).on("azexo_synchronize", function(sender, data) {
+                                sortable_disable();
+                                for (var i = 0; i < element.synchronizable.length; i++) {
+                                    $(element.dom_content_element).find(element.synchronizable[i]).each(function() {
+                                        $(this).find('.editable-highlight').removeClass('editable-highlight');
+                                        $(this).find('.styleable-highlight').removeClass('styleable-highlight');
+                                        $(this).find('.sortable-highlight').removeClass('sortable-highlight');
+                                        $(this).find('[class=""]').removeAttr('class');
+                                        $(this).find('[style=""]').removeAttr('style');
+                                        if (this != data.from_node) {
+                                            if ($(this).html() == data.old_state) {
+                                                var synchronized = $(data.from_node).data('synchronized');
+                                                if (!synchronized)
+                                                    synchronized = [];
+                                                synchronized.push(this);
+                                                synchronized = $.unique(synchronized);
+                                                $(data.from_node).data('synchronized', synchronized);
+
+                                                synchronized = $(this).data('synchronized');
+                                                if (!synchronized)
+                                                    synchronized = [];
+                                                synchronized.push(data.from_node);
+                                                synchronized = $.unique(synchronized);
+                                                $(this).data('synchronized', synchronized);
+                                                
+                                                $(this).html(data.new_state);
+                                                element.attrs['content'] = $(element.dom_content_element).html();
+                                            }
+                                        }
+                                    });
+                                }
+                                able();
+                            });
+                            function sortable_disable() {
+                                for (var i = 0; i < element.sortable.length; i++) {
+                                    if ($(element.dom_content_element).find(element.sortable[i]).hasClass('ui-sortable')) {
+                                        $(element.dom_content_element).find(element.sortable[i]).sortable('destroy');
+                                        $(element.dom_content_element).find(element.sortable[i]).find('.ui-sortable-handle').removeClass('ui-sortable-handle');
                                     }
-                                });
+                                }
                             }
+                            function sortable_enable() {
+                                for (var i = 0; i < element.sortable.length; i++) {
+                                    $(element.dom_element).find(element.sortable[i]).sortable({
+                                        items: '> *',
+                                        placeholder: 'az-sortable-placeholder',
+                                        forcePlaceholderSize: true,
+                                        start: function(event, ui) {
+                                            $(ui.item).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
+                                        },
+                                        update: function(event, ui) {
+                                            synchronize();
+                                        },
+                                        over: function(event, ui) {
+                                            ui.placeholder.attr('class', ui.helper.attr('class'));
+                                            ui.placeholder.removeClass('ui-sortable-helper');
+                                            ui.placeholder.addClass('az-sortable-placeholder');
+                                        }
+                                    });
+                                }
+                            }
+                            function able() {
+                                for (var i = 0; i < element.styleable.length; i++) {
+                                    $(element.dom_element).find(element.styleable[i]).off('mouseenter.az-able').on('mouseenter.az-able', function() {
+                                        $(this).addClass('styleable-highlight');
+                                    });
+                                    $(element.dom_element).find(element.styleable[i]).off('mouseleave.az-able').on('mouseleave.az-able', function() {
+                                        $(this).removeClass('styleable-highlight');
+                                    });
+                                    $(element.dom_element).find(element.styleable[i]).off('click.az-able').on('click.az-able', function(e) {
+                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                            azexo_elements.edit_stack.push({
+                                                node: this,
+                                                edit: false,
+                                                style: true,
+                                            });
+                                            editor_opener();
+                                            return false;
+                                        } else {
+                                            azexo_elements.edit_stack.push({
+                                                node: this,
+                                                edit: false,
+                                                style: true,
+                                            });
+                                        }
+                                    });
+                                }
+                                for (var i = 0; i < element.editable.length; i++) {
+                                    $(element.dom_element).find(element.editable[i]).off('mouseenter.az-able').on('mouseenter.az-able', function() {
+                                        $(this).addClass('editable-highlight');
+                                    });
+                                    $(element.dom_element).find(element.editable[i]).off('mouseleave.az-able').on('mouseleave.az-able', function() {
+                                        $(this).removeClass('editable-highlight');
+                                    });
+                                    $(element.dom_element).find(element.editable[i]).off('click.az-able').on('click.az-able', function(e) {
+                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                            azexo_elements.edit_stack.push({
+                                                node: this,
+                                                edit: true,
+                                                style: true,
+                                            });
+                                            editor_opener();
+                                            return false;
+                                        } else {
+                                            azexo_elements.edit_stack.push({
+                                                node: this,
+                                                edit: true,
+                                                style: true,
+                                            });
+                                        }
+                                    });
+                                }
+                                for (var i = 0; i < element.sortable.length; i++) {
+                                    (function(i) {
+                                        var timeoutId = null;
+                                        function show_controls(node) {
+                                            if ($(node).hasClass('sortable-highlight')) {
+                                                $(node).find('.az-sortable-controls').remove();
+                                                var controls = $('<div class="az-sortable-controls"></div>').appendTo(node);
+                                                var clone = $('<div class="az-sortable-clone glyphicon glyphicon-repeat"></div>').appendTo(controls).click(function() {
+                                                    sortable_disable();
+                                                    $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
+                                                    $(node).clone().insertAfter(node);
+                                                    element.attrs['content'] = $(element.dom_content_element).html();
+                                                    synchronize();
+                                                    able();
+                                                    return false;
+                                                });
+                                                $(clone).css('line-height', $(clone).height() + 'px').css('font-size', $(clone).height() / 2 + 'px');
+                                                var remove = $('<div class="az-sortable-remove glyphicon glyphicon-remove"></div>').appendTo(controls).click(function() {
+                                                    sortable_disable();
+                                                    $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
+                                                    $(node).remove();
+                                                    element.attrs['content'] = $(element.dom_content_element).html();
+                                                    synchronize();
+                                                    able();
+                                                    return false;
+                                                });
+                                                $(remove).css('line-height', $(remove).height() + 'px').css('font-size', $(remove).height() / 2 + 'px');
+                                            }
+                                        }
+                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mousemove.az-able').on('mousemove.az-able', function() {
+                                            var node = this;
+                                            if ($(node).hasClass('sortable-highlight')) {
+                                                clearTimeout(timeoutId);
+                                                timeoutId = setTimeout(function() {
+                                                    show_controls(node);
+                                                }, 1000);
+                                            }
+                                        });
+                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-able').on('mouseenter.az-able', function() {
+                                            var node = this;
+                                            $(this).addClass('sortable-highlight');
+                                            timeoutId = setTimeout(function() {
+                                                show_controls(node);
+                                            }, 1000);
+                                        });
+                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-able').on('mouseleave.az-able', function() {
+                                            clearTimeout(timeoutId);
+                                            $(this).removeClass('sortable-highlight');
+                                            $(this).find('.az-sortable-controls').remove();
+                                        });
+                                    })(i);
+                                }
+                                sortable_enable();
+                            }
+                            able();
+                            synchronize();
                         }
                     },
                     showed: function($, p, fp) {
@@ -8642,7 +8790,7 @@
                 if (settings[i].type == 'image') {
                     v = 'url("' + v + '")';
                 }
-                if('selector' in settings[i] && 'property' in settings[i]) 
+                if ('selector' in settings[i] && 'property' in settings[i])
                     styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ';}';
             }
             styles += '</style>';
@@ -8871,7 +9019,7 @@
                 $(select_site).find('option:selected').remove();
                 $(select_site).trigger('change');
             });
-            var save_button = $('<button class="' + p + 'btn ' + p + 'btn-primary">' + t('Save') + '</button>').appendTo(buttons2).click(function() {
+            var save_button = $('<button class="az-save-site ' + p + 'btn ' + p + 'btn-primary">' + t('Save') + '</button>').appendTo(buttons2).click(function() {
                 var site = {};
                 site.settings = site_settings;
                 site.current_page = $(name_input).val();
@@ -8895,7 +9043,7 @@
                 });
             });
             var uploading = false;
-            $('<button class="' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons2).click(function() {
+            $('<button class="az-publish-site ' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons2).click(function() {
                 if (!uploading) {
                     $('#az-ftp-modal').remove();
                     var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
@@ -9075,7 +9223,7 @@
                         load_site(current_site);
                     }
                 }
-            });            
+            });
             var theme_styles = $('<div></div>').appendTo(panel);
             function make_theme_dialog(settings, callback) {
                 var params = [];
@@ -9099,31 +9247,31 @@
                     param_name: 'configuration',
                     value: configuration,
                 }));
-                BaseParamType.prototype.show_editor(params, {name: 'Theme configuration', attrs: {configuration: configuration}}, function(values){
+                BaseParamType.prototype.show_editor(params, {name: 'Theme configuration', attrs: {configuration: configuration}}, function(values) {
                     callback(values['configuration']);
                 });
-            }            
-            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Theme') + '</button>').appendTo(buttons3).click(function() {                
-                make_theme_dialog(site_settings.theme, function(new_theme){
+            }
+            $('<button class="az-theme-settings ' + p + 'btn ' + p + 'btn-default">' + t('Theme') + '</button>').appendTo(buttons3).click(function() {
+                make_theme_dialog(site_settings.theme, function(new_theme) {
                     site_settings.theme = new_theme;
                     $(theme_styles).empty();
                     $(theme_styles).append(make_theme_styles(site_settings.theme));
                 })
                 return false;
             });
-            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Configuration') + '</button>').appendTo(buttons3).click(function() {                
+            $('<button class="' + p + 'btn ' + p + 'btn-default">' + t('Configuration') + '</button>').appendTo(buttons3).click(function() {
                 azexo_add_js({
                     path: 'js/json2.min.js',
                     loaded: 'JSON' in window,
                     callback: function() {
                         var configuration = JSON.stringify(site_settings.theme, null, "\t");
-                        make_theme_configuration_dialog(configuration, function(new_configuration){                            
+                        make_theme_configuration_dialog(configuration, function(new_configuration) {
                             site_settings.theme = $.parseJSON(new_configuration);
                             $(theme_styles).empty();
                             $(theme_styles).append(make_theme_styles(site_settings.theme));
-                        });                        
+                        });
                     }
-                });                                
+                });
                 return false;
             });
             if (!window.azexo_editor)

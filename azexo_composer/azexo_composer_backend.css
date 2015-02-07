@@ -1,0 +1,771 @@
+#az-editor-tabs, #az-exporter *, #az-thumbnails *, #az-template-elements * {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+
+.azexo-editor.azexo.az-container {
+    /*overflow: visible;*/
+    margin-top: 34px !important;
+}
+
+div.azexo.az-container > .controls {
+    right: 0%;
+    left: auto;
+    top: -34px;
+    -moz-transform: none;
+    -o-transform: none;
+    -webkit-transform: none;
+    -ms-transform: none;
+    transform: none;
+}
+
+.az-step.step:not(.active) > .controls{
+    top: 0px !important;
+    left: 0px !important;
+    display:none !important;
+}
+
+.az-step-controls {
+    z-index: 1;
+}
+
+.az-element > .controls, .az-presentation > div > .controls, .az-presentation > div > div > .controls {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 100;
+    display:none;
+    text-align: center;
+    word-wrap: normal;
+    white-space: nowrap;
+    -moz-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.azexo-editor.az-container, .azexo-editor .az-container, .azexo-editor .az-ctnr {
+    min-height: 5px !important;
+}
+
+.azexo-editor div.az-container,
+.azexo-editor div.az-template, 
+/*.azexo-editor div.az-row,
+.azexo-editor div.az-grid,
+.azexo-editor div.az-tabs, 
+.azexo-editor div.az-accordion, 
+.azexo-editor div.az-carousel,
+.azexo-editor div.az-presentation,*/
+.azexo-editor div.az-column, 
+.azexo-editor div.az-section, 
+.azexo-editor div.az-link, 
+.azexo-editor li.az-item, 
+.azexo-editor div.az-tab, 
+.azexo-editor div.az-toggle, 
+.azexo-editor div.az-slide, 
+.azexo-editor div.az-step, 
+.azexo-editor div.az-panel, 
+.azexo-editor div.az-jumbotron , 
+.azexo-editor div.az-layers, 
+.azexo-editor form.az-form, 
+.azexo-editor div.az-wizard {
+    margin-top: 23px !important;
+}
+div.az-container > .controls,
+div.az-template > .controls,
+div.az-row > .controls,
+div.az-section > .controls,
+div.az-grid > .controls,
+div.az-tabs > .controls, 
+div.az-accordion > .controls, 
+div.az-carousel > .controls,
+div.az-presentation > .controls,
+div.az-link > .controls, 
+div.az-column > .controls, 
+li.az-item > .controls, 
+div.az-tab > .controls, 
+div.az-toggle > .controls, 
+div.az-slide > .controls, 
+div.az-step > .controls, 
+div.az-panel > .controls, 
+div.az-jumbotron > .controls, 
+div.az-layers > .controls, 
+form.az-form > .controls, 
+div.az-wizard > .controls {
+    left: 0px;
+    top: -23px;
+    -moz-transform: none;
+    -o-transform: none;
+    -webkit-transform: none;
+    -ms-transform: none;
+    transform: none;
+}
+
+div.azexo-editor div.az-wizard:before,
+div.azexo-editor div.az-ctnr:before,
+div.azexo-editor div.az-element.az-row:before,
+div.azexo-editor div.az-element.az-section:before,
+div.azexo-editor div.az-element.az-grid ul:before,
+div.azexo-editor div.az-tabs .tab-content:before,
+div.azexo-editor div.az-accordion.az-element:before {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.azexo-editor .az-element:hover > .controls,
+.azexo-editor .az-element.form-group:hover > .controls,
+.azexo-editor .az-element > .controls:hover {
+    display: block;
+}
+div.az-container:hover > .controls {
+    display: block;
+}
+
+div.controls > .control {    
+    display: inline-block;
+    float:none;
+}
+
+.az-element > .controls:hover {
+    z-index: 101;
+}
+
+.azexo-editor div.az-layers:hover > .az-ctnr:after, .azexo-editor .az-layers:hover > .az-ctnr > .az-element:after, .azexo-editor .az-presentation:hover .az-step:after {
+    content: '.';
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px dotted #222;
+    border: 1px dotted rgba(0,0,0,0.4);
+}
+
+.azexo-editor .az-row:hover .az-ctnr:after {
+    content: '';
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    outline: 2px dashed #EBEBEB;
+    outline: 2px dashed rgba(125,125,125,0.4);
+}
+
+.azexo-editor .az-element:not(.az-row):hover:after{
+    content: ' ';
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: grey;
+    opacity: 0.2;
+}
+
+.az-empty {
+    display: none;
+}
+.az-empty h1{
+    margin: 0;
+    padding: 0;
+}
+
+.azexo-editor .az-empty {
+    display: block;
+    text-align: center;    
+    cursor: pointer;
+    position: relative;
+    min-height: 200px;
+    font-size: 10px;
+}
+.azexo-editor .az-layers > .az-ctnr > .az-empty {
+    min-height: 100%;
+}
+
+.azexo-editor .az-empty .well, .azexo-editor .az-empty .ax-well {
+    z-index: 0;
+}
+.azexo-editor .az-empty .well:hover, .azexo-editor .az-empty .ax-well:hover {
+    z-index: 1;
+}
+
+.azexo-editor .az-empty .top{
+    position: absolute;
+    left: 50%;
+    top: 0%;
+    width: 30%;
+    -moz-transform: translate(-50%, 0%);
+    -o-transform: translate(-50%, 0%);
+    -webkit-transform: translate(-50%, 0%);
+    -ms-transform: translate(-50%, 0%);
+    transform: translate(-50%, 0%);
+}
+.azexo-editor .az-empty .top-left{
+    text-align: left;
+    position: absolute;
+    left: 2%;
+    top: 0%;
+    width: 30%;
+}
+.azexo-editor .az-empty .bottom-left{
+    text-align: left;
+    position: absolute;
+    left: 2%;
+    bottom: 0%;
+    width: 30%;
+}
+.azexo-editor .az-empty .bottom{
+    position: absolute;
+    left: 50%;
+    bottom: 0%;
+    width: 40%;
+    -moz-transform: translate(-50%, 0%);
+    -o-transform: translate(-50%, 0%);
+    -webkit-transform: translate(-50%, 0%);
+    -ms-transform: translate(-50%, 0%);
+    transform: translate(-50%, 0%);
+}
+.azexo-editor .az-empty .top-right{
+    text-align: right;
+    position: absolute;
+    right: 2%;
+    top: 0%;
+    width: 30%;
+}
+.azexo-editor .az-empty .bottom-right{
+    text-align: right;
+    position: absolute;
+    right: 2%;
+    bottom: 0%;
+    width: 30%;
+}
+.azexo-editor .az-empty::after {
+    content: "+";
+    font-family: 'Glyphicons Halflings';
+    font-style: noraz-layersmal;
+    font-weight: 400;
+    font-size: 3em;
+    opacity: 0.1;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -moz-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.az-highlight {
+    z-index: 10000 !important;
+}
+.az-highlight .controls{
+    display: block !important;
+}
+
+.az-sortable-placeholder {
+    background-image: 
+        -webkit-repeating-linear-gradient(45deg,
+        rgba(0,0,0,0.1) 0px, 
+        rgba(0,0,0,0.1) 5px, 
+        transparent 5px, 
+        transparent 10px);
+    background-image: 
+        repeating-linear-gradient(45deg,
+        rgba(0,0,0,0.1) 0px, 
+        rgba(0,0,0,0.1) 5px, 
+        transparent 5px, 
+        transparent 10px);
+}
+
+.ui-resizable { position: relative;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block;}
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0; }
+.ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0; }
+.ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 7px; left: -5px; top: 0; height: 100%; }
+.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
+.ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
+.ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
+.ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}
+
+.az-row > .controls >  .popover, .az-row > .controls >  .ax-popover {
+    max-width: 500px;
+    min-width: 340px;
+}
+
+.az-row > .controls >  .popover.right, .az-row > .controls >  .ax-popover.ax-right {
+    margin-left: 0px;
+}
+
+
+.az-form > .controls >  .popover, .az-form > .controls >  .ax-popover {
+    min-width: 256px;
+}
+
+.popover-title, .ax-popover-title {
+    text-align: center;
+}
+
+.row-layouts {
+    text-align: center;
+    word-wrap: normal;
+    white-space: nowrap;
+}
+.set-columns-layout {
+    background-position: center center;
+    background-repeat: no-repeat;
+    width: 23px;
+    height: 16px;    
+    margin-right: 5px !important;
+    position: relative;
+    float: left;    
+}
+
+.set-columns-layout:hover {
+    cursor: pointer;
+}
+
+.l_11 {
+    background-image: url(images/1.png);
+}
+.l_12_12 {
+    background-image: url(images/12_12.png);
+}
+.l_23_13 {
+    background-image: url(images/23_13.png);
+}
+.l_13_13_13 {
+    background-image: url(images/13_13_13.png);
+}
+.l_13_23 {
+    background-image: url(images/13_23.png);
+}
+.l_14_14_14_14 {
+    background-image: url(images/14_14_14_14.png);
+}
+.l_23_13 {
+    background-image: url(images/23_13.png);
+}
+.l_14_34 {
+    background-image: url(images/14_34.png);
+}
+.l_14_12_14 {
+    background-image: url(images/14_12_14.png);
+}
+.l_56_16 {
+    background-image: url(images/56_16.png);
+}
+.l_16_46_16 {
+    background-image: url(images/14_46_16.png);
+}
+.l_16_16_16_12 {
+    background-image: url(images/16_16_16_12.png);
+}
+.l_16_16_16_16_16_16 {
+    background-image: url(images/16_16_16_16_16_16.png);
+}
+
+
+
+#az-elements-tabs .tab-pane .well, #az-elements-tabs .ax-tab-pane .ax-well {
+    width: 160px;
+    margin: 5px;
+    height: 130px;
+    padding: 5px;
+}
+#az-elements-tabs .tab-pane .well:hover, #az-elements-tabs .ax-tab-pane .ax-well:hover {
+    cursor: pointer;
+}
+#az-elements-tabs .tab-pane .well i, #az-elements-tabs .ax-tab-pane .ax-well i{
+    display: block;
+    font-size: 40px;
+}
+
+
+#az-editor-tabs .icons {
+    height: 350px;
+    overflow: scroll;
+}
+#az-editor-tabs .icons > span {
+    width: 5%;
+    font-size: 2em;
+    cursor: pointer;
+}
+#az-editor-tabs .icons .ui-selected {
+    color: green; 
+}
+
+
+#az-editor-tabs .style .layout input {
+    position: absolute;
+    text-align: center;
+    padding: 3px 0;
+    height: 24px;
+    width: 34px;
+    margin: 0;
+    border: 1px solid #bdbdbd;
+    font-size: 11px;
+    line-height: 11px;
+}
+#az-editor-tabs .style .settings {
+    margin-top: 44px;
+}
+#az-editor-tabs .style .layout {
+    padding-top: 57px;
+}
+#az-editor-tabs .style .layout .margin, #az-editor-tabs .style .layout .border, #az-editor-tabs .style .layout .padding, #az-editor-tabs .style .layout .content {
+    margin: 44px;
+    position: relative;
+    border: 1px solid #bababa;
+}
+
+#az-editor-tabs .style .layout input[name="margin_top"], #az-editor-tabs .style .layout input[name="border_top_width"], #az-editor-tabs .style .layout input[name="padding_top"] {
+    top: 11px;
+    left: 50%;
+    margin-left: -17px;
+}
+
+#az-editor-tabs .style .layout input[name="margin_right"], #az-editor-tabs .style .layout input[name="border_right_width"], #az-editor-tabs .style .layout input[name="padding_right"] {
+    top: 50%;
+    right: 5px;
+    margin-top: -12px;
+}
+
+#az-editor-tabs .style .layout input[name="margin_bottom"], #az-editor-tabs .style .layout input[name="border_bottom_width"], #az-editor-tabs .style .layout input[name="padding_bottom"] {
+    bottom: 11px;
+    left: 50%;
+    margin-left: -17px;
+}
+
+#az-editor-tabs .style .layout input[name="margin_left"], #az-editor-tabs .style .layout input[name="border_left_width"], #az-editor-tabs .style .layout input[name="padding_left"] {
+    top: 50%;
+    left: 5px;
+    margin-top: -12px;
+}
+
+#az-editor-tabs .style .layout label {
+    display: inline-block;
+    position: absolute;
+    font-size: 11px;
+    line-height: 9px;
+    top: 6px;
+    left: 5px;
+    color: #2C2C2C;
+    margin: 0;
+    padding: 0;
+}
+#az-editor-tabs .style .layout .content {
+    border: none;
+    height: 50px;
+    padding: 0px;
+    text-align: center;
+    font-size: 10px;
+    line-height: 11px;
+    box-sizing: border-box;
+}
+
+#az-editor-tabs  table tr td {
+    text-align: center;
+}
+
+/*#az-editor-tabs  table tr input.image, #az-editor-tabs  table tr input.tags, #az-editor-tabs  table tr button.remove {
+    margin-top: 20px;
+}*/
+
+#az-js-animation-form .properties .row, #az-js-animation-form .properties .ax-row {
+    margin-bottom: 5px;
+}
+
+#jstree {
+    margin-top: 10px;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+#images-preview {
+    margin-top: 10px;
+}
+
+#images-preview > div {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: inline-block;
+    position: relative;
+    cursor: move;
+}
+
+#images-preview .delete {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 0px;
+    top: 0px;
+    background-color: red;
+    z-index: 3;
+    display: inline-block;
+    cursor: pointer;
+}
+
+
+.glyphicon, .ax-glyphicon {
+    font-family: 'Glyphicons Halflings' !important;
+}
+
+div.modal-lg, div.ax-modal-lg {
+    width: 900px;
+}
+
+div.modal-dialog, div.ax-modal-dialog {
+    padding: 0px;
+}
+
+
+.azexo .iris-picker, .azexo .iris-picker * {
+    -moz-box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box;
+}
+
+.az-left-sidebar, .az-right-sidebar {
+    background-color: whitesmoke;
+    position: fixed;
+    top: 0px;
+    width: 400px;
+    height: 100%;
+    z-index: 5;
+    padding-top:50px;
+    padding-left:20px;
+    padding-right:20px;
+    transition: 0.2s;
+}
+.az-left-sidebar {
+    left: -400px;
+}
+.az-right-sidebar {
+    right: -400px;
+}
+
+.az-left-sidebar::after, .az-right-sidebar::after {
+    font: normal normal normal 14px/1 FontAwesome;
+    position: absolute;
+    bottom: 100px;
+    width: 50px;
+    height: 50px;
+    display: block;
+    background-color: whitesmoke;
+    vertical-align: middle;
+    line-height: 50px;
+    font-size: 25px;
+    text-align:center;
+}
+.az-left-sidebar::after {
+    content: "\f053"; 
+    right: -50px;
+}
+.az-right-sidebar::after {
+    content: "\f054"; 
+    left: -50px;
+}
+
+.az-left-sidebar:hover {
+    left: 0px;
+}
+.az-right-sidebar:hover {
+    right: 0px;
+}
+
+.editable-highlight, .editable-highlight:hover, .styleable-highlight, .styleable-highlight:hover, .sortable-highlight, .sortable-highlight:hover {
+    outline: 2px dashed gray;
+    cursor: pointer;
+}
+
+.sortable-highlight, .sortable-highlight:hover {
+    outline: 2px dotted gray;
+    cursor: move;
+}
+
+.az-sortable > * {
+    position: relative;
+}
+
+.az-sortable-controls {
+    cursor: pointer;
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: 1;
+    opacity: 0.9;
+    text-align: center;
+}
+
+.az-sortable-clone {
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 50%;
+    color: black;    
+    vertical-align: middle;
+}
+
+.az-sortable-remove {
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 50%;
+    color: black; 
+    vertical-align: middle;
+}
+
+.nav.az-nav-list {
+    padding-left: 15px;
+    margin-bottom: 0;
+    display: none;
+}
+
+.nav.az-nav-list > li > a {
+    padding: 3px 15px;
+    margin-left: -15px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+    display: block;
+}
+
+#az-template-elements li:hover > .nav.az-nav-list {
+    display: block;
+}
+
+#az-template-elements > .nav.az-nav-list {
+    display: block;
+}
+
+
+#az-template-elements {
+    width: 200px;
+    left: -200px;
+}
+#az-template-elements:hover {
+    left: 0px;
+}
+
+#az-thumbnails {
+    display:none;
+    overflow-y: scroll;
+    height: 100%;
+    width: 200px;
+    position: absolute;
+    left: 200px;
+    top: 0px;
+    background-color: grey;
+    padding: 10px;
+}
+
+#az-template-elements.az-thumbnails::after {
+    right: -250px;
+}
+
+
+.az-thumbnail {
+    height: 50px;
+    cursor: move;
+    margin-bottom: 10px;
+}
+
+#az-exporter {
+    padding-top: 20px;
+}
+
+#az-exporter::after {
+    content: "\f019"; 
+}
+
+#az-template-elements::after {
+    content: "\f1b2"; 
+}
+
+
+#az-template-elements-welcome {
+    background-color: whitesmoke;
+    position: fixed;
+    bottom: 100px;
+    left: 100px;
+    width: 600px;
+    z-index: 5;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: left;
+}
+
+#az-exporter-welcome {
+    background-color: whitesmoke;
+    position: fixed;
+    bottom: 100px;
+    right: 100px;
+    width: 300px;
+    z-index: 5;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: left;
+}
+
+#az-exporter .btn-toolbar .btn-group {
+    float: none;
+    margin-bottom: 5px;
+}
+
+ul.az-browser, .az-messages {
+    height: 200px;
+    overflow-y: scroll;
+}
+
+ul.az-browser {
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+ul.az-browser li {
+    cursor: pointer;
+    display: block;
+    margin: 5px;    
+}
+
+ul.az-browser li::before {
+    margin-right: 10px;
+}
+
+
+.az-messages div{
+    padding: 5px;
+    margin-bottom: 2px;
+    font-size: 10px;    
+}
+
+.ace_editor * {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+}
