@@ -2059,6 +2059,14 @@
                                     callback();
                                 });
                             }
+                            function make_node_signature(dom) {
+                                var cdom = $(dom).clone();
+                                $(cdom).find('[class]').removeAttr('class');
+                                $(cdom).find('[style]').removeAttr('style');
+                                var html = $(cdom).html();
+                                html = html.replace(/\s*/g, '');
+                                return html;
+                            }
                             function synchronize() {
                                 sortable_disable();
                                 for (var i = 0; i < element.synchronizable.length; i++) {
@@ -2077,9 +2085,9 @@
                                         if ($(this).data('current-state')) {
                                             $(document).trigger("azexo_synchronize", {from_node: this, old_state: $(this).data('current-state'), new_state: $(this).html()});
                                         } else {
-                                            $(document).trigger("azexo_synchronize", {from_node: this, old_state: $(this).html(), new_state: $(this).html()});
+                                            $(document).trigger("azexo_synchronize", {from_node: this, old_state: make_node_signature(this), new_state: $(this).html()});
                                         }
-                                        $(this).data('current-state', $(this).html());
+                                        $(this).data('current-state', make_node_signature(this));
                                         element.attrs['content'] = $(element.dom_content_element).html();
                                     });
                                 }
@@ -2095,7 +2103,7 @@
                                         $(this).find('[class=""]').removeAttr('class');
                                         $(this).find('[style=""]').removeAttr('style');
                                         if (this != data.from_node) {
-                                            if ($(this).html() == data.old_state) {
+                                            if (make_node_signature(this) == data.old_state) {
                                                 var synchronized = $(data.from_node).data('synchronized');
                                                 if (!synchronized)
                                                     synchronized = [];
