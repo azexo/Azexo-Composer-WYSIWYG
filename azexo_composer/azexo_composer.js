@@ -1393,7 +1393,7 @@
         return select;
     }
     function get_alert(message) {
-        return '<div class="' + p + 'alert ' + p + 'alert-warning ' + p + 'fade ' + p + 'in" role="alert"><button type="button" class="' + p + 'close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="' + p + 'sr-only">' + t('Close') + '</span></button>' + message + '</div>';
+        return '<div class="' + p + 'alert ' + p + 'alert-warning ' + p + 'fade ' + p + 'in" role="alert"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'alert"><span aria-hidden="true">×</span><span class="' + p + 'sr-only">' + t('Close') + '</span></button>' + message + '</div>';
     }
     $.fn.closest_descendents = function(filter) {
         var $found = $(),
@@ -1429,8 +1429,8 @@
         param_types: {},
         show_editor: function(params, element, callback) {
             $('#az-editor-modal').remove();
-            var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + element.name + ' ' + t("settings") + '</h4></div>';
-            var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
+            var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + element.name + ' ' + t("settings") + '</h4></div>';
+            var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="' + p + 'modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
             var modal = $('<div id="az-editor-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
             var tabs = {};
             for (var i = 0; i < params.length; i++) {
@@ -1450,7 +1450,7 @@
                 i++;
                 if (title === '')
                     title = t('General');
-                menu += '<li><a href="#az-editor-tab-' + i + '" data-toggle="tab">' + title + '</a></li>';
+                menu += '<li><a href="#az-editor-tab-' + i + '" data-toggle="' + p + 'tab">' + title + '</a></li>';
             }
             menu += '</ul>';
             $(tabs_form).append(menu);
@@ -1560,7 +1560,7 @@
                 callback.call(element, values);
                 return false;
             });
-            $('#az-editor-modal').find('[data-dismiss="modal"]').click(function() {
+            $('#az-editor-modal').find('[data-dismiss="' + p + 'modal"]').click(function() {
                 azexo_elements.edit_stack = [];
             });
             var scrollTop = $(window).scrollTop();
@@ -1884,7 +1884,7 @@
                 }
                 register_element(name, false, TemplateElement);
                 var dom = $('<div>' + template + '</div>');
-                var section = $(dom).find('.' + p + 'container, .' + p + 'container-fluid').length > 0;
+                var section = $(dom).find('.' + p + 'container, .' + p + 'container-fluid, .az-rootable').length > 0;
                 mixin(TemplateElement.prototype, {
                     name: name,
                     icon: 'fa fa-cube',
@@ -2205,55 +2205,80 @@
                                         }
                                     });
                                 }
+                                var sort_stack = [];
+                                var sorted_node = null;
+                                var timeoutId = null;
+                                function show_controls(node) {
+                                    if ($(node).hasClass('sortable-highlight')) {
+                                        $(node).find('.az-sortable-controls').remove();
+                                        var controls = $('<div class="az-sortable-controls"></div>').appendTo(node);
+                                        var clone = $('<div class="az-sortable-clone glyphicon glyphicon-repeat" title="'+t('Clone')+'"></div>').appendTo(controls).click(function() {
+                                            sortable_disable();
+                                            $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
+                                            $(node).clone().insertAfter(node);
+                                            element.attrs['content'] = $(element.dom_content_element).html();
+                                            synchronize();
+                                            able();
+                                            return false;
+                                        });
+                                        $(clone).css('line-height', $(clone).height() + 'px').css('font-size', $(clone).height() / 2 + 'px');
+                                        var remove = $('<div class="az-sortable-remove glyphicon glyphicon-remove" title="'+t('Remove')+'"></div>').appendTo(controls).click(function() {
+                                            sortable_disable();
+                                            $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
+                                            $(node).remove();
+                                            element.attrs['content'] = $(element.dom_content_element).html();
+                                            synchronize();
+                                            able();
+                                            return false;
+                                        });
+                                        $(remove).css('line-height', $(remove).height() + 'px').css('font-size', $(remove).height() / 2 + 'px');
+                                    }
+                                }
+                                $(element.dom_element).off('mousemove.az-able').on('mousemove.az-able', function() {
+                                    if (sorted_node != null && $(sorted_node).hasClass('sortable-highlight')) {
+                                        clearTimeout(timeoutId);
+                                        timeoutId = setTimeout(function() {
+                                            show_controls(sorted_node);
+                                        }, 1000);
+                                    }
+                                });
                                 for (var i = 0; i < element.sortable.length; i++) {
                                     (function(i) {
-                                        var timeoutId = null;
-                                        function show_controls(node) {
-                                            if ($(node).hasClass('sortable-highlight')) {
-                                                $(node).find('.az-sortable-controls').remove();
-                                                var controls = $('<div class="az-sortable-controls"></div>').appendTo(node);
-                                                var clone = $('<div class="az-sortable-clone glyphicon glyphicon-repeat"></div>').appendTo(controls).click(function() {
-                                                    sortable_disable();
-                                                    $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
-                                                    $(node).clone().insertAfter(node);
-                                                    element.attrs['content'] = $(element.dom_content_element).html();
-                                                    synchronize();
-                                                    able();
-                                                    return false;
-                                                });
-                                                $(clone).css('line-height', $(clone).height() + 'px').css('font-size', $(clone).height() / 2 + 'px');
-                                                var remove = $('<div class="az-sortable-remove glyphicon glyphicon-remove"></div>').appendTo(controls).click(function() {
-                                                    sortable_disable();
-                                                    $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
-                                                    $(node).remove();
-                                                    element.attrs['content'] = $(element.dom_content_element).html();
-                                                    synchronize();
-                                                    able();
-                                                    return false;
-                                                });
-                                                $(remove).css('line-height', $(remove).height() + 'px').css('font-size', $(remove).height() / 2 + 'px');
-                                            }
-                                        }
-                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mousemove.az-able').on('mousemove.az-able', function() {
-                                            var node = this;
-                                            if ($(node).hasClass('sortable-highlight')) {
-                                                clearTimeout(timeoutId);
-                                                timeoutId = setTimeout(function() {
-                                                    show_controls(node);
-                                                }, 1000);
-                                            }
-                                        });
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-able').on('mouseenter.az-able', function() {
                                             var node = this;
-                                            $(this).addClass('sortable-highlight');
+                                            $(element.dom_element).find('.az-sortable-controls').remove();
+                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');                                            
+                                            if(sorted_node !== null) {
+                                                clearTimeout(timeoutId);
+                                            }
+                                            
+                                            $(node).addClass('sortable-highlight');                                            
+                                            sort_stack.push(node);
+                                            sorted_node = node;
                                             timeoutId = setTimeout(function() {
                                                 show_controls(node);
                                             }, 1000);
                                         });
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-able').on('mouseleave.az-able', function() {
-                                            clearTimeout(timeoutId);
-                                            $(this).removeClass('sortable-highlight');
-                                            $(this).find('.az-sortable-controls').remove();
+                                            var node = this;
+                                            $(element.dom_element).find('.az-sortable-controls').remove();
+                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');                                            
+                                            if(sorted_node !== null) {
+                                                clearTimeout(timeoutId);
+                                            }   
+                                            
+                                            sort_stack.pop();
+                                            if(sort_stack.length>0) {
+                                                node = sort_stack[sort_stack.length-1]
+                                                $(node).addClass('sortable-highlight');                                            
+
+                                                sorted_node = node;
+                                                timeoutId = setTimeout(function() {
+                                                    show_controls(node);
+                                                }, 1000);
+                                            } else {
+                                                sorted_node = null;
+                                            }
                                         });
                                     })(i);
                                 }
@@ -2306,8 +2331,8 @@
                         }
                         current['_'].push(elements[path]);
                     }
-                    var panel = $('<div id="az-template-elements" class="az-left-sidebar"></div>').appendTo('body');
-                    var welcome = $('<div id="az-template-elements-welcome">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
+                    var panel = $('<div id="az-template-elements" class="az-left-sidebar azexo"></div>').appendTo('body');
+                    var welcome = $('<div id="az-template-elements-welcome" class="azexo">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
                     $(panel).hover(function() {
                         $(welcome).remove();
                     });
@@ -2511,10 +2536,10 @@
                 i++;
                 if (title === '')
                     title = t('Content');
-                menu += '<li><a href="#az-elements-tab-' + i + '" data-toggle="tab">' + title + '</a></li>';
+                menu += '<li><a href="#az-elements-tab-' + i + '" data-toggle="' + p + 'tab">' + title + '</a></li>';
             }
             if (window.azexo_online)
-                menu += '<li><a href="#az-elements-tab-templates" data-toggle="tab">' + t("Saved templates") + '</a></li>';
+                menu += '<li><a href="#az-elements-tab-templates" data-toggle="' + p + 'tab">' + t("Saved templates") + '</a></li>';
             menu += '</ul>';
             $(elements_tabs).append(menu);
             i = 0;
@@ -2533,7 +2558,7 @@
             $(elements_tabs).append(tabs_content);
 
             $('#az-elements-modal').remove();
-            var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Elements list") + '</h4></div>';
+            var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Elements list") + '</h4></div>';
             var elements_modal = $('<div id="az-elements-modal" class="' + p + 'modal azexo" style="display:none"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div></div></div></div>');
             $('body').prepend(elements_modal);
             $(elements_modal).find('.' + p + 'modal-body').append(elements_tabs);
@@ -2778,9 +2803,27 @@
                 }
             }
         },
+        update_controls_zindex: function() {
+            function get_max_zindex(dom_element) {
+                var max_zindex = parseInt($(dom_element).css('z-index'));
+                $(dom_element).parent().find('*').each(function(){
+                    var zindex = parseInt($(this).css('z-index'));
+                    if(max_zindex < zindex)
+                        max_zindex = zindex;
+                });
+                return max_zindex;
+            };
+            var zindex = get_max_zindex(this.controls);
+            $(this.controls).css('z-index', zindex + 1);            
+        },
         show_controls: function() {
             if (window.azexo_editor) {
+                var element = this;
                 this.controls = $('<div class="controls ' + p + 'btn-group ' + p + 'btn-group-xs"></div>').prependTo(this.dom_element);
+                setTimeout(function() {
+                    element.update_controls_zindex();
+                }, 3000);
+                        
                 $('<span title="' + title("Drag and drop") + '" class="control drag-and-drop ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-move">' + this.name + '</span>').appendTo(this.controls);
 
                 if (this.is_container && !this.has_content) {
@@ -2796,7 +2839,6 @@
                     $('<button title="' + title('Save as template') + '" type="button" class="control save-template ' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-floppy-save"> </button>').appendTo(this.controls).click({object: this}, this.click_save_template);
                 this.update_empty();
 
-                var element = this;
                 setTimeout(function() {
                     element.controls_position();
                 }, 1000);
@@ -3737,8 +3779,8 @@
     var azexo_loaded = false;
     function open_settings_form() {
         $('#az-admin-modal').remove();
-        var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Azexo Composer") + '</h4></div>';
-        var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
+        var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Azexo Composer") + '</h4></div>';
+        var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="' + p + 'modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
         var modal = $('<div id="az-admin-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
         var form = null;
         azexo_get_settings_form(function(data) {
@@ -3750,7 +3792,7 @@
                 });
                 $(modal).find('.' + p + 'modal-body').append(form);
                 if (window.azexo_editor) {
-                    $('<button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Logout") + '</button>').appendTo('#az-admin-modal .modal-footer').click(function() {
+                    $('<button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="' + p + 'modal">' + t("Logout") + '</button>').appendTo('#az-admin-modal .modal-footer').click(function() {
                         setCookie('azexo_password', '', null);
                         window.location.reload();
                     });
@@ -5132,10 +5174,10 @@
                 $('<button title="' + title("Scroll animations") + '" class="control scroll-animation ' + p + 'btn ' + p + 'btn-warning ' + p + 'glyphicon ' + p + 'glyphicon-sort"> </button>').appendTo(this.controls).click(function() {
 
                     $('#az-js-animation-modal').remove();
-                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Scroll animation settings") + '</h4></div>';
-                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
+                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("Scroll animation settings") + '</h4></div>';
+                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="' + p + 'modal">' + t("Close") + '</button><button type="button" class="save ' + p + 'btn ' + p + 'btn-primary">' + t("Save changes") + '</button></div>';
                     var modal = $('<div id="az-js-animation-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
-                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
+                    var tabs = $('<div id="az-js-animation-tabs"><ul class="' + p + 'nav ' + p + 'nav-tabs"><li><a href="#script" data-toggle="' + p + 'tab">' + t("Script") + '</a></li><li><a href="#wizards" data-toggle="' + p + 'tab">' + t("Wizards") + '</a></li></ul><div class="' + p + 'tab-content"><div id="script" class="' + p + 'tab-pane"></div><div id="wizards" class="' + p + 'tab-pane"></div></div></div>');
                     $(modal).find('.' + p + 'modal-body').append(tabs);
                     var form = $('<div id="az-js-animation-form" class="' + p + 'clearfix"></div>');
                     $(tabs).find('#script').append(form);
@@ -6443,7 +6485,7 @@
                 var options = $(this).sortable('option');
                 var children = [];
                 $(this).find(options.items).each(function() {
-                    var id = $(this).find('a[data-toggle="tab"]').attr('href').replace('#', '');
+                    var id = $(this).find('a[data-toggle="' + p + 'tab"]').attr('href').replace('#', '');
                     children.push(azexo_elements.get_element(id));
                 });
                 element.children = children;
@@ -6471,7 +6513,7 @@
             this.dom_element = $('<div class="az-element az-tabs ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
             var menu = '<ul class="' + p + 'nav ' + p + 'nav-tabs" role="tablist">';
             for (var i = 0; i < this.children.length; i++) {
-                menu += '<li><a href="#' + this.children[i].id + '" role="tab" data-toggle="tab">' + this.children[i].attrs['title'] + '</a></li>';
+                menu += '<li><a href="#' + this.children[i].id + '" role="tab" data-toggle="' + p + 'tab">' + this.children[i].attrs['title'] + '</a></li>';
             }
             menu += '</ul>';
             $(this.dom_element).append(menu);
@@ -6673,7 +6715,7 @@
             var type = p + 'panel-default';
             if (this.parent.attrs['type'] != '')
                 type = this.parent.attrs['type'];
-            this.dom_element = $('<div class="az-element az-toggle ' + p + 'panel ' + type + ' ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div class="' + p + 'panel-heading"><h4 class="' + p + 'panel-title"><a data-toggle="collapse" data-parent="#' + this.parent.id + '" href="#' + this.id + '">' + this.attrs['title'] + '</a></h4></div><div id="' + this.id + '" class="' + p + 'panel-collapse ' + p + 'collapse"><div class="' + p + 'panel-body az-ctnr"></div></div></div>');
+            this.dom_element = $('<div class="az-element az-toggle ' + p + 'panel ' + type + ' ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"><div class="' + p + 'panel-heading"><h4 class="' + p + 'panel-title"><a data-toggle="' + p + 'collapse" data-parent="#' + this.parent.id + '" href="#' + this.id + '">' + this.attrs['title'] + '</a></h4></div><div id="' + this.id + '" class="' + p + 'panel-collapse ' + p + 'collapse"><div class="' + p + 'panel-body az-ctnr"></div></div></div>');
             this.dom_content_element = $(this.dom_element).find('.' + p + 'panel-body');
             ToggleElement.baseclass.prototype.render.apply(this, arguments);
         },
@@ -8376,7 +8418,7 @@
         },
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-scroll-menu"><nav  class="' + p + 'navbar ' + p + 'navbar-default ' + this.attrs['el_class'] + '" role="navigation" style="' + this.attrs['style'] + '"><div class="' + p + 'container-fluid"></div></nav></div>');
-            var header = $('<div class="' + p + 'navbar-header"><button type="button" class="' + p + 'navbar-toggle" data-toggle="collapse" data-target="#' + this.id + '"><span class="' + p + 'sr-only">' + t('Toggle navigation') + '</span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span></button><a class="' + p + 'navbar-brand" href="' + this.attrs['logo_link'] + '"></a></div>');
+            var header = $('<div class="' + p + 'navbar-header"><button type="button" class="' + p + 'navbar-toggle" data-toggle="' + p + 'collapse" data-target="#' + this.id + '"><span class="' + p + 'sr-only">' + t('Toggle navigation') + '</span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span></button><a class="' + p + 'navbar-brand" href="' + this.attrs['logo_link'] + '"></a></div>');
             function render_image(value, width, height) {
                 if ($.isNumeric(width))
                     width = width + 'px';
@@ -8529,7 +8571,7 @@
                 name = window.azexo_form_submit_name;
             azexo_load_submissions(type, name, element.attrs['name'], function(data) {
                 $('#az-form-modal').remove();
-                var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + element.attrs['name'] + ' ' + t(" submissions") + '</h4></div>';
+                var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + element.attrs['name'] + ' ' + t(" submissions") + '</h4></div>';
                 var footer = '<div class="' + p + 'modal-footer"></div>';
                 var modal = $('<div id="az-form-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-lg"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
 
@@ -8874,8 +8916,8 @@
             original_head = $('head').html();
             original_body = $('body').html();
             original_body_attributes = $('body').prop("attributes");
-            var panel = $('<div id="az-exporter" class="az-right-sidebar ' + p + 'text-center"></div>').appendTo('body');
-            var welcome = $('<div id="az-exporter-welcome">' + t('Manage and export your site via right panel.') + '</div>').appendTo(panel);
+            var panel = $('<div id="az-exporter" class="az-right-sidebar ' + p + 'text-center azexo"></div>').appendTo('body');
+            var welcome = $('<div id="az-exporter-welcome" class="azexo">' + t('Manage and export your site via right panel.') + '</div>').appendTo(panel);
             $(panel).hover(function() {
                 $(welcome).remove();
             });
@@ -8999,7 +9041,7 @@
             $(name_input).val('index');
             $(title_input).val('Home');
             //sites management
-            var sites_panel = $('<div class="panel panel-default"><div class="panel-heading" role="tab" id="sites-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#sites-collapse" aria-expanded="false" aria-controls="collapseOne" class="collapsed">' + t('Choose a site for edit') + '</a></h4></div><div id="sites-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="sites-heading" aria-expanded="false"><div class="panel-body"></div></div></div>').prependTo(panel).find('.panel-body');
+            var sites_panel = $('<div class="' + p + 'panel ' + p + 'panel-default"><div class="' + p + 'panel-heading" role="tab" id="sites-heading"><h4 class="' + p + 'panel-title"><a data-toggle="' + p + 'collapse" href="#sites-collapse" aria-expanded="false" class="' + p + 'collapsed">' + t('Choose a site for edit') + '</a></h4></div><div id="sites-collapse" class="' + p + 'panel-collapse ' + p + 'collapse" role="tabpanel" aria-labelledby="sites-heading" aria-expanded="false"><div class="' + p + 'panel-body"></div></div></div>').prependTo(panel).find('.' + p + 'panel-body');
             $('<hr>').appendTo(sites_panel);
             var sites_buttons = $('<div class="' + p + 'btn-group ' + p + 'btn-group-xs"></div>').appendTo(sites_panel);
             function add_site(name) {
@@ -9054,8 +9096,8 @@
             $('<button class="az-publish-site ' + p + 'btn ' + p + 'btn-success">' + t('FTP upload') + '</button>').appendTo(buttons2).click(function() {
                 if (!uploading) {
                     $('#az-ftp-modal').remove();
-                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
-                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="modal">' + t("Close") + '</button></div>';
+                    var header = '<div class="' + p + 'modal-header"><button type="button" class="' + p + 'close" data-dismiss="' + p + 'modal" aria-hidden="true">&times;</button><h4 class="' + p + 'modal-title">' + t("FTP upload") + '</h4></div>';
+                    var footer = '<div class="' + p + 'modal-footer"><button type="button" class="' + p + 'btn ' + p + 'btn-default" data-dismiss="' + p + 'modal">' + t("Close") + '</button></div>';
                     var modal = $('<div id="az-ftp-modal" class="' + p + 'modal azexo"><div class="' + p + 'modal-dialog ' + p + 'modal-sm"><div class="' + p + 'modal-content">' + header + '<div class="' + p + 'modal-body"></div>' + footer + '</div></div></div>').prependTo('body');
                     var body = $(modal).find('.' + p + 'modal-body');
                     var host_input = $('<div class="' + p + 'form-group"><label>' + t("Host") + '</label><div><input class="' + p + 'form-control" name="host" type="text" value="' + site_settings['host'] + '"></div><p class="' + p + 'help-block"></p></div>').appendTo(body).find('input');
@@ -9089,7 +9131,7 @@
                             for (var i = 0; i < list.length; i++) {
                                 var path = directory + '/' + list[i];
                                 (function(path) {
-                                    $('<li class="glyphicon glyphicon-folder-close">' + list[i] + '</li>').appendTo(browser).click(function() {
+                                    $('<li class="' + p + 'glyphicon ' + p + 'glyphicon-folder-close">' + list[i] + '</li>').appendTo(browser).click(function() {
                                         azexo_ftp_get_list(site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], path, function(data) {
                                             show_directory(path, data);
                                         });
@@ -9143,11 +9185,11 @@
                                         if (data['count'] > 0) {
                                             if (count == 0)
                                                 count = data['count'];
-                                            $(progress).show().find('.progress-bar').css('width', ((count - data['count']) / count * 100) + '%');
+                                            $(progress).show().find('.' + p + 'progress-bar').css('width', ((count - data['count']) / count * 100) + '%');
                                             uploading = true;
                                             azexo_ftp_upload(JSON.stringify({}), data['site_path'], JSON.stringify(data['files']), site_settings['host'], site_settings['username'], site_settings['password'], site_settings['port'], site_settings['directory'], upload_process);
                                         } else {
-                                            $(progress).show().find('.progress-bar').css('width', '100%');
+                                            $(progress).show().find('.' + p + 'progress-bar').css('width', '100%');
                                             $(messages).append('<div class="' + p + 'alert ' + p + 'alert-success">' + t('Done') + '</div>');
                                             uploading = false;
                                         }
@@ -9160,7 +9202,7 @@
                     });
                     $(body).find('input').trigger('change');
                     $('<hr>').appendTo(body);
-                    var progress = $('<div class="progress"><div class="progress-bar" role="progressbar"></div></div>').appendTo(body).hide();
+                    var progress = $('<div class="' + p + 'progress"><div class="' + p + 'progress-bar" role="progressbar"></div></div>').appendTo(body).hide();
                     var messages = $('<div class="az-messages"></div>').appendTo(body).hide();
                 }
                 $('#az-ftp-modal')[fp + 'modal']('show');

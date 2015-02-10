@@ -81,7 +81,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   // ALERT CLASS DEFINITION
   // ======================
 
-  var dismiss = '[data-dismiss="alert"]'
+  var dismiss = '[data-dismiss="ax-alert"]'
   var Alert   = function (el) {
     $(el).on('click', dismiss, this.close)
   }
@@ -212,7 +212,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
 
   Button.prototype.toggle = function () {
     var changed = true
-    var $parent = this.$element.closest('[data-toggle="buttons"]')
+    var $parent = this.$element.closest('[data-toggle="ax-buttons"]')
 
     if ($parent.length) {
       var $input = this.$element.find('input')
@@ -261,7 +261,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   // BUTTON DATA-API
   // ===============
 
-  $(document).on('click.ax_bs.button.data-api', '[data-toggle^="button"]', function (e) {
+  $(document).on('click.ax_bs.button.data-api', '[data-toggle^="ax-button"]', function (e) {
     var $btn = $(e.target)
     if (!$btn.hasClass('ax-btn')) $btn = $btn.closest('.btn')
     Plugin.call($btn, 'toggle')
@@ -643,7 +643,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   // COLLAPSE DATA-API
   // =================
 
-  $(document).on('click.ax_bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+  $(document).on('click.ax_bs.collapse.data-api', '[data-toggle="ax-collapse"]', function (e) {
     var href
     var $this   = $(this)
     var target  = $this.attr('data-target')
@@ -656,7 +656,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
     var $parent = parent && $(parent)
 
     if (!data || !data.transitioning) {
-      if ($parent) $parent.find('[data-toggle="collapse"][data-parent="' + parent + '"]').not($this).addClass('ax-collapsed')
+      if ($parent) $parent.find('[data-toggle="ax-collapse"][data-parent="' + parent + '"]').not($this).addClass('ax-collapsed')
       $this[$target.hasClass('ax-in') ? 'addClass' : 'removeClass']('ax-collapsed')
     }
 
@@ -681,7 +681,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   // =========================
 
   var backdrop = '.ax-dropdown-backdrop'
-  var toggle   = '[data-toggle="dropdown"]'
+  var toggle   = '[data-toggle="ax-dropdown"]'
   var Dropdown = function (element) {
     $(element).on('click.ax_bs.dropdown', this.toggle)
   }
@@ -691,7 +691,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   Dropdown.prototype.toggle = function (e) {
     var $this = $(this)
 
-    if ($this.is('.disabled, :disabled')) return
+    if ($this.is('.ax-disabled, :disabled')) return
 
     var $parent  = getParent($this)
     var isActive = $parent.hasClass('ax-open')
@@ -727,7 +727,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
     e.preventDefault()
     e.stopPropagation()
 
-    if ($this.is('.disabled, :disabled')) return
+    if ($this.is('.ax-disabled, :disabled')) return
 
     var $parent  = getParent($this)
     var isActive = $parent.hasClass('ax-open')
@@ -877,7 +877,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
     this.setScrollbar()
     this.escape()
 
-    this.$element.on('click.dismiss.ax_bs.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
+    this.$element.on('click.dismiss.ax_bs.modal', '[data-dismiss="ax-modal"]', $.proxy(this.hide, this))
 
     this.backdrop(function () {
       var transition = $.support.transition && that.$element.hasClass('ax-fade')
@@ -1079,7 +1079,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   // MODAL DATA-API
   // ==============
 
-  $(document).on('click.ax_bs.modal.data-api', '[data-toggle="modal"]', function (e) {
+  $(document).on('click.ax_bs.modal.data-api', '[data-toggle="ax-modal"]', function (e) {
     var $this   = $(this)
     var href    = $this.attr('href')
     var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, ''))) // strip for ie7
@@ -1963,7 +1963,7 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
   // TAB DATA-API
   // ============
 
-  $(document).on('click.ax_bs.tab.data-api', '[data-toggle="tab"], [data-toggle="pill"]', function (e) {
+  $(document).on('click.ax_bs.tab.data-api', '[data-toggle="ax-tab"], [data-toggle="ax-pill"]', function (e) {
     e.preventDefault()
     Plugin.call($(this), 'show')
   })

@@ -1,6 +1,65 @@
-#az-editor-tabs, #az-exporter *, #az-thumbnails *, #az-template-elements * {
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+#az-ftp-modal *, 
+#az-editor-modal *:not(.fa):not(.glyphicon):not(.ax-glyphicon):not(.mce-ico), 
+#az-elements-modal *:not(.fa), 
+#az-admin-modal *, 
+#az-js-animation-modal *, 
+#az-exporter *, 
+#az-thumbnails *, 
+#az-form-modal *, 
+#az-exporter-welcome *, 
+#az-template-elements-welcome *, 
+#az-template-elements * {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.6;
 }
+
+.az-element .controls * {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:12px;
+    line-height:1.6;
+}
+
+.az-empty * {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height:1.6;
+}
+
+#az-editor-modal .ace_editor * {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;    
+}
+
+#az-ftp-modal a, 
+#az-editor-modal a, 
+#az-elements-modal a, 
+#az-admin-modal a, 
+#az-js-animation-modal a, 
+#az-exporter a:not(.ax-list-group-item), 
+#az-thumbnails a, 
+#az-form-modal a, 
+#az-exporter-welcome a, 
+#az-template-elements-welcome a, 
+#az-template-elements a{
+    color:#428bca;
+    text-decoration:none;
+}
+#az-ftp-modal a:hover, #az-ftp-modal a:focus, 
+#az-editor-modal a:hover, #az-editor-modal a:focus, 
+#az-elements-modal a:hover, #az-elements-modal a:focus, 
+#az-admin-modal a:hover, #az-admin-modal a:focus, 
+#az-js-animation-modal a:hover, #az-js-animation-modal a:focus, 
+#az-exporter a:hover:not(.ax-list-group-item), #az-exporter a:focus:not(.ax-list-group-item), 
+#az-thumbnails a:hover, #az-thumbnails a:focus, 
+#az-form-modal a:hover, #az-form-modal a:focus, 
+#az-exporter-welcome a:hover, #az-exporter-welcome a:focus, 
+#az-template-elements-welcome a:hover, #az-template-elements-welcome a:focus, 
+#az-template-elements a:hover, #az-template-elements a:focus {
+    color:#2a6496;
+    text-decoration:none;
+}
+
 
 .azexo-editor.azexo.az-container {
     /*overflow: visible;*/
@@ -593,13 +652,13 @@ div.modal-dialog, div.ax-modal-dialog {
 }
 
 .editable-highlight, .editable-highlight:hover, .styleable-highlight, .styleable-highlight:hover, .sortable-highlight, .sortable-highlight:hover {
-    outline: 2px dashed gray;
-    cursor: pointer;
+    outline: 2px dashed gray !important;
+    cursor: pointer !important;
 }
 
 .sortable-highlight, .sortable-highlight:hover {
-    outline: 2px dotted gray;
-    cursor: move;
+    outline: 2px dotted gray !important;
+    cursor: move !important;
 }
 
 .az-sortable > * {
@@ -615,7 +674,7 @@ div.modal-dialog, div.ax-modal-dialog {
     width: 100%;
     height: 100%;
     background-color: white;
-    z-index: 1;
+    z-index: 10000;
     opacity: 0.9;
     text-align: center;
 }
@@ -642,24 +701,31 @@ div.modal-dialog, div.ax-modal-dialog {
     vertical-align: middle;
 }
 
-.nav.az-nav-list {
+.nav.az-nav-list, .ax-nav.az-nav-list{
     padding-left: 15px;
     margin-bottom: 0;
     display: none;
 }
 
-.nav.az-nav-list > li > a {
+.nav.az-nav-list > li > a, .ax-nav.az-nav-list > li > a{
     padding: 3px 15px;
     margin-left: -15px;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
     display: block;
 }
 
-#az-template-elements li:hover > .nav.az-nav-list {
+#az-template-elements, #az-thumbnails, #az-exporter, #az-template-elements-welcome, #az-exporter-welcome, #az-template-elements *, #az-thumbnails *, #az-exporter *, #az-template-elements-welcome *, #az-exporter-welcome *{
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;    
+}
+
+
+#az-template-elements li:hover > .nav.az-nav-list, #az-template-elements li:hover > .ax-nav.az-nav-list {
     display: block;
 }
 
-#az-template-elements > .nav.az-nav-list {
+#az-template-elements > .nav.az-nav-list, #az-template-elements > .ax-nav.az-nav-list{
     display: block;
 }
 
@@ -732,9 +798,10 @@ div.modal-dialog, div.ax-modal-dialog {
     font-size: 20px;
     font-weight: bold;
     text-align: left;
+    box-sizing: border-box;
 }
 
-#az-exporter .btn-toolbar .btn-group {
+#az-exporter .btn-toolbar .btn-group, #az-exporter .ax-btn-toolbar .ax-btn-group{
     float: none;
     margin-bottom: 5px;
 }
@@ -764,8 +831,4 @@ ul.az-browser li::before {
     padding: 5px;
     margin-bottom: 2px;
     font-size: 10px;    
-}
-
-.ace_editor * {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
 }
