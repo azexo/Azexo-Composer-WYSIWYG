@@ -2906,28 +2906,32 @@
                 }
                 if (element.show_parent_controls) {
                     _.defer(function() {
+                        var parent = element.parent;
+                        if(_.isString(element.show_parent_controls)) {
+                            parent = azexo_elements.get_element($(element.dom_element).closest(element.show_parent_controls).attr('data-az-id'));
+                        }
                         function update_controls(element) {
-                            if ($(element.parent.controls).find('.' + p + 'btn:not(span)').css('display') == 'none') {
+                            if ($(parent.controls).find('.' + p + 'btn:not(span)').css('display') == 'none') {
                                 $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             } else {
                                 $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             }
                             if ($(element.controls).find('.' + p + 'btn:not(span)').css('display') == 'none') {
-                                $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
+                                $(parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             } else {
-                                $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
+                                $(parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             }
-                            $(element.parent.controls).attr('data-az-cid', $(element.dom_element).attr('data-az-id'));
+                            $(parent.controls).attr('data-az-cid', $(element.dom_element).attr('data-az-id'));
                             var offset = $(element.dom_element).offset();
                             offset.top = offset.top - parseInt($(element.dom_element).css('margin-top'));
-                            $(element.parent.controls).offset(offset);
-                            offset.left = offset.left + $(element.parent.controls).width() - 1;
+                            $(parent.controls).offset(offset);
+                            offset.left = offset.left + $(parent.controls).width() - 1;
                             $(element.controls).offset(offset);
                         }
                         $(element.dom_element).off('mouseenter').on('mouseenter', function() {
                             $(element.dom_element).data('hover', true);
                             if ($(element.dom_element).parents('.azexo-editor').length > 0) {
-                                $(element.parent.controls).css('display', 'block');
+                                $(parent.controls).css('display', 'block');
                                 update_controls(element);
                             }
                         });
@@ -2939,7 +2943,7 @@
                         });
                         setInterval(function() {
                             if ($(element.dom_element).parents('.azexo-editor').length > 0) {
-                                if (!$(element.dom_element).data('hover') && !$(element.parent.controls).data('hover')) {
+                                if (!$(element.dom_element).data('hover') && !$(parent.controls).data('hover')) {
                                     $(element.controls).css('display', '');
                                 }
                                 if ($(element.dom_element).data('hover')) {
@@ -2947,31 +2951,31 @@
                                     $(element.controls).css('visibility', 'visibile');
                                     $(element.controls).css('opacity', '1');
                                 }
-                                var e = azexo_elements.get_element($(element.parent.controls).closest('[data-az-cid]').attr('data-az-cid'));
+                                var e = azexo_elements.get_element($(parent.controls).closest('[data-az-cid]').attr('data-az-cid'));
                                 if (!_.isUndefined(e))
-                                    $(element.parent.controls).css('display', $(e.controls).css('display'));
-                                if (_.isUndefined($(element.parent.controls).data('spc'))) {
-                                    $(element.parent.controls).off('mouseenter').on('mouseenter', function() {
-                                        $(element.parent.controls).data('hover', true);
+                                    $(parent.controls).css('display', $(e.controls).css('display'));
+                                if (_.isUndefined($(parent.controls).data('spc'))) {
+                                    $(parent.controls).off('mouseenter').on('mouseenter', function() {
+                                        $(parent.controls).data('hover', true);
                                         var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
                                         if (!_.isUndefined(el))
                                             $(el.controls).css('display', 'block');
                                     });
-                                    $(element.parent.controls).off('mouseleave').on('mouseleave', function() {
-                                        $(element.parent.controls).data('hover', false);
+                                    $(parent.controls).off('mouseleave').on('mouseleave', function() {
+                                        $(parent.controls).data('hover', false);
                                     });
-                                    $(element.parent.controls).data('spc', true);
+                                    $(parent.controls).data('spc', true);
                                 }
                             }
                         }, 100);
                         $(element.controls).find('span').off('click').on('click', function() {
                             $(element.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
-                            $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
+                            $(parent.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
                             update_controls(element);
                             return false;
                         });
-                        $(element.parent.controls).find('span').off('click').on('click', function() {
-                            $(element.parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
+                        $(parent.controls).find('span').off('click').on('click', function() {
+                            $(parent.controls).find('.' + p + 'btn:not(span)').css('display', 'inline-block');
                             var el = azexo_elements.get_element($(this).closest('[data-az-cid]').attr('data-az-cid'));
                             if (!_.isUndefined(el)) {
                                 $(el.controls).find('.' + p + 'btn:not(span)').css('display', 'none');
@@ -5577,11 +5581,11 @@
                     //container: 'body',
                     content: buttons,
                 }).hover(function() {
-                    $(this)[fp + 'popover']('show');
+                    $(columns)[fp + 'popover']('show');
                     $(controls).find('.' + p + 'popover .set-columns-layout').each(function() {
                         $(this).click({object: element}, element.click_set_columns);
                     });
-                    $(element.dom_element).mouseleave(function() {
+                    $(element.controls).mouseleave(function() {
                         $(columns)[fp + 'popover']('hide');
                         $(columns).css('display', '');
                     });
@@ -8400,6 +8404,8 @@
                     target: '#' + element.id + '.navbar-collapse',
                     offset: element.navbar_height,
                 });
+                var h = $(element.dom_element).find('.navbar-brand').height();
+                $(element.dom_element).find('.navbar-brand img').css('max-height', h + 'px');
                 $(element.dom_element).find('.' + p + 'navbar')[fp + 'affix']({
                     offset: {
                         top: $(element.dom_element).find('.' + p + 'navbar').offset().top,
@@ -8419,19 +8425,7 @@
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-scroll-menu"><nav  class="' + p + 'navbar ' + p + 'navbar-default ' + this.attrs['el_class'] + '" role="navigation" style="' + this.attrs['style'] + '"><div class="' + p + 'container-fluid"></div></nav></div>');
             var header = $('<div class="' + p + 'navbar-header"><button type="button" class="' + p + 'navbar-toggle" data-toggle="' + p + 'collapse" data-target="#' + this.id + '"><span class="' + p + 'sr-only">' + t('Toggle navigation') + '</span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span></button><a class="' + p + 'navbar-brand" href="' + this.attrs['logo_link'] + '"></a></div>');
-            function render_image(value, width, height) {
-                if ($.isNumeric(width))
-                    width = width + 'px';
-                if ($.isNumeric(height))
-                    height = height + 'px';
-                var img = $('<img src="' + value + '" alt="">');
-                if (width.length > 0)
-                    $(img).attr('width', width);
-                if (height.length > 0)
-                    $(img).attr('height', height);
-                return img;
-            }
-            var img = render_image(this.attrs['logo'], '100%', '');
+            var img = $('<img src="' + this.attrs['logo'] + '" alt="">');            
             $(header).find('a.' + p + 'navbar-brand').append(img);
             var collapse = $('<div class="' + p + 'collapse ' + p + 'navbar-collapse" id="' + this.id + '"></div>');
             var links = '<ul class="' + p + 'nav ' + p + 'navbar-nav">';
@@ -8507,7 +8501,7 @@
                 }
                 buttons += '</div>';
 
-                var columns = $('<button title="' + title("Add form field") + '" class="control set-columns ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-plus-sign"> </button>').appendTo(this.controls)[fp + 'popover']({
+                var add_field = $('<button title="' + title("Add form field") + '" class="control add-field ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-plus-sign"> </button>').appendTo(this.controls)[fp + 'popover']({
                     animation: false,
                     placement: p + 'right',
                     html: 'true',
@@ -8515,7 +8509,7 @@
                     //container: 'body',
                     content: buttons,
                 }).hover(function() {
-                    $(this)[fp + 'popover']('show');
+                    $(add_field)[fp + 'popover']('show');
                     $(element.controls).find('.' + p + 'popover .control').each(function() {
                         $(this).click(function() {
                             var base = $(this).attr('data-az-element');
@@ -8529,9 +8523,9 @@
                             return false;
                         });
                     });
-                    $(element.dom_element).mouseleave(function() {
-                        $(columns)[fp + 'popover']('hide');
-                        $(columns).css('display', '');
+                    $(element.controls).mouseleave(function() {
+                        $(add_field)[fp + 'popover']('hide');
+                        $(add_field).css('display', '');
                     });
                 });
             }
@@ -8678,7 +8672,7 @@
     extend(FormDataElement, AnimatedElement);
     mixin(FormDataElement.prototype, {
         form_elements: {},
-        show_parent_controls: true,
+        show_parent_controls: '.az-form',
         params: [
             make_param_type({
                 type: 'textfield',

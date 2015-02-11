@@ -28,7 +28,7 @@
 #az-editor-modal .ace_editor * {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
     font-size: 12px !important;
-    line-height: 1.6 !important;    
+    line-height: 1.4 !important;    
 }
 
 #az-ftp-modal a, 
