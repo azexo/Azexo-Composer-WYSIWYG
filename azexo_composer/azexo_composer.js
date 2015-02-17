@@ -8143,12 +8143,16 @@
             this.recursive_clear_animation();
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
             $(dom).find('.az-element > .controls').remove();
-            $(dom).find('> .controls').remove();
+            $(dom).find('> .controls').remove();            
+            $(dom).find('.az-sortable-controls').remove();
             $(dom).find('.az-step-controls').remove();
             $(dom).find('.az-empty').remove();
             $(dom).find('.ui-resizable-e').remove();
             $(dom).find('.ui-resizable-s').remove();
             $(dom).find('.ui-resizable-se').remove();
+            $(dom).find('.editable-highlight').removeClass('editable-highlight');
+            $(dom).find('.styleable-highlight').removeClass('styleable-highlight');
+            $(dom).find('.sortable-highlight').removeClass('sortable-highlight');
             $(dom).find('.ui-draggable').removeClass('ui-draggable');
             $(dom).find('.ui-resizable').removeClass('ui-resizable');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
@@ -8843,7 +8847,7 @@
                 if (settings[i].type == 'google_font') {
                     var v = settings[i].value;
                     var font = v.split('|')[0];
-                    if(!(font in google_fonts)) {
+                    if (!(font in google_fonts)) {
                         google_fonts[font] = {subsets: [], variants: []};
                     }
                     var subset = v.split('|')[1];
@@ -8855,7 +8859,7 @@
                 }
             }
             var styles = '<style>';
-            for (var font in google_fonts) {                
+            for (var font in google_fonts) {
                 var url = encodeURI('http://fonts.googleapis.com/css?family=' + font + ':' + google_fonts[font].variants.join(',') + '&subset=' + google_fonts[font].subsets.join(','));
                 styles += '@import url(' + url + ');';
             }
@@ -8882,7 +8886,7 @@
                             if ('important' in settings[i] && settings[i].important)
                                 styles += settings[i].selector + '{font-family: ' + font + ' !important;font-weight: ' + variant + ' !important;}';
                             else
-                                styles += settings[i].selector + '{font-family: ' + font + ';font-weight: ' + variant + ';}';                            
+                                styles += settings[i].selector + '{font-family: ' + font + ';font-weight: ' + variant + ';}';
                         }
                     }
                 }
@@ -8948,7 +8952,8 @@
             window.links_select = function(input, delimiter) {
                 var options = {};
                 for (var name in site_pages) {
-                    options[name + '.html'] = site_pages[name].title;
+                    if(site_pages[name] != null)
+                        options[name + '.html'] = site_pages[name].title;
                 }
                 chosen_select(options, input);
             }
@@ -9031,8 +9036,10 @@
             function get_export_site() {
                 var site = {};
                 for (var name in site_containers) {
-                    var html = get_page_html(site_containers[name], true, site_pages[name].title);
-                    site[name] = btoa(enc(encodeURIComponent(html)));
+                    if(site_containers[name] != null) {
+                        var html = get_page_html(site_containers[name], true, site_pages[name].title);
+                        site[name] = btoa(enc(encodeURIComponent(html)));
+                    }
                 }
                 return site;
             }
@@ -9055,7 +9062,7 @@
             $('<hr>').appendTo(panel);
             var form = $('<div class="' + p + 'text-left"></div>').appendTo(panel);
             $('<h4>' + t('Current page settings') + '</h4>').appendTo(form);
-            var name_input = $('<div class="' + p + 'form-group"><label>' + t('File name') + '</label><div><input class="' + p + 'form-control" name="name" type="text"></div><p class="' + p + 'help-block">' + t('"html"-extension will be added during export process') + '</p></div>').appendTo(form).find('input').change(function() {
+            var name_input = $('<div class="' + p + 'form-group"><label>' + t('File name') + '</label><div><input class="' + p + 'form-control" name="name" type="text"></div><p class="' + p + 'help-block">' + t('"html"-extension will be added during export process') + '</p></div>').appendTo(form).find('input[name="name"]').change(function() {
                 var name = $(pages).find('.' + p + 'active').text();
                 var new_name = $(this).val();
                 site_containers[new_name] = site_containers[name];
@@ -9063,8 +9070,17 @@
                 site_pages[new_name] = site_pages[name];
                 site_pages[name] = null;
                 $(pages).find('a.' + p + 'active:contains("' + name + '")').text(new_name);
+                for (var page_name in site_containers) {
+                    if(site_containers[page_name] != null) {
+                        for (var i = 0; i < site_containers[page_name].length; i++) {
+                            $(site_containers[page_name][i].dom_content_element).find('[href="' + name + '.html"]').each(function() {
+                                $(this).attr('href', new_name + '.html');
+                            });
+                        }
+                    }
+                }
             });
-            var title_input = $('<div class="' + p + 'form-group"><label>' + t('Title') + '</label><div><input class="' + p + 'form-control" name="title" type="text"></div><p class="' + p + 'help-block">' + t('') + '</p></div>').appendTo(form).find('input').change(function() {
+            var title_input = $('<div class="' + p + 'form-group"><label>' + t('Title') + '</label><div><input class="' + p + 'form-control" name="title" type="text"></div><p class="' + p + 'help-block">' + t('') + '</p></div>').appendTo(form).find('input[name="title"]').change(function() {
                 var name = $(pages).find('.' + p + 'active').text();
                 site_pages[name].title = $(this).val();
             });

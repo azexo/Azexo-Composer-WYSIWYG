@@ -949,7 +949,10 @@
                     subset = value.split('|')[1];
                     variant = value.split('|')[2];
                 }
-                this.dom_element = $('<div class="' + p + 'form-group"><div><label>' + this.heading + '</label><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + font + '"></div><div><label>' + t('Subset') + '</label><input class="' + p + 'form-control" name="' + this.param_name + '_subset" type="text" value="' + subset + '"></div><div><label>' + t('Variant') + '</label><input class="' + p + 'form-control" name="' + this.param_name + '_variant" type="text" value="' + variant + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
+                var font_input = '<div class="' + p + 'col-sm-4"><label>' + this.heading + '</label><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + font + '"></div>';
+                var subset_input = '<div class="' + p + 'col-sm-4"><label>' + t('Subset') + '</label><input class="' + p + 'form-control" name="' + this.param_name + '_subset" type="text" value="' + subset + '"></div>';
+                var variant_input = '<div class="' + p + 'col-sm-4"><label>' + t('Variant') + '</label><input class="' + p + 'form-control" name="' + this.param_name + '_variant" type="text" value="' + variant + '"></div>';
+                this.dom_element = $('<div class="' + p + 'form-group"><div class="' + p + 'row">' + font_input + subset_input + variant_input + '</div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
             opened: function() {
                 var element = this;
@@ -957,11 +960,11 @@
                 fonts = _.object(fonts, fonts);
                 var font_select = null;
                 var subset_select = null;
-                var variant_select = null;                
+                var variant_select = null;
                 font_select = chosen_select(fonts, $(this.dom_element).find('input[name="' + this.param_name + '"]'));
                 $(font_select).chosen().change(function() {
                     var f = Object.keys(window.azexo_google_fonts)[0];
-                    if($(this).val() in window.azexo_google_fonts)
+                    if ($(this).val() in window.azexo_google_fonts)
                         f = window.azexo_google_fonts[$(this).val()];
                     var subsets = {};
                     for (var i = 0; i < f.subsets.length; i++) {
