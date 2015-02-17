@@ -1270,6 +1270,20 @@
             }
         }
     }
+    function get_max_zindex(dom_element) {
+        var max_zindex = parseInt($(dom_element).css('z-index'));
+        $(dom_element).parent().find('*').each(function() {
+            var zindex = parseInt($(this).css('z-index'));
+            if (max_zindex < zindex)
+                max_zindex = zindex;
+        });
+        return max_zindex;
+    }
+    ;
+    function set_highest_zindex(dom_element) {
+        var zindex = get_max_zindex(dom_element);
+        $(dom_element).css('z-index', zindex + 1);
+    }
     function chosen_select(options, input) {
         var single_select = '<select>';
         for (var key in options) {
@@ -1848,9 +1862,16 @@
 
                 if ('ajaxurl' in window) {
                     function template_element_urls(dom) {
+                        var folders = path.split('|');
+                        folders.pop();
+                        folders = folders.join('/')
                         function update_url(url) {
                             if (url.indexOf("azexo_elements") == 0) {
                                 return window.azexo_baseurl + '../' + url;
+                            } else {
+                                if (url.indexOf("/") != 0 && url.indexOf("http://") != 0 && url.indexOf("https://") != 0) {
+                                    return window.azexo_baseurl + '../azexo_elements/' + folders + '/' + url;
+                                }
                             }
                             return url;
                         }
@@ -2117,7 +2138,7 @@
                                                 synchronized.push(data.from_node);
                                                 synchronized = $.unique(synchronized);
                                                 $(this).data('synchronized', synchronized);
-                                                
+
                                                 $(this).html(data.new_state);
                                                 element.attrs['content'] = $(element.dom_content_element).html();
                                             }
@@ -2212,7 +2233,7 @@
                                     if ($(node).hasClass('sortable-highlight')) {
                                         $(node).find('.az-sortable-controls').remove();
                                         var controls = $('<div class="az-sortable-controls"></div>').appendTo(node);
-                                        var clone = $('<div class="az-sortable-clone glyphicon glyphicon-repeat" title="'+t('Clone')+'"></div>').appendTo(controls).click(function() {
+                                        var clone = $('<div class="az-sortable-clone glyphicon glyphicon-repeat" title="' + t('Clone') + '"></div>').appendTo(controls).click(function() {
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).clone().insertAfter(node);
@@ -2222,7 +2243,7 @@
                                             return false;
                                         });
                                         $(clone).css('line-height', $(clone).height() + 'px').css('font-size', $(clone).height() / 2 + 'px');
-                                        var remove = $('<div class="az-sortable-remove glyphicon glyphicon-remove" title="'+t('Remove')+'"></div>').appendTo(controls).click(function() {
+                                        var remove = $('<div class="az-sortable-remove glyphicon glyphicon-remove" title="' + t('Remove') + '"></div>').appendTo(controls).click(function() {
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).remove();
@@ -2247,12 +2268,12 @@
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-able').on('mouseenter.az-able', function() {
                                             var node = this;
                                             $(element.dom_element).find('.az-sortable-controls').remove();
-                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');                                            
-                                            if(sorted_node !== null) {
+                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
+                                            if (sorted_node !== null) {
                                                 clearTimeout(timeoutId);
                                             }
-                                            
-                                            $(node).addClass('sortable-highlight');                                            
+
+                                            $(node).addClass('sortable-highlight');
                                             sort_stack.push(node);
                                             sorted_node = node;
                                             timeoutId = setTimeout(function() {
@@ -2262,15 +2283,15 @@
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-able').on('mouseleave.az-able', function() {
                                             var node = this;
                                             $(element.dom_element).find('.az-sortable-controls').remove();
-                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');                                            
-                                            if(sorted_node !== null) {
+                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
+                                            if (sorted_node !== null) {
                                                 clearTimeout(timeoutId);
-                                            }   
-                                            
+                                            }
+
                                             sort_stack.pop();
-                                            if(sort_stack.length>0) {
-                                                node = sort_stack[sort_stack.length-1]
-                                                $(node).addClass('sortable-highlight');                                            
+                                            if (sort_stack.length > 0) {
+                                                node = sort_stack[sort_stack.length - 1]
+                                                $(node).addClass('sortable-highlight');
 
                                                 sorted_node = node;
                                                 timeoutId = setTimeout(function() {
@@ -2804,17 +2825,7 @@
             }
         },
         update_controls_zindex: function() {
-            function get_max_zindex(dom_element) {
-                var max_zindex = parseInt($(dom_element).css('z-index'));
-                $(dom_element).parent().find('*').each(function(){
-                    var zindex = parseInt($(this).css('z-index'));
-                    if(max_zindex < zindex)
-                        max_zindex = zindex;
-                });
-                return max_zindex;
-            };
-            var zindex = get_max_zindex(this.controls);
-            $(this.controls).css('z-index', zindex + 1);            
+            set_highest_zindex(this.controls);
         },
         show_controls: function() {
             if (window.azexo_editor) {
@@ -2823,7 +2834,7 @@
                 setTimeout(function() {
                     element.update_controls_zindex();
                 }, 3000);
-                        
+
                 $('<span title="' + title("Drag and drop") + '" class="control drag-and-drop ' + p + 'btn ' + p + 'btn-primary ' + p + 'glyphicon ' + p + 'glyphicon-move">' + this.name + '</span>').appendTo(this.controls);
 
                 if (this.is_container && !this.has_content) {
@@ -2907,7 +2918,7 @@
                 if (element.show_parent_controls) {
                     _.defer(function() {
                         var parent = element.parent;
-                        if(_.isString(element.show_parent_controls)) {
+                        if (_.isString(element.show_parent_controls)) {
                             parent = azexo_elements.get_element($(element.dom_element).closest(element.show_parent_controls).attr('data-az-id'));
                         }
                         function update_controls(element) {
@@ -5582,6 +5593,7 @@
                     content: buttons,
                 }).hover(function() {
                     $(columns)[fp + 'popover']('show');
+                    set_highest_zindex($(controls).find('.' + p + 'popover'));
                     $(controls).find('.' + p + 'popover .set-columns-layout').each(function() {
                         $(this).click({object: element}, element.click_set_columns);
                     });
@@ -8425,7 +8437,7 @@
         render: function($, p, fp) {
             this.dom_element = $('<div class="az-element az-scroll-menu"><nav  class="' + p + 'navbar ' + p + 'navbar-default ' + this.attrs['el_class'] + '" role="navigation" style="' + this.attrs['style'] + '"><div class="' + p + 'container-fluid"></div></nav></div>');
             var header = $('<div class="' + p + 'navbar-header"><button type="button" class="' + p + 'navbar-toggle" data-toggle="' + p + 'collapse" data-target="#' + this.id + '"><span class="' + p + 'sr-only">' + t('Toggle navigation') + '</span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span><span class="' + p + 'icon-bar"></span></button><a class="' + p + 'navbar-brand" href="' + this.attrs['logo_link'] + '"></a></div>');
-            var img = $('<img src="' + this.attrs['logo'] + '" alt="">');            
+            var img = $('<img src="' + this.attrs['logo'] + '" alt="">');
             $(header).find('a.' + p + 'navbar-brand').append(img);
             var collapse = $('<div class="' + p + 'collapse ' + p + 'navbar-collapse" id="' + this.id + '"></div>');
             var links = '<ul class="' + p + 'nav ' + p + 'navbar-nav">';
@@ -8510,6 +8522,7 @@
                     content: buttons,
                 }).hover(function() {
                     $(add_field)[fp + 'popover']('show');
+                    set_highest_zindex($(element.controls).find('.' + p + 'popover'));
                     $(element.controls).find('.' + p + 'popover .control').each(function() {
                         $(this).click(function() {
                             var base = $(this).attr('data-az-element');
@@ -8825,7 +8838,27 @@
             });
         }
         function make_theme_styles(settings) {
+            var google_fonts = {};
+            for (var i = 0; i < settings.length; i++) {
+                if (settings[i].type == 'google_font') {
+                    var v = settings[i].value;
+                    var font = v.split('|')[0];
+                    if(!(font in google_fonts)) {
+                        google_fonts[font] = {subsets: [], variants: []};
+                    }
+                    var subset = v.split('|')[1];
+                    var variant = v.split('|')[2];
+                    google_fonts[font].subsets.push(subset);
+                    $.unique(google_fonts[font].subsets);
+                    google_fonts[font].variants.push(variant);
+                    $.unique(google_fonts[font].variants);
+                }
+            }
             var styles = '<style>';
+            for (var font in google_fonts) {                
+                var url = encodeURI('http://fonts.googleapis.com/css?family=' + font + ':' + google_fonts[font].variants.join(',') + '&subset=' + google_fonts[font].subsets.join(','));
+                styles += '@import url(' + url + ');';
+            }
             for (var i = 0; i < settings.length; i++) {
                 var v = settings[i].value;
                 if (settings[i].type == 'integer_slider') {
@@ -8834,8 +8867,25 @@
                 if (settings[i].type == 'image') {
                     v = 'url("' + v + '")';
                 }
-                if ('selector' in settings[i] && 'property' in settings[i])
-                    styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ';}';
+                if (settings[i].type != 'google_font') {
+                    if ('selector' in settings[i] && 'property' in settings[i]) {
+                        if ('important' in settings[i] && settings[i].important)
+                            styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ' !important;}';
+                        else
+                            styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ';}';
+                    }
+                } else {
+                    if (v != '' && v.split('|').length == 3) {
+                        var font = v.split('|')[0];
+                        var variant = v.split('|')[2];
+                        if ('selector' in settings[i]) {
+                            if ('important' in settings[i] && settings[i].important)
+                                styles += settings[i].selector + '{font-family: ' + font + ' !important;font-weight: ' + variant + ' !important;}';
+                            else
+                                styles += settings[i].selector + '{font-family: ' + font + ';font-weight: ' + variant + ';}';                            
+                        }
+                    }
+                }
             }
             styles += '</style>';
             return styles;

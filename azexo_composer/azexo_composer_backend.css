@@ -10,7 +10,7 @@
 #az-template-elements-welcome *, 
 #az-template-elements * {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size:14px;
+    font-size:12px;
     line-height:1.6;
 }
 
@@ -609,7 +609,7 @@ div.modal-dialog, div.ax-modal-dialog {
     top: 0px;
     width: 400px;
     height: 100%;
-    z-index: 5;
+    z-index: 10000;
     padding-top:50px;
     padding-left:20px;
     padding-right:20px;
@@ -780,7 +780,7 @@ div.modal-dialog, div.ax-modal-dialog {
     bottom: 100px;
     left: 100px;
     width: 600px;
-    z-index: 5;
+    z-index: 10000;
     padding: 20px;
     font-size: 20px;
     font-weight: bold;
@@ -793,7 +793,7 @@ div.modal-dialog, div.ax-modal-dialog {
     bottom: 100px;
     right: 100px;
     width: 300px;
-    z-index: 5;
+    z-index: 10000;
     padding: 20px;
     font-size: 20px;
     font-weight: bold;

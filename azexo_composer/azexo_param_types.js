@@ -1,4 +1,4 @@
-(function ($) {
+(function($) {
     var p = '';
     var fp = '';
     if ('azexo_prefix' in window) {
@@ -33,7 +33,7 @@
         }
     }
 
-    window.azexo_open_popup = function (url) {
+    window.azexo_open_popup = function(url) {
         window.open(url, '', 'location,width=800,height=600,top=0');
     }
     function azexo_get_links(folder, link_types, callback) {
@@ -48,7 +48,7 @@
             dataType: "json",
             cache: false,
             context: this
-        }).done(function (data) {
+        }).done(function(data) {
             callback(data);
         });
     }
@@ -74,13 +74,13 @@
             search_contains: true,
             allow_single_deselect: true,
         });
-        $(select).change(function () {
-            $(this).find('option:selected').each(function () {
+        $(select).change(function() {
+            $(this).find('option:selected').each(function() {
                 $(input).val($(this).val());
             });
         });
         $(select).parent().find('.chosen-container').width('100%');
-        $('<div><a class="direct-input" href="#">' + t("Direct input") + '</a></div>').insertBefore(select).click(function () {
+        $('<div><a class="direct-input" href="#">' + t("Direct input") + '</a></div>').insertBefore(select).click(function() {
             $(input).css('display', 'block');
             $(select).parent().find('.chosen-container').remove();
             $(select).remove();
@@ -120,15 +120,15 @@
         $(select).chosen({
             search_contains: true,
         });
-        $(select).change(function () {
+        $(select).change(function() {
             var selected = [];
-            $(this).find('option:selected').each(function () {
+            $(this).find('option:selected').each(function() {
                 selected.push($(this).val());
             });
             $(input).val(selected.join(delimiter));
         });
         $(select).parent().find('.chosen-container').width('100%');
-        $('<div><a class="direct-input" href="#">' + t("Direct input") + '</a></div>').insertBefore(select).click(function () {
+        $('<div><a class="direct-input" href="#">' + t("Direct input") + '</a></div>').insertBefore(select).click(function() {
             $(input).css('display', 'block');
             $(select).parent().find('.chosen-container').remove();
             $(select).remove();
@@ -140,7 +140,7 @@
         if ('links_select' in window) {
             window.links_select(input, '');
         } else {
-            azexo_get_links('/', 'htm, html', function (data) {
+            azexo_get_links('/', 'htm, html', function(data) {
                 chosen_select(data, input);
             });
         }
@@ -149,7 +149,7 @@
         if ('links_select' in window) {
             window.links_select(input, delimiter);
         } else {
-            azexo_get_links('/', 'htm, html', function (data) {
+            azexo_get_links('/', 'htm, html', function(data) {
                 multiple_chosen_select(data, input, delimiter);
             });
         }
@@ -163,7 +163,7 @@
         } else {
             function refresh_value(preview, input) {
                 var value = [];
-                _.each($(preview).find('> div'), function (img) {
+                _.each($(preview).find('> div'), function(img) {
                     value.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(img).attr('data-src').split('filemanager')[1]));
                 });
                 value = value.join(delimiter);
@@ -179,7 +179,7 @@
             for (var i = 0; i < images.length; i++) {
                 if (images[i] != '') {
                     var img = render_image(images[i], 100, 100);
-                    $(img).appendTo(preview).append('<div class="delete"></div>').click(function () {
+                    $(img).appendTo(preview).append('<div class="delete"></div>').click(function() {
                         $(this).remove();
                         refresh_value(preview, input);
                     });
@@ -188,17 +188,17 @@
             var filemanager_input_id = _.uniqueId();
             var filemanager_input = $('<input id="' + filemanager_input_id + '" hidden type="text" name="filemanager">').insertAfter(input);
             var popup = $('<a href="javascript:azexo_open_popup(\'' + window.azexo_baseurl + 'filemanager/filemanager/dialog.php?type=1&popup=1&field_id=' + filemanager_input_id + '\')" class="' + p + 'btn ' + p + 'btn-default ' + p + 'glyphicon ' + p + 'glyphicon-picture" type="button"></a>').insertAfter(input);
-            $('<div><a class="direct-input" href="#">' + t("Direct input") + '</a></div>').insertAfter(input).click(function () {
+            $('<div><a class="direct-input" href="#">' + t("Direct input") + '</a></div>').insertAfter(input).click(function() {
                 $(input).css('display', 'block');
                 $(preview).remove();
                 $(filemanager_input).remove();
                 $(popup).remove();
                 $(this).remove();
             });
-            var intervalID = setInterval(function () {
+            var intervalID = setInterval(function() {
                 if ($(filemanager_input).val() != '') {
                     var srcs = [];
-                    _.each($(preview).find('> div'), function (img) {
+                    _.each($(preview).find('> div'), function(img) {
                         srcs.push(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(img).attr('data-src').split('filemanager')[1]));
                     });
                     if (_.indexOf(srcs, $(filemanager_input).val()) < 0) {
@@ -208,7 +208,7 @@
                         var img = render_image(toAbsoluteURL(window.azexo_baseurl + 'filemanager' + $(filemanager_input).val().split('filemanager')[1]), 100, 100);
                         if (delimiter == '')
                             $(preview).empty();
-                        $(img).appendTo(preview).append('<div class="delete"></div>').click(function () {
+                        $(img).appendTo(preview).append('<div class="delete"></div>').click(function() {
                             $(this).remove();
                             refresh_value(preview, input);
                         });
@@ -217,21 +217,21 @@
                     }
                 }
             }, 200);
-            $(input).on("remove", function () {
+            $(input).on("remove", function() {
                 clearInterval(intervalID);
             });
             $(input).parent().find('#images-preview').sortable({
                 items: '> div',
                 placeholder: 'az-sortable-placeholder',
                 forcePlaceholderSize: true,
-                over: function (event, ui) {
+                over: function(event, ui) {
                     ui.placeholder.attr('class', ui.helper.attr('class'));
                     ui.placeholder.attr('width', ui.helper.attr('width'));
                     ui.placeholder.attr('height', ui.helper.attr('height'));
                     ui.placeholder.removeClass('ui-sortable-helper');
                     ui.placeholder.addClass('az-sortable-placeholder');
                 },
-                update: function () {
+                update: function() {
                     refresh_value(preview, input);
                 },
             });
@@ -249,11 +249,11 @@
             }
             azexo_add_js({
                 path: 'js/iris.min.js',
-                callback: function () {
+                callback: function() {
                     azexo_add_js({
                         path: 'js/color-picker.min.js',
-                        callback: function () {
-                            azexo_add_css('css/color-picker.min.css', function () {
+                        callback: function() {
+                            azexo_add_css('css/color-picker.min.css', function() {
                                 $(input).wpColorPicker();
                             });
                         }
@@ -262,11 +262,11 @@
         }
     }
     function nouislider(slider, min, max, value, step, target) {
-        azexo_add_css('noUiSlider/distribute/jquery.nouislider.min.css', function () {
+        azexo_add_css('noUiSlider/distribute/jquery.nouislider.min.css', function() {
         });
         azexo_add_js({
             path: 'noUiSlider/distribute/jquery.nouislider.all.min.js',
-            callback: function () {
+            callback: function() {
                 $(slider).noUiSlider({
                     start: [(value == '' || isNaN(parseFloat(value)) || value == 'NaN') ? min : parseFloat(value)],
                     step: parseFloat(step),
@@ -274,7 +274,7 @@
                         min: [parseFloat(min)],
                         max: [parseFloat(max)]
                     },
-                }).on('change', function () {
+                }).on('change', function() {
                     $(target).val($(slider).val());
                 });
             }
@@ -300,10 +300,10 @@
     var azexo_param_types = [
         {
             type: 'dropdown',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('select[name="' + this.param_name + '"] > option:selected').val();
             },
-            render: function (value) {
+            render: function(value) {
                 var select = '<select name="' + this.param_name + '" class="' + p + 'form-control">';
                 for (var name in this.value) {
                     var option = '';
@@ -321,14 +321,14 @@
         },
         {
             type: 'checkbox',
-            get_value: function () {
+            get_value: function() {
                 var values = [];
-                _.each($(this.dom_element).find('input[name="' + this.param_name + '"]:checked'), function (obj) {
+                _.each($(this.dom_element).find('input[name="' + this.param_name + '"]:checked'), function(obj) {
                     values.push($(obj).val());
                 });
                 return values.join(',');
             },
-            render: function (value) {
+            render: function(value) {
                 if (value == null)
                     value = '';
                 var values = value.split(',');
@@ -345,10 +345,10 @@
         },
         {
             type: 'textfield',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
-            render: function (value) {
+            render: function(value) {
                 var required = this.required ? 'required' : '';
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '" ' + required + '></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             }
@@ -356,15 +356,15 @@
         {
             type: 'textarea',
             safe: false,
-            get_value: function () {
+            get_value: function() {
                 //return $(this.dom_element).find('#' + this.id).val();
                 return tinymce.get(this.id).getContent();
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><textarea id="' + this.id + '" rows="10" cols="45" name="' + this.param_name + '" ">' + value + '</textarea></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 var param = this;
                 if ('azexo_tinymce' in window) {
                     window.azexo_tinymce($(this.dom_element).find('#' + param.id));
@@ -381,7 +381,7 @@
                     } else {
                         azexo_add_js({
                             path: 'tinymce/tinymce.min.js',
-                            callback: function () {
+                            callback: function() {
                                 if (_.isObject(tinymce)) {
                                     var tinymce_config = {
                                         theme: "modern",
@@ -407,7 +407,7 @@
                     }
                 }
             },
-            closed: function () {
+            closed: function() {
                 if ('tinymce' in window) {
                     tinymce.execCommand('mceFocus', false, this.id);
                     if (tinymce.majorVersion == 4)
@@ -420,14 +420,14 @@
         {
             type: 'html',
             safe: false,
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('#' + this.id).val();
             },
-            opened: function () {
+            opened: function() {
                 var param = this;
                 azexo_add_js({
                     path: 'ace/ace.js',
-                    callback: function () {
+                    callback: function() {
                         var aceeditor = ace.edit(param.id);
                         aceeditor.setTheme("ace/theme/chrome");
                         aceeditor.getSession().setMode("ace/mode/html");
@@ -437,7 +437,7 @@
                         });
                         $(param.dom_element).find('#' + param.id).val(aceeditor.getSession().getValue());
                         aceeditor.on(
-                                'change', function (e) {
+                                'change', function(e) {
                                     $(param.dom_element).find('#' + param.id).val(aceeditor.getSession().getValue());
                                     aceeditor.resize();
                                 }
@@ -445,7 +445,7 @@
                     }
                 });
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div id="' + this.id + '"><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + this.param_name + '" ">' + value + '</textarea></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
@@ -453,14 +453,14 @@
         {
             type: 'css',
             safe: false,
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('#' + this.id).val();
             },
-            opened: function () {
+            opened: function() {
                 var param = this;
                 azexo_add_js({
                     path: 'ace/ace.js',
-                    callback: function () {
+                    callback: function() {
                         var aceeditor = ace.edit(param.id);
                         aceeditor.setTheme("ace/theme/chrome");
                         aceeditor.getSession().setMode("ace/mode/css");
@@ -470,7 +470,7 @@
                         });
                         $(param.dom_element).find('#' + param.id).val(aceeditor.getSession().getValue());
                         aceeditor.on(
-                                'change', function (e) {
+                                'change', function(e) {
                                     $(param.dom_element).find('#' + param.id).val(aceeditor.getSession().getValue());
                                     aceeditor.resize();
                                 }
@@ -478,7 +478,7 @@
                     }
                 });
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div id="' + this.id + '"><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + this.param_name + '" ">' + value + '</textarea></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
@@ -486,14 +486,14 @@
         {
             type: 'javascript',
             safe: false,
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('#' + this.id).val();
             },
-            opened: function () {
+            opened: function() {
                 var param = this;
                 azexo_add_js({
                     path: 'ace/ace.js',
-                    callback: function () {
+                    callback: function() {
                         var aceeditor = ace.edit(param.id);
                         aceeditor.setTheme("ace/theme/chrome");
                         aceeditor.getSession().setMode("ace/mode/javascript");
@@ -503,7 +503,7 @@
                         });
                         $(param.dom_element).find('#' + param.id).val(aceeditor.getSession().getValue());
                         aceeditor.on(
-                                'change', function (e) {
+                                'change', function(e) {
                                     $(param.dom_element).find('#' + param.id).val(aceeditor.getSession().getValue());
                                     aceeditor.resize();
                                 }
@@ -511,41 +511,41 @@
                     }
                 });
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div id="' + this.id + '"><textarea class="' + p + 'form-control" rows="10" cols="45" name="' + this.param_name + '" ">' + value + '</textarea></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-        },        
+        },
         {
             type: 'rawtext',
             safe: false,
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('#' + this.id).val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><textarea id="' + this.id + '" class="' + p + 'form-control" rows="10" cols="45" name="' + this.param_name + '" ">' + value + '</textarea></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
         },
         {
             type: 'colorpicker',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('#' + this.id).val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input id="' + this.id + '" name="' + this.param_name + '" type="text" value="' + value + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 colorpicker('#' + this.id);
             },
         },
         {
             type: 'style',
-            create: function () {
+            create: function() {
                 this.important = false;
             },
-            get_value: function () {
+            get_value: function() {
                 var important_str = '';
                 if (this.important) {
                     important_str = ' !important';
@@ -686,7 +686,7 @@
                 }
                 return style;
             },
-            render: function (value) {
+            render: function(value) {
                 value = value.replace(/!important/g, '');
                 var output = '<div class="style ' + p + 'row">';
                 var match = null;
@@ -921,7 +921,7 @@
                 output += '</div>';
                 this.dom_element = $(output);
             },
-            opened: function () {
+            opened: function() {
                 image_select($(this.dom_element).find('input[name="bg_image"]'));
                 colorpicker('#' + this.color_id);
                 colorpicker('#' + this.border_color_id);
@@ -932,51 +932,101 @@
             },
         },
         {
+            type: 'google_font',
+            hidden: !'azexo_google_fonts' in window,
+            get_value: function() {
+                var font = $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
+                var subset = $(this.dom_element).find('input[name="' + this.param_name + '_subset"]').val();
+                var variant = $(this.dom_element).find('input[name="' + this.param_name + '_variant"]').val();
+                return font + '|' + subset + '|' + variant;
+            },
+            render: function(value) {
+                var font = '';
+                var subset = '';
+                var variant = '';
+                if (_.isString(value) && value != '' && value.split('|').length == 3) {
+                    font = value.split('|')[0];
+                    subset = value.split('|')[1];
+                    variant = value.split('|')[2];
+                }
+                this.dom_element = $('<div class="' + p + 'form-group"><div><label>' + this.heading + '</label><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + font + '"></div><div><label>' + t('Subset') + '</label><input class="' + p + 'form-control" name="' + this.param_name + '_subset" type="text" value="' + subset + '"></div><div><label>' + t('Variant') + '</label><input class="' + p + 'form-control" name="' + this.param_name + '_variant" type="text" value="' + variant + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
+            },
+            opened: function() {
+                var element = this;
+                var fonts = Object.keys(window.azexo_google_fonts);
+                fonts = _.object(fonts, fonts);
+                var font_select = null;
+                var subset_select = null;
+                var variant_select = null;                
+                font_select = chosen_select(fonts, $(this.dom_element).find('input[name="' + this.param_name + '"]'));
+                $(font_select).chosen().change(function() {
+                    var f = Object.keys(window.azexo_google_fonts)[0];
+                    if($(this).val() in window.azexo_google_fonts)
+                        f = window.azexo_google_fonts[$(this).val()];
+                    var subsets = {};
+                    for (var i = 0; i < f.subsets.length; i++) {
+                        subsets[f.subsets[i].id] = f.subsets[i].name;
+                    }
+                    var variants = {};
+                    for (var i = 0; i < f.variants.length; i++) {
+                        variants[f.variants[i].id] = f.variants[i].name;
+                    }
+
+                    $(subset_select).parent().find('.direct-input').click();
+                    subset_select = chosen_select(subsets, $(element.dom_element).find('input[name="' + element.param_name + '_subset"]'));
+
+                    $(variant_select).parent().find('.direct-input').click();
+                    variant_select = chosen_select(variants, $(element.dom_element).find('input[name="' + element.param_name + '_variant"]'));
+                });
+                $(font_select).chosen().trigger('change');
+            },
+        },
+        {
             type: 'image',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 image_select($(this.dom_element).find('input[name="' + this.param_name + '"]'));
             },
         },
         {
             type: 'images',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 images_select($(this.dom_element).find('input[name="' + this.param_name + '"]'), ',');
             },
         },
         {
             type: 'tagged_images',
-            get_value: function () {
+            get_value: function() {
                 var value = '';
-                $(this.dom_element).find('tbody tr').each(function () {
+                $(this.dom_element).find('tbody tr').each(function() {
                     value += $(this).find('input.image').val() + '{' + $(this).find('input.tags').val() + '}';
                 });
                 return value;
             },
-            render: function (value) {
+            render: function(value) {
                 var param = this;
                 function add_image(container, src, tags) {
                     var row = $('<tr><td></td><td><input class="image ' + p + 'form-control" type="text" value="' + src + '"></td><td><input class="tags ' + p + 'form-control" type="text" value="' + tags + '"></td><td class="remove"><button title="' + t("Remove") + '" type="button" class="control remove ' + p + 'btn ' + p + 'btn-danger ' + p + 'glyphicon ' + p + 'glyphicon-remove"> </button></td></tr>').appendTo(container);
                     image_select($(row).find('input.image'));
-                    $(row).find('button.remove').click(function () {
+                    $(row).find('button.remove').click(function() {
                         $(row).remove();
                         return false;
                     });
                     return row;
                 }
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div class="add-image ' + p + 'btn-group ' + p + 'center-block"></div><table class="' + p + 'table"><thead><tr><td></td><td>' + t('Image') + '</td><td>' + t('Tags') + '</td><td>' + t('Remove') + '</td></tr></thead><tbody class="images-group"></tbody></table><p class="' + p + 'help-block">' + this.description + '</p></div>');
-                $('<button title="' + t("Add one image") + '" class="add-image ' + p + 'btn ' + p + 'btn-default">' + t("Add one image") + '</button>').appendTo($(this.dom_element).find('div.add-image')).click(function () {
+                $('<button title="' + t("Add one image") + '" class="add-image ' + p + 'btn ' + p + 'btn-default">' + t("Add one image") + '</button>').appendTo($(this.dom_element).find('div.add-image')).click(function() {
                     add_image($(param.dom_element).find('tbody.images-group'), '', '');
                     $(param.dom_element).find('tbody.images-group').sortable({
                         axis: 'y',
@@ -986,7 +1036,7 @@
                     });
                     return false;
                 });
-                $('<button title="' + t("Add images") + '" class="add-images ' + p + 'btn ' + p + 'btn-default">' + t("Add images") + '</button>').appendTo($(this.dom_element).find('div.add-image')).click(function () {
+                $('<button title="' + t("Add images") + '" class="add-images ' + p + 'btn ' + p + 'btn-default">' + t("Add images") + '</button>').appendTo($(this.dom_element).find('div.add-image')).click(function() {
                     return false;
                 });
                 if (value != '') {
@@ -999,7 +1049,7 @@
                     }
                 }
             },
-            opened: function () {
+            opened: function() {
                 $(this.dom_element).find('tbody.images-group').sortable({
                     axis: 'y',
                     items: '> tr',
@@ -1212,23 +1262,23 @@
                 p + 'glyphicon ' + p + 'glyphicon-tree-conifer',
                 p + 'glyphicon ' + p + 'glyphicon-tree-deciduous',
             ].concat(icons),
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 var icons = $('<div class="icons"></div>').appendTo(this.dom_element);
                 for (var i = 0; i < this.icons.length; i++) {
                     $(icons).append('<span class="' + this.icons[i] + '"></span>');
                 }
                 var param = this;
                 $(icons).selectable({
-                    stop: function () {
+                    stop: function() {
                         var icon = '';
                         var c = $(param.dom_element).find('.ui-selected').attr('class');
-                        if(c)
+                        if (c)
                             icon = c.replace('ui-selectee', '').replace('ui-selected', '');
                         $(param.dom_element).find('input[name="' + param.param_name + '"]').val($.trim(icon));
                     }
@@ -1239,68 +1289,68 @@
         },
         {
             type: 'link',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 link_select($(this.dom_element).find('input[name="' + this.param_name + '"]'));
             },
         },
         {
             type: 'links',
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('#' + this.id).val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.id = _.uniqueId();
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><textarea id="' + this.id + '" class="' + p + 'form-control" rows="10" cols="45" name="' + this.param_name + '" ">' + value + '</textarea></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 links_select($(this.dom_element).find('textarea[name="' + this.param_name + '"]'), "\n");
             },
         },
         {
             type: 'integer_slider',
-            create: function () {
+            create: function() {
                 this.min = 0;
                 this.max = 100;
                 this.step = 1;
             },
-            get_value: function () {
+            get_value: function() {
                 var v = $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
                 return (v == '') ? NaN : parseFloat(v).toString();
             },
-            render: function (value) {
+            render: function(value) {
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '"></div><div class="slider"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 nouislider($(this.dom_element).find('.slider'), this.min, this.max, this.get_value(), this.step, $(this.dom_element).find('input[name="' + this.param_name + '"]'));
             },
         },
         {
             type: 'datetime',
-            create: function () {
+            create: function() {
                 this.formatDate = '';
                 this.formatTime = '';
                 this.timepicker = false;
                 this.datepicker = false;
             },
-            get_value: function () {
+            get_value: function() {
                 return $(this.dom_element).find('input[name="' + this.param_name + '"]').val();
             },
-            render: function (value) {
+            render: function(value) {
                 this.dom_element = $('<div class="' + p + 'form-group"><label>' + this.heading + '</label><div><input class="' + p + 'form-control" name="' + this.param_name + '" type="text" value="' + value + '"></div><p class="' + p + 'help-block">' + this.description + '</p></div>');
             },
-            opened: function () {
+            opened: function() {
                 var param = this;
-                azexo_add_css('datetimepicker/jquery.datetimepicker.css', function () {
+                azexo_add_css('datetimepicker/jquery.datetimepicker.css', function() {
                 });
                 azexo_add_js({
                     path: 'datetimepicker/jquery.datetimepicker.js',
-                    callback: function () {
+                    callback: function() {
                         if (param.datepicker && param.timepicker)
                             param.format = param.formatDate + ' ' + param.formatTime;
                         if (param.datepicker && !param.timepicker)
@@ -1319,7 +1369,7 @@
         },
         {
             type: 'saved_datetime',
-            get_value: function () {
+            get_value: function() {
                 return (new Date).toUTCString();
             },
         },
