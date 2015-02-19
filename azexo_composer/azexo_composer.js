@@ -1852,6 +1852,9 @@
             var synchronizable = [];
             if ('azexo_synchronizable' in window)
                 synchronizable = window.azexo_synchronizable;
+            var restoreable = [];
+            if ('azexo_restoreable' in window)
+                restoreable = window.azexo_restoreable;
             var icons = BaseParamType.prototype.param_types['icon'].prototype.icons.map(function(item, i, arr) {
                 return item.replace(/^/, '.').replace(/ /, '.')
             });
@@ -1929,6 +1932,8 @@
                     styleable: ['.az-styleable'].concat(styleable),
                     sortable: ['.az-sortable'].concat(sortable),
                     synchronizable: ['.az-synchronizable'].concat(synchronizable),
+                    restoreable: ['.az-restoreable'].concat(restoreable),
+                    restore_nodes: {},
                     show_controls: function() {
                         if (window.azexo_editor) {
                             var element = this;
@@ -2075,6 +2080,7 @@
                                         $(node).attr('style', values['style']);
                                     }
                                     element.attrs['content'] = $(element.dom_content_element).html();
+                                    element.restore_content();
                                     synchronize();
                                     able();
                                     callback();
@@ -2110,6 +2116,7 @@
                                         }
                                         $(this).data('current-state', make_node_signature(this));
                                         element.attrs['content'] = $(element.dom_content_element).html();
+                                        element.restore_content();
                                     });
                                 }
                                 able();
@@ -2141,6 +2148,7 @@
 
                                                 $(this).html(data.new_state);
                                                 element.attrs['content'] = $(element.dom_content_element).html();
+                                                element.restore_content();
                                             }
                                         }
                                     });
@@ -2176,15 +2184,40 @@
                                 }
                             }
                             function able() {
+                                for (var i = 0; i < element.restoreable.length; i++) {
+                                    $(element.dom_element).find(element.restoreable[i]).off('mouseenter.az-restoreable').on('mouseenter.az-restoreable', function() {
+                                        $(this).addClass('restoreable-highlight');
+                                    });
+                                    $(element.dom_element).find(element.restoreable[i]).off('mouseleave.az-restoreable').on('mouseleave.az-restoreable', function() {
+                                        $(this).removeClass('restoreable-highlight');
+                                    });
+                                    $(element.dom_element).find(element.restoreable[i]).off('click.az-restoreable').on('click.az-restoreable', function(e) {
+                                        if($(this).hasAttr('data-az-restore')) {
+                                            var params = [];
+                                            params.push(make_param_type({
+                                                type: 'html',
+                                                heading: t('HTML'),
+                                                param_name: 'html',
+                                            }));
+                                            var id = $(this).attr('data-az-restore');
+                                            var html = this.restore_nodes[id];
+                                            BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'html': html}}, function(values) {                                            
+                                                element.restore_nodes[id] = values['html'];
+                                                element.restore_content();
+                                            });
+                                            return false;
+                                        }
+                                    });
+                                }
                                 for (var i = 0; i < element.styleable.length; i++) {
-                                    $(element.dom_element).find(element.styleable[i]).off('mouseenter.az-able').on('mouseenter.az-able', function() {
+                                    $(element.dom_element).find(element.styleable[i]).off('mouseenter.az-styleable').on('mouseenter.az-styleable', function() {
                                         $(this).addClass('styleable-highlight');
                                     });
-                                    $(element.dom_element).find(element.styleable[i]).off('mouseleave.az-able').on('mouseleave.az-able', function() {
+                                    $(element.dom_element).find(element.styleable[i]).off('mouseleave.az-styleable').on('mouseleave.az-styleable', function() {
                                         $(this).removeClass('styleable-highlight');
                                     });
-                                    $(element.dom_element).find(element.styleable[i]).off('click.az-able').on('click.az-able', function(e) {
-                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                    $(element.dom_element).find(element.styleable[i]).off('click.az-styleable').on('click.az-styleable', function(e) {
+                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight, .restoreable-highlight').length == 0) {
                                             azexo_elements.edit_stack.push({
                                                 node: this,
                                                 edit: false,
@@ -2202,14 +2235,14 @@
                                     });
                                 }
                                 for (var i = 0; i < element.editable.length; i++) {
-                                    $(element.dom_element).find(element.editable[i]).off('mouseenter.az-able').on('mouseenter.az-able', function() {
+                                    $(element.dom_element).find(element.editable[i]).off('mouseenter.az-editable').on('mouseenter.az-editable', function() {
                                         $(this).addClass('editable-highlight');
                                     });
-                                    $(element.dom_element).find(element.editable[i]).off('mouseleave.az-able').on('mouseleave.az-able', function() {
+                                    $(element.dom_element).find(element.editable[i]).off('mouseleave.az-editable').on('mouseleave.az-editable', function() {
                                         $(this).removeClass('editable-highlight');
                                     });
-                                    $(element.dom_element).find(element.editable[i]).off('click.az-able').on('click.az-able', function(e) {
-                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                    $(element.dom_element).find(element.editable[i]).off('click.az-editable').on('click.az-editable', function(e) {
+                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight, .restoreable-highlight').length == 0) {
                                             azexo_elements.edit_stack.push({
                                                 node: this,
                                                 edit: true,
@@ -2238,6 +2271,7 @@
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).clone().insertAfter(node);
                                             element.attrs['content'] = $(element.dom_content_element).html();
+                                            element.restore_content();
                                             synchronize();
                                             able();
                                             return false;
@@ -2248,6 +2282,7 @@
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).remove();
                                             element.attrs['content'] = $(element.dom_content_element).html();
+                                            element.restore_content();
                                             synchronize();
                                             able();
                                             return false;
@@ -2265,7 +2300,7 @@
                                 });
                                 for (var i = 0; i < element.sortable.length; i++) {
                                     (function(i) {
-                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-able').on('mouseenter.az-able', function() {
+                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-sortable').on('mouseenter.az-sortable', function() {
                                             var node = this;
                                             $(element.dom_element).find('.az-sortable-controls').remove();
                                             $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
@@ -2280,7 +2315,7 @@
                                                 show_controls(node);
                                             }, 1000);
                                         });
-                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-able').on('mouseleave.az-able', function() {
+                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-sortable').on('mouseleave.az-sortable', function() {
                                             var node = this;
                                             $(element.dom_element).find('.az-sortable-controls').remove();
                                             $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
@@ -2309,6 +2344,19 @@
                             synchronize();
                         }
                     },
+                    restore_content: function() {
+                        var content = '<div>' + this.attrs['content'] + '</div>';
+                        for (var id in this.restore_nodes) {
+                            $(content).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
+                        }
+                        this.attrs['content'] = $(content).html();
+                    },
+                    restore: function() {
+                        TemplateElement.baseclass.prototype.restore.apply(this, arguments);
+                        for (var id in this.restore_nodes) {
+                            $(this.dom_element).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
+                        }
+                    },
                     showed: function($, p, fp) {
                         TemplateElement.baseclass.prototype.showed.apply(this, arguments);
                         var element = this;
@@ -2323,14 +2371,24 @@
                                     $(this).removeClass(p + 'container');
                                     $(this).removeClass(p + 'container-fluid');
                                     element.attrs['content'] = $(element.dom_content_element).html();
+                                    element.restore_content();
                                     element.section = false;
                                 });
                         }
                     },
                     render: function($, p, fp) {
+                        var element = this;
                         this.dom_element = $('<div class="az-element az-template ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                         this.dom_content_element = $('<div></div>').appendTo(this.dom_element);
-                        $(this.attrs['content']).appendTo(this.dom_content_element);
+                        var content = $(this.attrs['content']);
+                        for (var i = 0; i < this.restoreable.length; i++) {
+                            $(content).find(this.restoreable[i]).each(function() {
+                                var id = _.uniqueId('r');
+                                $(this).attr('data-az-restore', id);
+                                element.restore_nodes[id] = $(this).html();
+                            });
+                        }
+                        $(content).appendTo(this.dom_content_element);
                         TemplateElement.baseclass.prototype.render.apply(this, arguments);
                     },
                 });
@@ -2394,6 +2452,7 @@
                                             }
                                         });
                                         var dnd = false;
+                                        var scrollTop = 0;
                                         $(thumbnails).sortable({
                                             items: '.az-thumbnail',
                                             connectWith: '.az-ctnr',
@@ -2401,6 +2460,10 @@
                                                 dnd = true;
                                                 $(panel).css('left', '0px');
                                                 $(thumbnails).css('overflow-y', 'visible');
+                                                scrollTop = $(window).scrollTop();
+                                                $(window).on('scroll.template-elements-sortable', function() {
+                                                    $(window).scrollTop(scrollTop);
+                                                });
                                             },
                                             stop: function(event, ui) {
                                                 dnd = false;
@@ -2408,6 +2471,7 @@
                                                 $(panel).removeClass('az-thumbnails');
                                                 $(thumbnails).css('overflow-y', 'scroll');
                                                 $(thumbnails).css('display', 'none');
+                                                $(window).off('scroll.template-elements-sortable');
                                             },
                                             update: function(event, ui) {
                                                 var container = azexo_elements.get_element($(ui.item).parent().closest('[data-az-id]').attr('data-az-id'));
@@ -2423,6 +2487,7 @@
                                                 });
                                                 $(ui.item).detach();
                                                 $(menu_item).click();
+                                                $(window).scrollTop(scrollTop);
                                             },
                                             placeholder: 'az-sortable-placeholder',
                                             forcePlaceholderSize: true,
@@ -3097,6 +3162,14 @@
                 return '<style id="hover-style-' + this.id + '">.hover-style-' + this.id + ':hover ' + this.style_selector + ' { ' + this.attrs['hover_style'] + '} </style>';
             else
                 return '';
+        },
+        restore: function() {
+        },
+        recursive_restore: function() {
+            for (var i = 0; i < this.children.length; i++) {
+                this.children[i].recursive_restore();
+            }
+            this.restore();
         },
         showed: function($, p, fp) {
             if ('pos_left' in this.attrs && this.attrs['pos_left'] != '')
@@ -8141,9 +8214,10 @@
         get_html: function() {
             this.recursive_update_data();
             this.recursive_clear_animation();
+            this.recursive_restore();
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
             $(dom).find('.az-element > .controls').remove();
-            $(dom).find('> .controls').remove();            
+            $(dom).find('> .controls').remove();
             $(dom).find('.az-sortable-controls').remove();
             $(dom).find('.az-step-controls').remove();
             $(dom).find('.az-empty').remove();
@@ -8952,7 +9026,7 @@
             window.links_select = function(input, delimiter) {
                 var options = {};
                 for (var name in site_pages) {
-                    if(site_pages[name] != null)
+                    if (site_pages[name] != null)
                         options[name + '.html'] = site_pages[name].title;
                 }
                 chosen_select(options, input);
@@ -9036,7 +9110,7 @@
             function get_export_site() {
                 var site = {};
                 for (var name in site_containers) {
-                    if(site_containers[name] != null) {
+                    if (site_containers[name] != null) {
                         var html = get_page_html(site_containers[name], true, site_pages[name].title);
                         site[name] = btoa(enc(encodeURIComponent(html)));
                     }
@@ -9071,7 +9145,7 @@
                 site_pages[name] = null;
                 $(pages).find('a.' + p + 'active:contains("' + name + '")').text(new_name);
                 for (var page_name in site_containers) {
-                    if(site_containers[page_name] != null) {
+                    if (site_containers[page_name] != null) {
                         for (var i = 0; i < site_containers[page_name].length; i++) {
                             $(site_containers[page_name][i].dom_content_element).find('[href="' + name + '.html"]').each(function() {
                                 $(this).attr('href', new_name + '.html');
