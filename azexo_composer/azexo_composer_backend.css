@@ -661,6 +661,32 @@ div.modal-dialog, div.ax-modal-dialog {
     cursor: move !important;
 }
 
+.restoreable-highlight::after, .restoreable-highlight:hover::after {
+    content: ' ';
+    cursor: pointer;
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    opacity: 0.9;
+    background-image: 
+        -webkit-repeating-linear-gradient(45deg,
+        rgba(0,0,0,0.1) 0px, 
+        rgba(0,0,0,0.1) 5px, 
+        transparent 5px, 
+        transparent 10px);
+    background-image: 
+        repeating-linear-gradient(45deg,
+        rgba(0,0,0,0.1) 0px, 
+        rgba(0,0,0,0.1) 5px, 
+        transparent 5px, 
+        transparent 10px);    
+}
+
+
 .az-sortable > * {
     position: relative;
 }

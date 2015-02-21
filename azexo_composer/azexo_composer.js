@@ -1840,6 +1840,13 @@
             }
         },
         create_template_elements: function(elements) {
+            var urls_to_update = {
+                'link[href]': 'href',
+                'script[src]': 'src',
+                'img[src]': 'src',
+            };
+            if ('azexo_urls_to_update' in window)
+                urls_to_update = $.extend(urls_to_update, window.azexo_urls_to_update);
             var editable = [];
             if ('azexo_editable' in window)
                 editable = window.azexo_editable;
@@ -1855,6 +1862,9 @@
             var restoreable = [];
             if ('azexo_restoreable' in window)
                 restoreable = window.azexo_restoreable;
+            var containable = [];
+            if ('azexo_containable' in window)
+                containable = window.azexo_containable;
             var icons = BaseParamType.prototype.param_types['icon'].prototype.icons.map(function(item, i, arr) {
                 return item.replace(/^/, '.').replace(/ /, '.')
             });
@@ -1878,14 +1888,15 @@
                             }
                             return url;
                         }
-                        $(dom).find('link[href]').each(function() {
-                            $(this).attr('href', update_url($(this).attr('href')));
-                        });
-                        $(dom).find('script[src]').each(function() {
-                            $(this).attr('src', update_url($(this).attr('src')));
-                        });
-                        $(dom).find('img[src]').each(function() {
-                            $(this).attr('src', update_url($(this).attr('src')));
+                        for (var selector in urls_to_update) {
+                            var attr = urls_to_update[selector];
+                            $(dom).find(selector).each(function() {
+                                $(this).attr(attr, update_url($(this).attr(attr)));
+                            });
+                        }
+                        $(dom).find('[data-az-url]').each(function() {
+                            var attr = $(this).attr('data-az-url');
+                            $(this).attr(attr, update_url($(this).attr(attr)));
                         });
                         $(dom).find('[style*="background-image"]').each(function() {
                             var style = $(this).attr('style').replace(/background-image[: ]*url\(([^\)]+)\) *;/, function(match, url) {
@@ -1933,7 +1944,9 @@
                     sortable: ['.az-sortable'].concat(sortable),
                     synchronizable: ['.az-synchronizable'].concat(synchronizable),
                     restoreable: ['.az-restoreable'].concat(restoreable),
+                    containable: ['.az-containable'].concat(containable),
                     restore_nodes: {},
+                    contained_elements: {},
                     show_controls: function() {
                         if (window.azexo_editor) {
                             var element = this;
@@ -2098,25 +2111,27 @@
                                 sortable_disable();
                                 for (var i = 0; i < element.synchronizable.length; i++) {
                                     $(element.dom_content_element).find(element.synchronizable[i]).each(function() {
-                                        $(this).find('.editable-highlight').removeClass('editable-highlight');
-                                        $(this).find('.styleable-highlight').removeClass('styleable-highlight');
-                                        $(this).find('.sortable-highlight').removeClass('sortable-highlight');
-                                        $(this).find('[class=""]').removeAttr('class');
-                                        $(this).find('[style=""]').removeAttr('style');
-                                        var synchronized = $(this).data('synchronized');
-                                        if (synchronized) {
-                                            for (var i = 0; i < synchronized.length; i++) {
-                                                $(synchronized[i]).html($(this).html());
+                                        if ($(this).closest('[data-az-restore]').length == 0) {
+                                            $(this).find('.editable-highlight').removeClass('editable-highlight');
+                                            $(this).find('.styleable-highlight').removeClass('styleable-highlight');
+                                            $(this).find('.sortable-highlight').removeClass('sortable-highlight');
+                                            $(this).find('[class=""]').removeAttr('class');
+                                            $(this).find('[style=""]').removeAttr('style');
+                                            var synchronized = $(this).data('synchronized');
+                                            if (synchronized) {
+                                                for (var i = 0; i < synchronized.length; i++) {
+                                                    $(synchronized[i]).html($(this).html());
+                                                }
                                             }
+                                            if ($(this).data('current-state')) {
+                                                $(document).trigger("azexo_synchronize", {from_node: this, old_state: $(this).data('current-state'), new_state: $(this).html()});
+                                            } else {
+                                                $(document).trigger("azexo_synchronize", {from_node: this, old_state: make_node_signature(this), new_state: $(this).html()});
+                                            }
+                                            $(this).data('current-state', make_node_signature(this));
+                                            element.attrs['content'] = $(element.dom_content_element).html();
+                                            element.restore_content();
                                         }
-                                        if ($(this).data('current-state')) {
-                                            $(document).trigger("azexo_synchronize", {from_node: this, old_state: $(this).data('current-state'), new_state: $(this).html()});
-                                        } else {
-                                            $(document).trigger("azexo_synchronize", {from_node: this, old_state: make_node_signature(this), new_state: $(this).html()});
-                                        }
-                                        $(this).data('current-state', make_node_signature(this));
-                                        element.attrs['content'] = $(element.dom_content_element).html();
-                                        element.restore_content();
                                     });
                                 }
                                 able();
@@ -2125,30 +2140,32 @@
                                 sortable_disable();
                                 for (var i = 0; i < element.synchronizable.length; i++) {
                                     $(element.dom_content_element).find(element.synchronizable[i]).each(function() {
-                                        $(this).find('.editable-highlight').removeClass('editable-highlight');
-                                        $(this).find('.styleable-highlight').removeClass('styleable-highlight');
-                                        $(this).find('.sortable-highlight').removeClass('sortable-highlight');
-                                        $(this).find('[class=""]').removeAttr('class');
-                                        $(this).find('[style=""]').removeAttr('style');
-                                        if (this != data.from_node) {
-                                            if (make_node_signature(this) == data.old_state) {
-                                                var synchronized = $(data.from_node).data('synchronized');
-                                                if (!synchronized)
-                                                    synchronized = [];
-                                                synchronized.push(this);
-                                                synchronized = $.unique(synchronized);
-                                                $(data.from_node).data('synchronized', synchronized);
+                                        if ($(this).closest('[data-az-restore]').length == 0) {
+                                            $(this).find('.editable-highlight').removeClass('editable-highlight');
+                                            $(this).find('.styleable-highlight').removeClass('styleable-highlight');
+                                            $(this).find('.sortable-highlight').removeClass('sortable-highlight');
+                                            $(this).find('[class=""]').removeAttr('class');
+                                            $(this).find('[style=""]').removeAttr('style');
+                                            if (this != data.from_node) {
+                                                if (make_node_signature(this) == data.old_state) {
+                                                    var synchronized = $(data.from_node).data('synchronized');
+                                                    if (!synchronized)
+                                                        synchronized = [];
+                                                    synchronized.push(this);
+                                                    synchronized = $.unique(synchronized);
+                                                    $(data.from_node).data('synchronized', synchronized);
 
-                                                synchronized = $(this).data('synchronized');
-                                                if (!synchronized)
-                                                    synchronized = [];
-                                                synchronized.push(data.from_node);
-                                                synchronized = $.unique(synchronized);
-                                                $(this).data('synchronized', synchronized);
+                                                    synchronized = $(this).data('synchronized');
+                                                    if (!synchronized)
+                                                        synchronized = [];
+                                                    synchronized.push(data.from_node);
+                                                    synchronized = $.unique(synchronized);
+                                                    $(this).data('synchronized', synchronized);
 
-                                                $(this).html(data.new_state);
-                                                element.attrs['content'] = $(element.dom_content_element).html();
-                                                element.restore_content();
+                                                    $(this).html(data.new_state);
+                                                    element.attrs['content'] = $(element.dom_content_element).html();
+                                                    element.restore_content();
+                                                }
                                             }
                                         }
                                     });
@@ -2157,28 +2174,38 @@
                             });
                             function sortable_disable() {
                                 for (var i = 0; i < element.sortable.length; i++) {
-                                    if ($(element.dom_content_element).find(element.sortable[i]).hasClass('ui-sortable')) {
-                                        $(element.dom_content_element).find(element.sortable[i]).sortable('destroy');
-                                        $(element.dom_content_element).find(element.sortable[i]).find('.ui-sortable-handle').removeClass('ui-sortable-handle');
-                                    }
+                                    $(element.dom_content_element).find(element.sortable[i]).each(function(){
+                                        if ($(this).hasClass('ui-sortable')) {
+                                            if($(this).sortable('instance')) {
+                                                $(this).sortable('destroy');
+                                                $(this).find('.ui-sortable-handle').removeClass('ui-sortable-handle');
+                                            }
+                                        }                                        
+                                    });
                                 }
                             }
                             function sortable_enable() {
                                 for (var i = 0; i < element.sortable.length; i++) {
-                                    $(element.dom_element).find(element.sortable[i]).sortable({
-                                        items: '> *',
-                                        placeholder: 'az-sortable-placeholder',
-                                        forcePlaceholderSize: true,
-                                        start: function(event, ui) {
-                                            $(ui.item).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
-                                        },
-                                        update: function(event, ui) {
-                                            synchronize();
-                                        },
-                                        over: function(event, ui) {
-                                            ui.placeholder.attr('class', ui.helper.attr('class'));
-                                            ui.placeholder.removeClass('ui-sortable-helper');
-                                            ui.placeholder.addClass('az-sortable-placeholder');
+                                    $(element.dom_element).find(element.sortable[i]).each(function() {
+                                        if ($(this).closest('[data-az-restore]').length == 0) {
+                                            $(this).sortable({
+                                                items: '> *',
+                                                placeholder: 'az-sortable-placeholder',
+                                                forcePlaceholderSize: true,
+                                                start: function(event, ui) {
+                                                    $(ui.item).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
+                                                },
+                                                update: function(event, ui) {
+                                                    element.attrs['content'] = $(element.dom_content_element).html();
+                                                    element.restore_content();
+                                                    synchronize();
+                                                },
+                                                over: function(event, ui) {
+                                                    ui.placeholder.attr('class', ui.helper.attr('class'));
+                                                    ui.placeholder.removeClass('ui-sortable-helper');
+                                                    ui.placeholder.addClass('az-sortable-placeholder');
+                                                }
+                                            });
                                         }
                                     });
                                 }
@@ -2192,7 +2219,7 @@
                                         $(this).removeClass('restoreable-highlight');
                                     });
                                     $(element.dom_element).find(element.restoreable[i]).off('click.az-restoreable').on('click.az-restoreable', function(e) {
-                                        if($(this).hasAttr('data-az-restore')) {
+                                        if ($(this).is('[data-az-restore]')) {
                                             var params = [];
                                             params.push(make_param_type({
                                                 type: 'html',
@@ -2200,10 +2227,12 @@
                                                 param_name: 'html',
                                             }));
                                             var id = $(this).attr('data-az-restore');
-                                            var html = this.restore_nodes[id];
-                                            BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'html': html}}, function(values) {                                            
+                                            var html = element.restore_nodes[id];
+                                            BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'html': html}}, function(values) {
                                                 element.restore_nodes[id] = values['html'];
                                                 element.restore_content();
+                                                element.update_dom();
+                                                synchronize();
                                             });
                                             return false;
                                         }
@@ -2211,51 +2240,59 @@
                                 }
                                 for (var i = 0; i < element.styleable.length; i++) {
                                     $(element.dom_element).find(element.styleable[i]).off('mouseenter.az-styleable').on('mouseenter.az-styleable', function() {
-                                        $(this).addClass('styleable-highlight');
+                                        if ($(this).closest('[data-az-restore]').length == 0)
+                                            $(this).addClass('styleable-highlight');
                                     });
                                     $(element.dom_element).find(element.styleable[i]).off('mouseleave.az-styleable').on('mouseleave.az-styleable', function() {
-                                        $(this).removeClass('styleable-highlight');
+                                        if ($(this).closest('[data-az-restore]').length == 0)
+                                            $(this).removeClass('styleable-highlight');
                                     });
                                     $(element.dom_element).find(element.styleable[i]).off('click.az-styleable').on('click.az-styleable', function(e) {
-                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight, .restoreable-highlight').length == 0) {
-                                            azexo_elements.edit_stack.push({
-                                                node: this,
-                                                edit: false,
-                                                style: true,
-                                            });
-                                            editor_opener();
-                                            return false;
-                                        } else {
-                                            azexo_elements.edit_stack.push({
-                                                node: this,
-                                                edit: false,
-                                                style: true,
-                                            });
+                                        if ($(this).closest('[data-az-restore]').length == 0) {
+                                            if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                                azexo_elements.edit_stack.push({
+                                                    node: this,
+                                                    edit: false,
+                                                    style: true,
+                                                });
+                                                editor_opener();
+                                                return false;
+                                            } else {
+                                                azexo_elements.edit_stack.push({
+                                                    node: this,
+                                                    edit: false,
+                                                    style: true,
+                                                });
+                                            }
                                         }
                                     });
                                 }
                                 for (var i = 0; i < element.editable.length; i++) {
                                     $(element.dom_element).find(element.editable[i]).off('mouseenter.az-editable').on('mouseenter.az-editable', function() {
-                                        $(this).addClass('editable-highlight');
+                                        if ($(this).closest('[data-az-restore]').length == 0)
+                                            $(this).addClass('editable-highlight');
                                     });
                                     $(element.dom_element).find(element.editable[i]).off('mouseleave.az-editable').on('mouseleave.az-editable', function() {
-                                        $(this).removeClass('editable-highlight');
+                                        if ($(this).closest('[data-az-restore]').length == 0)
+                                            $(this).removeClass('editable-highlight');
                                     });
                                     $(element.dom_element).find(element.editable[i]).off('click.az-editable').on('click.az-editable', function(e) {
-                                        if ($(this).parent().closest('.styleable-highlight, .editable-highlight, .restoreable-highlight').length == 0) {
-                                            azexo_elements.edit_stack.push({
-                                                node: this,
-                                                edit: true,
-                                                style: true,
-                                            });
-                                            editor_opener();
-                                            return false;
-                                        } else {
-                                            azexo_elements.edit_stack.push({
-                                                node: this,
-                                                edit: true,
-                                                style: true,
-                                            });
+                                        if ($(this).closest('[data-az-restore]').length == 0) {
+                                            if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                                azexo_elements.edit_stack.push({
+                                                    node: this,
+                                                    edit: true,
+                                                    style: true,
+                                                });
+                                                editor_opener();
+                                                return false;
+                                            } else {
+                                                azexo_elements.edit_stack.push({
+                                                    node: this,
+                                                    edit: true,
+                                                    style: true,
+                                                });
+                                            }
                                         }
                                     });
                                 }
@@ -2266,7 +2303,7 @@
                                     if ($(node).hasClass('sortable-highlight')) {
                                         $(node).find('.az-sortable-controls').remove();
                                         var controls = $('<div class="az-sortable-controls"></div>').appendTo(node);
-                                        var clone = $('<div class="az-sortable-clone glyphicon glyphicon-repeat" title="' + t('Clone') + '"></div>').appendTo(controls).click(function() {
+                                        var clone = $('<div class="az-sortable-clone '+p+'glyphicon '+p+'glyphicon-repeat" title="' + t('Clone') + '"></div>').appendTo(controls).click(function() {
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).clone().insertAfter(node);
@@ -2277,7 +2314,7 @@
                                             return false;
                                         });
                                         $(clone).css('line-height', $(clone).height() + 'px').css('font-size', $(clone).height() / 2 + 'px');
-                                        var remove = $('<div class="az-sortable-remove glyphicon glyphicon-remove" title="' + t('Remove') + '"></div>').appendTo(controls).click(function() {
+                                        var remove = $('<div class="az-sortable-remove '+p+'glyphicon '+p+'glyphicon-remove" title="' + t('Remove') + '"></div>').appendTo(controls).click(function() {
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).remove();
@@ -2301,39 +2338,43 @@
                                 for (var i = 0; i < element.sortable.length; i++) {
                                     (function(i) {
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-sortable').on('mouseenter.az-sortable', function() {
-                                            var node = this;
-                                            $(element.dom_element).find('.az-sortable-controls').remove();
-                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
-                                            if (sorted_node !== null) {
-                                                clearTimeout(timeoutId);
-                                            }
+                                            if ($(this).closest('[data-az-restore]').length == 0) {
+                                                var node = this;
+                                                $(element.dom_element).find('.az-sortable-controls').remove();
+                                                $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
+                                                if (sorted_node !== null) {
+                                                    clearTimeout(timeoutId);
+                                                }
 
-                                            $(node).addClass('sortable-highlight');
-                                            sort_stack.push(node);
-                                            sorted_node = node;
-                                            timeoutId = setTimeout(function() {
-                                                show_controls(node);
-                                            }, 1000);
-                                        });
-                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-sortable').on('mouseleave.az-sortable', function() {
-                                            var node = this;
-                                            $(element.dom_element).find('.az-sortable-controls').remove();
-                                            $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
-                                            if (sorted_node !== null) {
-                                                clearTimeout(timeoutId);
-                                            }
-
-                                            sort_stack.pop();
-                                            if (sort_stack.length > 0) {
-                                                node = sort_stack[sort_stack.length - 1]
                                                 $(node).addClass('sortable-highlight');
-
+                                                sort_stack.push(node);
                                                 sorted_node = node;
                                                 timeoutId = setTimeout(function() {
                                                     show_controls(node);
                                                 }, 1000);
-                                            } else {
-                                                sorted_node = null;
+                                            }
+                                        });
+                                        $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-sortable').on('mouseleave.az-sortable', function() {
+                                            if ($(this).closest('[data-az-restore]').length == 0) {
+                                                var node = this;
+                                                $(element.dom_element).find('.az-sortable-controls').remove();
+                                                $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
+                                                if (sorted_node !== null) {
+                                                    clearTimeout(timeoutId);
+                                                }
+
+                                                sort_stack.pop();
+                                                if (sort_stack.length > 0) {
+                                                    node = sort_stack[sort_stack.length - 1]
+                                                    $(node).addClass('sortable-highlight');
+
+                                                    sorted_node = node;
+                                                    timeoutId = setTimeout(function() {
+                                                        show_controls(node);
+                                                    }, 1000);
+                                                } else {
+                                                    sorted_node = null;
+                                                }
                                             }
                                         });
                                     })(i);
@@ -2345,10 +2386,12 @@
                         }
                     },
                     restore_content: function() {
-                        var content = '<div>' + this.attrs['content'] + '</div>';
+                        var element = this;
+                        var content = $('<div>' + this.attrs['content'] + '</div>');
                         for (var id in this.restore_nodes) {
                             $(content).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
                         }
+                        $(document).trigger('azexo_restore', {dom: content});
                         this.attrs['content'] = $(content).html();
                     },
                     restore: function() {
@@ -2356,6 +2399,8 @@
                         for (var id in this.restore_nodes) {
                             $(this.dom_element).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
                         }
+                        $(document).trigger('azexo_restore', {dom: this.dom_element});
+                        $(this.dom_element).find('[data-az-restore]').removeAttr('data-az-restore');
                     },
                     showed: function($, p, fp) {
                         TemplateElement.baseclass.prototype.showed.apply(this, arguments);
@@ -2380,7 +2425,9 @@
                         var element = this;
                         this.dom_element = $('<div class="az-element az-template ' + this.attrs['el_class'] + '" style="' + this.attrs['style'] + '"></div>');
                         this.dom_content_element = $('<div></div>').appendTo(this.dom_element);
-                        var content = $(this.attrs['content']);
+                        var content = '<div>' + this.attrs['content'] + '</div>';
+                        content = $(content);
+                        element.restore_nodes = {};
                         for (var i = 0; i < this.restoreable.length; i++) {
                             $(content).find(this.restoreable[i]).each(function() {
                                 var id = _.uniqueId('r');
@@ -2388,7 +2435,8 @@
                                 element.restore_nodes[id] = $(this).html();
                             });
                         }
-                        $(content).appendTo(this.dom_content_element);
+                        this.attrs['content'] = $(content).html();
+                        $(this.attrs['content']).appendTo(this.dom_content_element);
                         TemplateElement.baseclass.prototype.render.apply(this, arguments);
                     },
                 });
@@ -8997,16 +9045,19 @@
             $(dom).find('.azexo-backend').remove();
             $(dom).find('.azexo-editor').removeClass('azexo-editor');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
+            
+            
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
-            }
+            }            
+            
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
             $(dom).find('.azexo-backend').remove();
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
-            }
+            }            
 
             $(dom).find('title').text(title);
             make_absolute_urls(dom);
