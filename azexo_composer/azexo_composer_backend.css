@@ -746,11 +746,6 @@ div.modal-dialog, div.ax-modal-dialog {
     box-sizing: border-box;    
 }
 
-
-#az-template-elements li:hover > .nav.az-nav-list, #az-template-elements li:hover > .ax-nav.az-nav-list {
-    display: block;
-}
-
 #az-template-elements > .nav.az-nav-list, #az-template-elements > .ax-nav.az-nav-list{
     display: block;
 }

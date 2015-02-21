@@ -2174,13 +2174,13 @@
                             });
                             function sortable_disable() {
                                 for (var i = 0; i < element.sortable.length; i++) {
-                                    $(element.dom_content_element).find(element.sortable[i]).each(function(){
+                                    $(element.dom_content_element).find(element.sortable[i]).each(function() {
                                         if ($(this).hasClass('ui-sortable')) {
-                                            if($(this).sortable('instance')) {
+                                            if ($(this).sortable('instance')) {
                                                 $(this).sortable('destroy');
                                                 $(this).find('.ui-sortable-handle').removeClass('ui-sortable-handle');
                                             }
-                                        }                                        
+                                        }
                                     });
                                 }
                             }
@@ -2303,7 +2303,7 @@
                                     if ($(node).hasClass('sortable-highlight')) {
                                         $(node).find('.az-sortable-controls').remove();
                                         var controls = $('<div class="az-sortable-controls"></div>').appendTo(node);
-                                        var clone = $('<div class="az-sortable-clone '+p+'glyphicon '+p+'glyphicon-repeat" title="' + t('Clone') + '"></div>').appendTo(controls).click(function() {
+                                        var clone = $('<div class="az-sortable-clone ' + p + 'glyphicon ' + p + 'glyphicon-repeat" title="' + t('Clone') + '"></div>').appendTo(controls).click(function() {
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).clone().insertAfter(node);
@@ -2314,7 +2314,7 @@
                                             return false;
                                         });
                                         $(clone).css('line-height', $(clone).height() + 'px').css('font-size', $(clone).height() / 2 + 'px');
-                                        var remove = $('<div class="az-sortable-remove '+p+'glyphicon '+p+'glyphicon-remove" title="' + t('Remove') + '"></div>').appendTo(controls).click(function() {
+                                        var remove = $('<div class="az-sortable-remove ' + p + 'glyphicon ' + p + 'glyphicon-remove" title="' + t('Remove') + '"></div>').appendTo(controls).click(function() {
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).remove();
@@ -2471,7 +2471,9 @@
                         var m = $('<ul class="' + p + 'nav az-nav-list"></ul>');
                         for (var name in item) {
                             if (name != '_') {
-                                var li = $('<li></li>').appendTo(m);
+                                var li = $('<li></li>').appendTo(m).on('mouseenter', function() {
+                                    $(this).find('> .az-nav-list').css('display', 'block');
+                                });
                                 var it = item[name];
                                 (function(it) {
                                     $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
@@ -2554,6 +2556,9 @@
                         return m;
                     }
                     $(panel).append(build_menu(menu));
+                    $(panel).find('> .az-nav-list > li').on('mouseleave', function() {
+                        $(this).find('.az-nav-list').css('display', 'none');
+                    });
                     var thumbnails = $('<div id="az-thumbnails"></div>').appendTo(panel);
                 }
             });
@@ -9045,19 +9050,19 @@
             $(dom).find('.azexo-backend').remove();
             $(dom).find('.azexo-editor').removeClass('azexo-editor');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
-            
-            
+
+
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
-            }            
-            
+            }
+
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
             $(dom).find('.azexo-backend').remove();
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
-            }            
+            }
 
             $(dom).find('title').text(title);
             make_absolute_urls(dom);
@@ -9432,6 +9437,8 @@
                     switch_page(site.current_page);
                     $(pages).find('a').removeClass(p + 'active');
                     $(pages).find('a:contains("' + site.current_page + '")').addClass(p + 'active');
+                    $('#az-template-elements-welcome').remove();
+                    $('#az-exporter-welcome').remove();
                 });
             }
             azexo_get_sites(function(names) {
