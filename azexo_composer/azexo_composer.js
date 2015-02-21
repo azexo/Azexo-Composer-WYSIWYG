@@ -2176,7 +2176,8 @@
                                 for (var i = 0; i < element.sortable.length; i++) {
                                     $(element.dom_content_element).find(element.sortable[i]).each(function() {
                                         if ($(this).hasClass('ui-sortable')) {
-                                            if ($(this).sortable('instance')) {
+                                            if ($(this).data('sortable')) {
+                                                $(this).data('sortable', false);
                                                 $(this).sortable('destroy');
                                                 $(this).find('.ui-sortable-handle').removeClass('ui-sortable-handle');
                                             }
@@ -2188,6 +2189,7 @@
                                 for (var i = 0; i < element.sortable.length; i++) {
                                     $(element.dom_element).find(element.sortable[i]).each(function() {
                                         if ($(this).closest('[data-az-restore]').length == 0) {
+                                            $(this).data('sortable', true);
                                             $(this).sortable({
                                                 items: '> *',
                                                 placeholder: 'az-sortable-placeholder',
