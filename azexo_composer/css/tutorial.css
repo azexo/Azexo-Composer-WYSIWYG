@@ -1,0 +1,155 @@
+.az-tut-force-show {
+    display: block !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+}
+
+.az-tut-prevent {   
+}
+
+.az-tut-prevent .top, .az-tut-prevent .right, .az-tut-prevent .bottom, .az-tut-prevent .left{
+    z-index: 999999;
+    position: fixed;
+    background-color: black;
+    opacity: 0.4;
+}
+
+.az-tut-bubble {
+    white-space: nowrap;
+}
+
+.az-tut-bubble-type-action {
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #fff;
+    padding: 30px 40px;
+    border: 1px solid rgba(0,0,0,.12); /* stroke */
+    -moz-box-shadow: 0 2px 2px rgba(0,0,0,.03), 0 0 7px rgba(0,0,0,.05); /* drop shadow and outer glow */
+    -webkit-box-shadow: 0 2px 2px rgba(0,0,0,.03), 0 0 7px rgba(0,0,0,.05); /* drop shadow and outer glow */
+    box-shadow: 0 2px 2px rgba(0,0,0,.03), 0 0 7px rgba(0,0,0,.05); /* drop shadow and outer glow */
+    z-index: 9999998;
+    color: #9e9e9e;
+    font-size: 14px;
+    line-height: 28px;
+}
+
+.az-tut-bubble-pos-above.az-tut-bubble-type-action:after, .az-tut-bubble-pos-above.az-tut-bubble-type-action:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.az-tut-bubble-pos-above.az-tut-bubble-type-action:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-top-color: #fff;
+    border-width: 8px;
+    left: 50%;
+    margin-left: -8px;
+}
+.az-tut-bubble-pos-above.az-tut-bubble-type-action:before {
+    border-color: rgba(224, 224, 224, 0);
+    border-top-color: #d2d2d2;
+    border-width: 9px;
+    left: 50%;
+    margin-left: -9px;
+}
+
+.az-tut-bubble-pos-bellow.az-tut-bubble-type-action:after, .az-tut-bubble-pos-bellow.az-tut-bubble-type-action:before {
+    bottom: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.az-tut-bubble-pos-bellow.az-tut-bubble-type-action:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 8px;
+    left: 50%;
+    margin-left: -8px;
+}
+.az-tut-bubble-pos-bellow.az-tut-bubble-type-action:before {
+    border-color: rgba(224, 224, 224, 0);
+    border-bottom-color: #d2d2d2;
+    border-width: 9px;
+    left: 50%;
+    margin-left: -9px;
+}
+
+.az-tut-bubble-type-information {
+    background: #fff;
+    border-radius: 3px;
+    position: absolute;
+    margin: 0 auto;
+    padding: 30px 35px 30px 30px;
+    -moz-box-shadow: 0 2px 2px rgba(0,0,0,.04), 0 0 7px rgba(0,0,0,.12); /* drop shadow and outer glow */
+    -webkit-box-shadow: 0 2px 2px rgba(0,0,0,.04), 0 0 7px rgba(0,0,0,.12); /* drop shadow and outer glow */
+    opacity: 1;
+    box-shadow: 0 2px 2px rgba(0,0,0,.04), 0 0 7px rgba(0,0,0,.12); /* drop shadow and outer glow */
+    z-index: 9999998;
+}
+
+.az-tut-bubble-title {
+    display: block;
+    color: #424242;
+    font-family: "Lato";
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 22px;
+}
+
+.az-tut-bubble-descr {
+    position: absolute;
+    right: 35px;
+    top: 32px;
+    color: #a8a8a8; 
+    font-size: 12px;
+    line-height: 1;
+    font-family: "Lato";
+}
+
+.az-tut-bubble-content {
+    margin: 30px 0 23px;
+    border-top: 1px solid #e5e5e5;
+    padding-top: 23px;
+    color: #9e9e9e;
+    font-size: 14px;
+    line-height: 28px;
+}
+
+.az-tut-proceed {
+    background: #4cc12d;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+    display: inline-block;
+    font-size: 13px;
+    font-family: "Open Sans", sans-serif;
+    font-weight: bold;
+    line-height: 1;
+    padding: 13px 15px;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.az-tut-bubble-overlay {
+    background: rgba( 255, 255, 255, 0.80 );
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999999;
+    height: 100%;
+}
