@@ -3,7 +3,7 @@
     $(window).load(function() {
 
         $('body').append('<div class="az-tut-prevent"></div><div class="az-tut-bubble-overlay"></div><div class="az-tut-bubble" data-step="0"></div>');
-
+        focus('body', 0);
         var BubblePosCheck;
 
         $(document).on('mousedown', '.az-tut-prevent .top, .az-tut-prevent .right, .az-tut-prevent .bottom, .az-tut-prevent .left', function(e) {
@@ -19,7 +19,7 @@
             }, 20);
         });
 
-        function focus(target) {
+        function focus(target, duration) {
             var focus_padding = 0;
             if ($('.az-tut-prevent div').length == 0)
                 $('.az-tut-prevent').append('<div class="top"></div><div class="right"></div><div class="bottom"></div><div class="left"></div>');
@@ -31,30 +31,30 @@
             var target_left = $(target).offset()['left'] - focus_padding;
             var target_width = $(target).outerWidth() + focus_padding * 2;
             var target_height = $(target).outerHeight() + focus_padding * 2;
-            $(top).css({
+            $(top).stop().animate({
                 top: 0,
                 left: 0,
                 right: 0,
                 height: target_top,
-            });
-            $(right).css({
+            }, duration, 'linear');
+            $(right).stop().animate({
                 top: target_top,
                 left: target_left + target_width,
                 right: 0,
                 height: target_height,
-            });
-            $(bottom).css({
+            }, duration, 'linear');
+            $(bottom).stop().animate({
                 top: target_top + target_height,
                 left: 0,
                 right: 0,
                 bottom: 0,
-            });
-            $(left).css({
+            }, duration, 'linear');
+            $(left).stop().animate({
                 top: target_top,
                 left: 0,
                 height: target_height,
                 width: target_left,
-            });
+            }, duration, 'linear');
         }
 
         function tut_keep_up(Step) {
@@ -67,7 +67,7 @@
 
                 if ($(Step.target).is(':visible')) {
 
-                    focus(Step.target);
+                    focus(Step.target, 200);
                     event_bind(Step);
 
                     Offset = $(Step.target).offset();
@@ -274,7 +274,7 @@
 
         var Tuts = [];
 
-        Tuts['html-elements-menu'] = [
+        Tuts['html-elements'] = [
             {
                 'type': 'information',
                 'label': '<span class="az-tut-bubble-title">Welcome</span>'
