@@ -57,60 +57,73 @@
             }, duration, 'linear');
         }
 
+        function update_position(Step, init) {
+            var Bubble, Offset, LeftOffset, TopOffset, ArrOffsetLeft;
+
+            Bubble = $('.az-tut-bubble');
+
+            Offset = $(Step.target).offset();
+            LeftOffset = Offset.left + ($(Step.target).outerWidth() / 2 - Bubble.outerWidth() / 2)
+
+            if (LeftOffset < 0) {
+                ArrOffsetLeft = (Bubble.width() / 2) + LeftOffset + $(Step.target).width() / 2 + 15 + 3 + 'px';
+                LeftOffset = 15;
+            }
+
+            if ((Bubble.outerWidth() + LeftOffset) > $(window).width()) {
+
+                ArrOffsetLeft = (Bubble.outerWidth() - $(Step.target).width() / 2) - ($(window).width() - ($(Step.target).offset().left + $(Step.target).width())) + 'px';
+                if (parseInt(ArrOffsetLeft) > (Bubble.outerWidth() - 20)) {
+                    ArrOffsetLeft = Bubble.outerWidth() - 20 + 'px';
+                }
+                LeftOffset = $(window).width() - Bubble.outerWidth() - 15;
+
+            }
+
+            if (Step.type == 'action') {
+                if (Step[ 'pos' ] == 'above')
+                    TopOffset = Offset.top - Bubble.outerHeight() - 10;
+                else
+                    TopOffset = Offset.top + $(Step.target).outerHeight() + 10;
+            } else {
+                TopOffset = BubbleOverlay.height() / 2 - Bubble.outerHeight() / 2;
+            }
+
+            if ($('#wpadminbar').length) {
+                TopOffset -= $('#wpadminbar').outerHeight();
+            }
+
+            if ($('.az-container.azexo-editor').length) {
+                TopOffset -= parseInt($('.az-container.azexo-editor').css('margin-top'));
+            }
+
+            if (init) {
+                if (Step.animation == 'fade') {
+                    Bubble.stop().css({top: TopOffset + 20, left: LeftOffset}).animate({top: TopOffset, opacity: 1}, 400, function() {
+                        if (Step[ 'keep_up' ] && Step['type'] == 'action')
+                            tut_keep_up(Step);
+                    });
+                } else {
+                    Bubble.stop().css({opacity: 1}).animate({top: TopOffset, left: LeftOffset}, 400, function() {
+                        if (Step[ 'keep_up' ] && Step['type'] == 'action')
+                            tut_keep_up(Step);
+                    });
+                }
+            } else {
+                Bubble.stop().css({top: TopOffset, left: LeftOffset});
+            }
+
+            $("head .az-tut-bubble-arr-offset").remove();
+            $("head").append($('<style class="az-tut-bubble-arr-offset">.az-tut-bubble:after, .az-tut-bubble:before { left: ' + ArrOffsetLeft + ' !important; }</style>'));
+        }
+
         function tut_keep_up(Step) {
-
             BubblePosCheck = setInterval(function() {
-
-                var Bubble, Offset, LeftOffset, TopOffset, ArrOffsetLeft, Type, Animation, BubbleHeight, Tut, TutIDVar;
-
-                Bubble = $('.az-tut-bubble');
-
                 if ($(Step.target).is(':visible')) {
-
                     focus(Step.target, 200);
                     event_bind(Step);
-
-                    Offset = $(Step.target).offset();
-                    LeftOffset = Offset.left + ($(Step.target).outerWidth() / 2 - Bubble.outerWidth() / 2)
-
-                    if (LeftOffset < 0) {
-                        ArrOffsetLeft = (Bubble.width() / 2) + LeftOffset + $(Step.target).width() / 2 + 15 + 3 + 'px';
-                        LeftOffset = 15;
-                    }
-
-                    if ((Bubble.outerWidth() + LeftOffset) > $(window).width()) {
-
-                        ArrOffsetLeft = (Bubble.outerWidth() - $(Step.target).width() / 2) - ($(window).width() - ($(Step.target).offset().left + $(Step.target).width())) + 'px';
-                        if (parseInt(ArrOffsetLeft) > (Bubble.outerWidth() - 20)) {
-                            ArrOffsetLeft = Bubble.outerWidth() - 20 + 'px';
-                        }
-                        LeftOffset = $(window).width() - Bubble.outerWidth() - 15;
-
-                    }
-
-                    if (Step.type == 'action') {
-                        if (Step[ 'pos' ] == 'above')
-                            TopOffset = Offset.top - Bubble.outerHeight() - 10;
-                        else
-                            TopOffset = Offset.top + $(Step.target).outerHeight() + 10;
-                    } else {
-                        TopOffset = BubbleOverlay.height() / 2 - Bubble.outerHeight() / 2;
-                    }
-
-                    if ($('#wpadminbar').length) {
-                        TopOffset -= $('#wpadminbar').outerHeight();
-                    }
-
-                    if ($('.az-container.azexo-editor').length) {
-                        TopOffset -= parseInt($('.az-container.azexo-editor').css('margin-top'));
-                    }
-
-
-                    Bubble.stop().css({top: TopOffset, left: LeftOffset});
-                    $("head").append($('<style>.az-tut-bubble:after, .az-tut-bubble:before { left: ' + ArrOffsetLeft + ' !important; }</style>'));
-
+                    update_position(Step, false);
                 }
-
             }, 200);
 
         }
@@ -129,13 +142,13 @@
 
         function tut_proceed() {
 
-            var Bubble, StepID, Step, Offset, LeftOffset, TopOffset, ArrOffsetLeft, Type, Animation, BubbleHeight, Tut, TutIDVar;
+            var Bubble, StepID, Step, Type, Animation, Tut;
 
             Tut = Tuts[window.azexo_tutorial];
             Bubble = $('.az-tut-bubble');
             BubbleOverlay = $('.az-tut-bubble-overlay');
             StepID = Bubble.data('step');
-            if (parseInt(Tut.length) == (StepID + 0)) {
+            if (parseInt(Bubble.length) == 0 || parseInt(Tut.length) == (StepID + 0)) {
                 Bubble.remove();
                 BubbleOverlay.remove();
                 $('.az-tut-prevent').remove();
@@ -162,9 +175,7 @@
 
             var StepCheck = setInterval(function() {
 
-                if ($(Step.target).length
-                        && $(Step.target).offset().left <= ($(window).width() - $(Step.target).outerWidth())
-                        ) {
+                if ($(Step.target).length) {
 
                     clearInterval(StepCheck);
 
@@ -175,19 +186,6 @@
                     if ($(Step.event_el).css('position') == 'static') {
                         $(Step.event_el).css('position', 'relative');
                     }
-
-//                    $('.az-tut-revert-zindex').each(function() {
-//                        $(this).css('z-index', $(this).data('orig-zindex')).removeClass('az-tut-revert-zindex');
-//                    });
-//
-//                    if (Step.target != 'body') {
-//                        $(Step.target).data('orig-zindex', $(Step.target).css('z-index')).addClass('az-tut-revert-zindex').css({'z-index': 9999997});
-//                    }
-//
-//                    if ($(Step.event_el).hasClass('az-tut-revert-zindex')) {
-//                    } else {
-//                        $(Step.event_el).data('orig-zindex', $(Step.event_el).css('z-index')).css({'z-index': 9999997}).addClass('az-tut-revert-zindex');
-//                    }
 
                     Bubble.data('step', StepID + 1)
 
@@ -206,7 +204,6 @@
 
                     event_bind(Step);
 
-
                     Bubble.removeClass('az-tut-bubble-type-action az-tut-bubble-type-information').addClass('az-tut-bubble-type-' + Type);
                     Bubble.removeClass('az-tut-bubble-pos-above az-tut-bubble-pos-bellow').addClass('az-tut-bubble-pos-' + Step['pos']);
 
@@ -215,57 +212,7 @@
                     else
                         BubbleOverlay.fadeOut(200);
 
-                    Offset = $(Step.target).offset();
-                    LeftOffset = Offset.left + ($(Step.target).outerWidth() / 2 - Bubble.outerWidth() / 2)
-
-                    var ArrOffsetLeft = '50%';
-
-                    if (LeftOffset < 0) {
-                        ArrOffsetLeft = (Bubble.width() / 2) + LeftOffset + $(Step.target).width() / 2 + 15 + 3 + 'px';
-                        LeftOffset = 15;
-                    }
-
-                    if ((Bubble.outerWidth() + LeftOffset) > $(window).width()) {
-
-                        ArrOffsetLeft = (Bubble.outerWidth() - $(Step.target).width() / 2) - ($(window).width() - ($(Step.target).offset().left + $(Step.target).width())) + 'px';
-                        LeftOffset = $(window).width() - Bubble.outerWidth() - 15;
-
-                    }
-
-
-                    if (Type == 'action') {
-                        if (Step[ 'pos' ] == 'above')
-                            TopOffset = Offset.top - Bubble.outerHeight() - 10;
-                        else
-                            TopOffset = Offset.top + $(Step.target).outerHeight() + 10;
-                    } else {
-                        TopOffset = BubbleOverlay.height() / 2 - Bubble.outerHeight() / 2;
-                    }
-
-                    if ($('#wpadminbar').length) {
-                        TopOffset -= $('#wpadminbar').outerHeight();
-                    }
-
-                    if ($('.az-container.azexo-editor').length) {
-                        TopOffset -= parseInt($('.az-container.azexo-editor').css('margin-top'));
-                    }
-
-
-
-                    if (Animation == 'fade') {
-                        Bubble.stop().css({top: TopOffset + 20, left: LeftOffset}).animate({top: TopOffset, opacity: 1}, 400, function() {
-                            if (Step[ 'keep_up' ] && Step['type'] == 'action')
-                                tut_keep_up(Step);
-                        });
-                    } else {
-                        Bubble.stop().css({opacity: 1}).animate({top: TopOffset, left: LeftOffset}, 400, function() {
-                            if (Step[ 'keep_up' ] && Step['type'] == 'action')
-                                tut_keep_up(Step);
-                        });
-                    }
-
-                    $("head").append($('<style>.az-tut-bubble:after, .az-tut-bubble:before { left: ' + ArrOffsetLeft + ' !important; }</style>'));
-
+                    update_position(Step, true);
                 }
 
             }, 300);
@@ -274,7 +221,87 @@
 
         var Tuts = [];
 
-        Tuts['html-elements'] = [
+
+        Tuts['html-elements-font-styles'] = [
+            {
+                'type': 'information',
+                'label': '<span class="az-tut-bubble-title">Welcome</span>'
+                        + '<div class="az-tut-bubble-content">'
+                        + 'Welcome to the <strong>Azexo Composer</strong> interactive <strong>tutorial</strong>.<br>'
+                        + 'In this step by step guide, we will show you some of the core functionalities.<br>'
+                        + '</div>'
+                        + '<a href="#" class="az-tut-proceed">Start</a>',
+                'target': 'body',
+                'event_el': '.az-tut-proceed',
+                'event': 'click.tut',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'lets change font size and color of this text',
+                'target': '.az-template h2:first-of-type',
+                'event_el': '.az-template h2:first-of-type',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'change text and <a href="#" class="az-tut-proceed-2"><strong>click here to continue</strong></a>',
+                'target': '#az-editor-modal .mce-edit-area',
+                'event_el': '.az-tut-proceed-2',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'switch to style tab',
+                'target': '#az-editor-tabs ul li:last-of-type a',
+                'event_el': '#az-editor-tabs ul li:last-of-type a',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'open color picker',
+                'target': '#az-editor-modal .settings .font .wp-picker-container',
+                'event_el': '#az-editor-modal .settings .font .wp-picker-container',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'choose a color and <a href="#" class="az-tut-proceed-2"><strong>click here to continue</strong></a>',
+                'target': '#az-editor-modal .settings .font .wp-picker-holder',
+                'event_el': '.az-tut-proceed-2',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'choose a font size',
+                'target': '#az-editor-modal .settings .fontsize-slider',
+                'event_el': '#az-editor-modal .settings .fontsize-slider',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'save changes',
+                'target': '#az-editor-modal button.save',
+                'event_el': '#az-editor-modal button.save',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },
+        ];
+
+        Tuts['html-elements-menu'] = [
             {
                 'type': 'information',
                 'label': '<span class="az-tut-bubble-title">Welcome</span>'
@@ -291,16 +318,16 @@
             {
                 'type': 'action',
                 'label': 'lets reorder menu',
-                'target': 'nav > ul > li a:first-of-type',
-                'event_el': 'nav > ul > li a:first-of-type',
+                'target': '.az-template nav > ul > li a:first-of-type',
+                'event_el': '.az-template nav > ul > li a:first-of-type',
                 'event': 'mousedown.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
                 'func_start': function() {
-                    $('body').on('DOMNodeInserted.tut', 'nav > ul > li .az-sortable-controls', function(e) {
-                        $('nav > ul > li .az-sortable-controls').remove();
+                    $('body').on('DOMNodeInserted.tut', '.az-template nav > ul > li .az-sortable-controls', function(e) {
+                        $('.az-template nav > ul > li .az-sortable-controls').remove();
                     });
-                    $('nav > ul > li a').off('click').on('click', function() {
+                    $('.az-template nav > ul > li a').off('click').on('click', function() {
                         return false;
                     });
                 },
@@ -336,8 +363,8 @@
             {
                 'type': 'action',
                 'label': 'lets clone menu item',
-                'target': 'nav > ul > li:first-of-type',
-                'event_el': 'nav > ul > li:first-of-type',
+                'target': '.az-template nav > ul > li:first-of-type',
+                'event_el': '.az-template nav > ul > li:first-of-type',
                 'event': 'mouseenter.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
@@ -345,14 +372,14 @@
             {
                 'type': 'action',
                 'label': 'click here to clone',
-                'target': 'nav > ul > li:first-of-type .az-sortable-controls .az-sortable-clone',
-                'event_el': 'nav > ul > li:first-of-type .az-sortable-controls .az-sortable-clone',
+                'target': '.az-template nav > ul > li:first-of-type .az-sortable-controls .az-sortable-clone',
+                'event_el': '.az-template nav > ul > li:first-of-type .az-sortable-controls .az-sortable-clone',
                 'event': 'click.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
                 'func_start': function() {
-                    $('nav > ul > li:first-of-type').off('mouseenter.az-sortable');
-                    $('nav > ul > li:first-of-type').off('mouseleave.az-sortable');
+                    $('.az-template nav > ul > li:first-of-type').off('mouseenter.az-sortable');
+                    $('.az-template nav > ul > li:first-of-type').off('mouseleave.az-sortable');
                 }
             },
             {
@@ -369,8 +396,8 @@
             {
                 'type': 'action',
                 'label': 'lets remove menu item',
-                'target': 'nav > ul > li:first-of-type',
-                'event_el': 'nav > ul > li:first-of-type',
+                'target': '.az-template nav > ul > li:first-of-type',
+                'event_el': '.az-template nav > ul > li:first-of-type',
                 'event': 'mouseenter.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
@@ -378,14 +405,14 @@
             {
                 'type': 'action',
                 'label': 'click here to remove',
-                'target': 'nav > ul > li:first-of-type .az-sortable-controls .az-sortable-remove',
-                'event_el': 'nav > ul > li:first-of-type .az-sortable-controls .az-sortable-remove',
+                'target': '.az-template nav > ul > li:first-of-type .az-sortable-controls .az-sortable-remove',
+                'event_el': '.az-template nav > ul > li:first-of-type .az-sortable-controls .az-sortable-remove',
                 'event': 'click.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
                 'func_start': function() {
-                    $('nav > ul > li:first-of-type').off('mouseenter.az-sortable');
-                    $('nav > ul > li:first-of-type').off('mouseleave.az-sortable');
+                    $('.az-template nav > ul > li:first-of-type').off('mouseenter.az-sortable');
+                    $('.az-template nav > ul > li:first-of-type').off('mouseleave.az-sortable');
                 }
             },
         ];
@@ -407,15 +434,15 @@
             {
                 'type': 'action',
                 'label': 'lets change one of menu item',
-                'target': 'nav > ul',
-                'event_el': 'nav > ul > li a',
+                'target': '.az-template nav > ul',
+                'event_el': '.az-template nav > ul > li a',
                 'event': 'click.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
             },
             {
                 'type': 'action',
-                'label': 'lets change text <a href="#" class="az-tut-proceed-2"><strong>click here to continue</strong></a>',
+                'label': 'change text and <a href="#" class="az-tut-proceed-2"><strong>click here to continue</strong></a>',
                 'target': '#az-editor-modal .mce-edit-area',
                 'event_el': '.az-tut-proceed-2',
                 'event': 'click.tut',
@@ -468,8 +495,8 @@
             {
                 'type': 'action',
                 'label': 'lets change this logo',
-                'target': 'img[src*="logo"]',
-                'event_el': 'img[src*="logo"]',
+                'target': '.az-template img[src*="logo"]',
+                'event_el': '.az-template img[src*="logo"]',
                 'event': 'click.tut',
                 'pos': 'bellow',
                 'animation': 'fade',
@@ -477,10 +504,37 @@
             {
                 'type': 'action',
                 'label': 'open image library',
-                'target': '#az-editor-modal button.ax-glyphicon-picture',
-                'event_el': '#az-editor-modal button.ax-glyphicon-picture',
+                'target': '#az-editor-modal button.ax-glyphicon-picture, #az-editor-modal button.glyphicon-picture',
+                'event_el': '#az-editor-modal button.ax-glyphicon-picture, #az-editor-modal button.glyphicon-picture',
                 'event': 'click.tut',
                 'pos': 'bellow',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'switch to upload tab',
+                'target': '.media-modal-content .media-router a:first-of-type',
+                'event_el': '.media-modal-content .media-router a:first-of-type',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'upload new image',
+                'target': '.media-modal-content .upload-ui .browser.button',
+                'event_el': '.media-modal-content .upload-ui .browser.button',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'switch to library tab',
+                'target': '.media-modal-content .media-router a:last-of-type',
+                'event_el': '.media-modal-content .media-router a:last-of-type',
+                'event': 'click.tut',
+                'pos': 'above',
                 'animation': 'fade',
             },
             {
@@ -489,6 +543,15 @@
                 'target': '.media-modal-content ul.attachments',
                 'event_el': '.media-modal-content ul.attachments li',
                 'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'choose image size',
+                'target': '.media-modal-content .attachment-display-settings select.size',
+                'event_el': '.media-modal-content .attachment-display-settings select.size',
+                'event': 'change.tut',
                 'pos': 'above',
                 'animation': 'fade',
             },
@@ -541,6 +604,216 @@
 
 
         Tuts['site-manage'] = [
+            {
+                'type': 'information',
+                'label': '<span class="az-tut-bubble-title">Welcome</span>'
+                        + '<div class="az-tut-bubble-content">'
+                        + 'Welcome to the <strong>Azexo Composer</strong> interactive <strong>tutorial</strong>.<br>'
+                        + 'In this step by step guide, we will show you some of the core functionalities.<br>'
+                        + '</div>'
+                        + '<a href="#" class="az-tut-proceed">Start</a>',
+                'target': 'body',
+                'event_el': '.az-tut-proceed',
+                'event': 'click.tut',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'open site manage panel',
+                'target': '#az-exporter',
+                'event_el': '#az-exporter',
+                'event': 'mouseenter.tut',
+                'pos': 'above',
+                'animation': 'fade',
+                'func_start': function() {
+                    $('#az-exporter').css('right', '-350px')
+                },
+                'func_end': function() {
+                    $('#az-exporter').css('right', '0px')
+                },
+            },
+            {
+                'type': 'action',
+                'label': 'check pages list of your site',
+                'target': '#az-exporter > .ax-list-group',
+                'event_el': '#az-exporter > .ax-list-group',
+                'event': 'mouseenter.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                                               
+            {
+                'type': 'action',
+                'label': 'click to add new page',
+                'target': '#az-exporter > .ax-btn-toolbar .ax-btn-group:first-of-type .ax-btn:first-of-type',
+                'event_el': '#az-exporter > .ax-btn-toolbar .ax-btn-group:first-of-type .ax-btn:first-of-type',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },                                               
+            {
+                'type': 'action',
+                'label': 'check new added page',
+                'target': '#az-exporter > .ax-list-group',
+                'event_el': '#az-exporter > .ax-list-group',
+                'event': 'mouseenter.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                  
+            {
+                'type': 'action',
+                'label': 'look to current page settings',
+                'target': '#az-exporter > .ax-text-left',
+                'event_el': '#az-exporter > .ax-text-left',
+                'event': 'mouseenter.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                              
+            {
+                'type': 'action',
+                'label': 'lets change title',
+                'target': '#az-exporter input[name="title"]',
+                'event_el': '#az-exporter input[name="title"]',
+                'event': 'change.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                              
+            {
+                'type': 'information',
+                'label': '<span class="az-tut-bubble-title">lets remove one of pages</span>'
+                        + '<div class="az-tut-bubble-content">'
+                        + '</div>'
+                        + '<a href="#" class="az-tut-proceed">Continue</a>',
+                'target': 'body',
+                'event_el': '.az-tut-proceed',
+                'event': 'click.tut',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'click on page name you want to remove',
+                'target': '#az-exporter > .ax-list-group',
+                'event_el': '#az-exporter > .ax-list-group .ax-list-group-item',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                              
+            {
+                'type': 'action',
+                'label': 'click to remove selected page',
+                'target': '#az-exporter > .ax-btn-toolbar .ax-btn-group:first-of-type .ax-btn:last-of-type',
+                'event_el': '#az-exporter > .ax-btn-toolbar .ax-btn-group:first-of-type .ax-btn:last-of-type',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },                                               
+            {
+                'type': 'action',
+                'label': 'check removed page',
+                'target': '#az-exporter > .ax-list-group',
+                'event_el': '#az-exporter > .ax-list-group',
+                'event': 'mouseenter.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                  
+            {
+                'type': 'information',
+                'label': '<span class="az-tut-bubble-title">lets try save, export and upload</span>'
+                        + '<div class="az-tut-bubble-content">'
+                        + '</div>'
+                        + '<a href="#" class="az-tut-proceed">Continue</a>',
+                'target': 'body',
+                'event_el': '.az-tut-proceed',
+                'event': 'click.tut',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'lets save all changes to server',
+                'target': '#az-exporter > .ax-btn-toolbar .ax-btn-group:nth-of-type(2) .ax-btn:nth-of-type(2)',
+                'event_el': '#az-exporter > .ax-btn-toolbar .ax-btn-group:nth-of-type(2) .ax-btn:nth-of-type(2)',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },                                               
+            {
+                'type': 'action',
+                'label': 'lets download our site as zip file',
+                'target': '#az-exporter > .ax-btn-toolbar .ax-btn-group:nth-of-type(2) .ax-btn:first-of-type',
+                'event_el': '#az-exporter > .ax-btn-toolbar .ax-btn-group:nth-of-type(2) .ax-btn:first-of-type',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },                                               
+            {
+                'type': 'action',
+                'label': 'lets upload our site via FTP',
+                'target': '#az-exporter > .ax-btn-toolbar .ax-btn-group:nth-of-type(2) .ax-btn:last-of-type',
+                'event_el': '#az-exporter > .ax-btn-toolbar .ax-btn-group:nth-of-type(2) .ax-btn:last-of-type',
+                'event': 'click.tut',
+                'pos': 'bellow',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'look to ftp settings',
+                'target': '#az-ftp-modal .ax-modal-body',
+                'event_el': '#az-ftp-modal .ax-modal-body',
+                'event': 'mouseenter.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },     
+            {
+                'type': 'action',
+                'label': 'click to upload site',
+                'target': '#az-ftp-modal .ax-modal-body .ax-btn-success',
+                'event_el': '#az-ftp-modal .ax-modal-body .ax-btn-success',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                        
+            {
+                'type': 'action',
+                'label': 'you can close dialog even upload not complette',
+                'target': '#az-ftp-modal .ax-modal-footer button[data-dismiss="ax-modal"]',
+                'event_el': '#az-ftp-modal .ax-modal-footer button[data-dismiss="ax-modal"]',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+            },                        
+            {
+                'type': 'information',
+                'label': '<span class="az-tut-bubble-title">lets start edit content of our site</span>'
+                        + '<div class="az-tut-bubble-content">'
+                        + '</div>'
+                        + '<a href="#" class="az-tut-proceed">Continue</a>',
+                'target': 'body',
+                'event_el': '.az-tut-proceed',
+                'event': 'click.tut',
+                'animation': 'fade',
+            },
+            {
+                'type': 'action',
+                'label': 'click on page name you want to edit',
+                'target': '#az-exporter > .ax-list-group',
+                'event_el': '#az-exporter > .ax-list-group .ax-list-group-item',
+                'event': 'click.tut',
+                'pos': 'above',
+                'animation': 'fade',
+                'func_end': function() {
+                    $('#az-exporter').css('right', '')
+                },
+            },                              
+            {
+                'type': 'information',
+                'label': '<span class="az-tut-bubble-title">and just edit it</span>'
+                        + '<div class="az-tut-bubble-content">'
+                        + '</div>'
+                        + '<a href="#" class="az-tut-proceed">Continue</a>',
+                'target': 'body',
+                'event_el': '.az-tut-proceed',
+                'event': 'click.tut',
+                'animation': 'fade',
+            },
         ];
 
 
