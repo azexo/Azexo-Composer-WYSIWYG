@@ -1964,7 +1964,7 @@
             base: 'az_textarea',
             name: t('Textarea'),
             icon: 'fa fa-file-text-o',
-            description: t('Form text area'),
+            description: t('Form text area field'),
             params: [
             ],
             hidden: true,
