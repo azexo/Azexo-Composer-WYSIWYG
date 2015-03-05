@@ -1877,12 +1877,13 @@
                     thumbnail = elements[path].thumbnail;                
                 var section = (template.indexOf('az-rootable') >= 0);
 
-                var TemplateElement = function(parent, position) {                    
+                var TemplateElement = function(parent, position) { 
+                    var element = this;
                     for(var i = 0; i < this.baseclass.prototype.params.length; i++) {
                         if(this.baseclass.prototype.params[i].param_name == 'content' && this.baseclass.prototype.params[i].value == '') {
                             if ('ajaxurl' in window) {
                                 function template_element_urls(dom) {
-                                    var folders = path.split('|');
+                                    var folders = element.path.split('|');
                                     folders.pop();
                                     folders = folders.join('/')
                                     function update_url(url) {
@@ -1912,7 +1913,7 @@
                                         $(this).attr('style', style);
                                     });
                                 }
-                                var template = $('<div>' + this.template + '</div>');
+                                var template = $('<div>' + element.template + '</div>');
                                 template_element_urls(template);
                                 template = $(template).html();
                                 this.baseclass.prototype.params[i].value = template;
@@ -1926,6 +1927,7 @@
                 mixin(TemplateElement.prototype, {
                     baseclass: TemplateElement,
                     template: template,
+                    path: path,
                     name: name,
                     icon: 'fa fa-cube',
                     description: t(''),
