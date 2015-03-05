@@ -1264,7 +1264,7 @@
                     type: 'colorpicker',
                     heading: t('Background color'),
                     param_name: 'bgcolor',
-                    description: t('Is the background color of the cicle.'),
+                    description: t('Is the background color of the circle.'),
                 },
                 {
                     type: 'colorpicker',
