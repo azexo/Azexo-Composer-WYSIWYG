@@ -2036,7 +2036,7 @@
                                             type: 'link',
                                             heading: t('Link'),
                                             param_name: 'link',
-                                            description: t('Conent link (url).'),
+                                            description: t('Content link (url).'),
                                         }));
                                     }
                                 }
