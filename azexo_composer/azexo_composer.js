@@ -5728,6 +5728,7 @@
                     content: buttons,
                 }).hover(function() {
                     $(columns)[fp + 'popover']('show');
+                    set_highest_zindex($(controls));
                     set_highest_zindex($(controls).find('.' + p + 'popover'));
                     $(controls).find('.' + p + 'popover .set-columns-layout').each(function() {
                         $(this).click({object: element}, element.click_set_columns);
@@ -8662,6 +8663,7 @@
                     content: buttons,
                 }).hover(function() {
                     $(add_field)[fp + 'popover']('show');
+                    set_highest_zindex($(element.controls));
                     set_highest_zindex($(element.controls).find('.' + p + 'popover'));
                     $(element.controls).find('.' + p + 'popover .control').each(function() {
                         $(this).click(function() {
