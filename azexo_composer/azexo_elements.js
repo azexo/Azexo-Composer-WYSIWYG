@@ -1309,7 +1309,7 @@
                     type: 'textfield',
                     heading: t('Info'),
                     param_name: 'info',
-                    description: t('Will be deisplayed inside of the circle bellow the text element (can be empty if you dont want to show info text).'),
+                    description: t('Will be displayed inside of the circle bellow the text element (can be empty if you dont want to show info text).'),
                     tab: t('Circle content'),
                 },
                 {
