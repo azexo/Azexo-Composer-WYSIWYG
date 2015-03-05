@@ -1872,55 +1872,60 @@
             for (var path in elements) {
                 var name = elements[path].name;
                 var template = elements[path].html;
-
-                if ('ajaxurl' in window) {
-                    function template_element_urls(dom) {
-                        var folders = path.split('|');
-                        folders.pop();
-                        folders = folders.join('/')
-                        function update_url(url) {
-                            if (url.indexOf("azexo_elements") == 0) {
-                                return window.azexo_baseurl + '../' + url;
-                            } else {
-                                if (url.indexOf("/") != 0 && url.indexOf("http://") != 0 && url.indexOf("https://") != 0) {
-                                    return window.azexo_baseurl + '../azexo_elements/' + folders + '/' + url;
-                                }
-                            }
-                            return url;
-                        }
-                        for (var selector in urls_to_update) {
-                            var attr = urls_to_update[selector];
-                            $(dom).find(selector).each(function() {
-                                $(this).attr(attr, update_url($(this).attr(attr)));
-                            });
-                        }
-                        $(dom).find('[data-az-url]').each(function() {
-                            var attr = $(this).attr('data-az-url');
-                            $(this).attr(attr, update_url($(this).attr(attr)));
-                        });
-                        $(dom).find('[style*="background-image"]').each(function() {
-                            var style = $(this).attr('style').replace(/background-image[: ]*url\(([^\)]+)\) *;/, function(match, url) {
-                                return match.replace(url, encodeURI(update_url(decodeURI(url))));
-                            });
-                            $(this).attr('style', style);
-                        });
-                    }
-                    template = $('<div>' + template + '</div>');
-                    template_element_urls(template);
-                    template = $(template).html();
-                }
-
                 var thumbnail = '';
                 if ('thumbnail' in elements[path])
-                    thumbnail = elements[path].thumbnail;
+                    thumbnail = elements[path].thumbnail;                
+                var section = (template.indexOf('az-rootable') >= 0);
 
-                var TemplateElement = function(parent, position) {
-                    TemplateElement.baseclass.apply(this, arguments);
+                var TemplateElement = function(parent, position) {                    
+                    for(var i = 0; i < this.baseclass.prototype.params.length; i++) {
+                        if(this.baseclass.prototype.params[i].param_name == 'content' && this.baseclass.prototype.params[i].value == '') {
+                            if ('ajaxurl' in window) {
+                                function template_element_urls(dom) {
+                                    var folders = path.split('|');
+                                    folders.pop();
+                                    folders = folders.join('/')
+                                    function update_url(url) {
+                                        if (url.indexOf("azexo_elements") == 0) {
+                                            return window.azexo_baseurl + '../' + url;
+                                        } else {
+                                            if (url.indexOf("/") != 0 && url.indexOf("http://") != 0 && url.indexOf("https://") != 0) {
+                                                return window.azexo_baseurl + '../azexo_elements/' + folders + '/' + url;
+                                            }
+                                        }
+                                        return url;
+                                    }
+                                    for (var selector in urls_to_update) {
+                                        var attr = urls_to_update[selector];
+                                        $(dom).find(selector).each(function() {
+                                            $(this).attr(attr, update_url($(this).attr(attr)));
+                                        });
+                                    }
+                                    $(dom).find('[data-az-url]').each(function() {
+                                        var attr = $(this).attr('data-az-url');
+                                        $(this).attr(attr, update_url($(this).attr(attr)));
+                                    });
+                                    $(dom).find('[style*="background-image"]').each(function() {
+                                        var style = $(this).attr('style').replace(/background-image[: ]*url\(([^\)]+)\) *;/, function(match, url) {
+                                            return match.replace(url, encodeURI(update_url(decodeURI(url))));
+                                        });
+                                        $(this).attr('style', style);
+                                    });
+                                }
+                                var template = $('<div>' + this.template + '</div>');
+                                template_element_urls(template);
+                                template = $(template).html();
+                                this.baseclass.prototype.params[i].value = template;
+                            }                            
+                            break;
+                        }
+                    }                                        
+                    BaseElement.apply(this, arguments);
                 }
                 register_element(name, false, TemplateElement);
-                var dom = $('<div>' + template + '</div>');
-                var section = $(dom).find('.' + p + 'container, .' + p + 'container-fluid, .az-rootable').length > 0;
                 mixin(TemplateElement.prototype, {
+                    baseclass: TemplateElement,
+                    template: template,
                     name: name,
                     icon: 'fa fa-cube',
                     description: t(''),
@@ -1930,7 +1935,7 @@
                             type: 'html',
                             heading: t('Content'),
                             param_name: 'content',
-                            value: template,
+                            value: '',
                         }),
                     ].concat(TemplateElement.prototype.params),
                     show_settings_on_create: false,
@@ -1950,7 +1955,7 @@
                     show_controls: function() {
                         if (window.azexo_editor) {
                             var element = this;
-                            TemplateElement.baseclass.prototype.show_controls.apply(this, arguments);
+                            BaseElement.prototype.show_controls.apply(this, arguments);
                             var editor_opener = function() {
                                 if (azexo_elements.edit_stack.length > 0) {
                                     var args = azexo_elements.edit_stack.shift();
@@ -2397,7 +2402,7 @@
                         this.attrs['content'] = $(content).html();
                     },
                     restore: function() {
-                        TemplateElement.baseclass.prototype.restore.apply(this, arguments);
+                        BaseElement.prototype.restore.apply(this, arguments);
                         for (var id in this.restore_nodes) {
                             $(this.dom_element).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
                         }
@@ -2405,7 +2410,7 @@
                         $(this.dom_element).find('[data-az-restore]').removeAttr('data-az-restore');
                     },
                     showed: function($, p, fp) {
-                        TemplateElement.baseclass.prototype.showed.apply(this, arguments);
+                        BaseElement.prototype.showed.apply(this, arguments);
                         var element = this;
                         if (element.section) {
                             var container = $(element.dom_element).parent().closest('.' + p + 'container, .' + p + 'container-fluid');
@@ -2439,7 +2444,7 @@
                         }
                         this.attrs['content'] = $(content).html();
                         $(this.attrs['content']).appendTo(this.dom_content_element);
-                        TemplateElement.baseclass.prototype.render.apply(this, arguments);
+                        BaseElement.prototype.render.apply(this, arguments);
                     },
                 });
             }
