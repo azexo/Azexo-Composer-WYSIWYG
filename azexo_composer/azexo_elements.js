@@ -717,7 +717,7 @@
         },
         {
             base: 'az_progress_bar',
-            name: t('ProgressBar'),
+            name: t('Progress Bar'),
             icon: 'fa fa-align-left',
             description: t('Animated progress bar'),
             params: [
