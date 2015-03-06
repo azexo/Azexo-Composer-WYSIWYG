@@ -1944,7 +1944,7 @@
                     is_container: true,
                     has_content: true,
                     section: section,
-                    category: 'Template-elements',
+                    category: t('Template-elements'),
                     is_template_element: true,
                     editable: ['.az-editable'].concat(editable),
                     styleable: ['.az-styleable'].concat(styleable),
@@ -2078,7 +2078,7 @@
                                 styles = styles.replace('border-top-color', 'border-color');
                                 styles = styles.replace('border-top-left-radius', 'border-radius');
                                 styles = styles.replace('border-top-style', 'border-style');
-                                BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
+                                BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
                                     if (edit) {
                                         if (icon != '') {
                                             $(node).removeClass(icon);
@@ -2237,7 +2237,7 @@
                                             }));
                                             var id = $(this).attr('data-az-restore');
                                             var html = element.restore_nodes[id];
-                                            BaseParamType.prototype.show_editor(params, {name: 'Content', attrs: {'html': html}}, function(values) {
+                                            BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: {'html': html}}, function(values) {
                                                 element.restore_nodes[id] = values['html'];
                                                 element.restore_content();
                                                 element.update_dom();
@@ -9485,7 +9485,7 @@
                     params.push(make_param_type(settings[i]));
                     values[settings[i].param_name] = settings[i].value;
                 }
-                BaseParamType.prototype.show_editor(params, {name: 'Theme', attrs: values}, function(values) {
+                BaseParamType.prototype.show_editor(params, {name: t('Theme'), attrs: values}, function(values) {
                     for (var i = 0; i < settings.length; i++) {
                         settings[i].value = values[settings[i].param_name];
                     }
@@ -9500,7 +9500,7 @@
                     param_name: 'configuration',
                     value: configuration,
                 }));
-                BaseParamType.prototype.show_editor(params, {name: 'Theme configuration', attrs: {configuration: configuration}}, function(values) {
+                BaseParamType.prototype.show_editor(params, {name: t('Theme configuration'), attrs: {configuration: configuration}}, function(values) {
                     callback(values['configuration']);
                 });
             }
