@@ -5552,7 +5552,7 @@
                     'youtube': t('YouTube Video'),
 //                    'gradient': t('Gradient Color'),
                 },
-                description: t('Select the effect you want to apply to the row background.')
+                description: t('Select the effect you want to apply to the section background.')
             }),
             make_param_type({
                 type: 'integer_slider',
