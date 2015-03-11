@@ -36,7 +36,7 @@
 #az-elements-modal a, 
 #az-admin-modal a, 
 #az-js-animation-modal a, 
-#az-exporter a:not(.ax-list-group-item), 
+#az-exporter a:not(.ax-list-group-item):not(.list-group-item), 
 #az-thumbnails a, 
 #az-form-modal a, 
 #az-exporter-welcome a, 
@@ -50,7 +50,7 @@
 #az-elements-modal a:hover, #az-elements-modal a:focus, 
 #az-admin-modal a:hover, #az-admin-modal a:focus, 
 #az-js-animation-modal a:hover, #az-js-animation-modal a:focus, 
-#az-exporter a:hover:not(.ax-list-group-item), #az-exporter a:focus:not(.ax-list-group-item), 
+#az-exporter a:hover:not(.ax-list-group-item):not(.list-group-item), #az-exporter a:focus:not(.ax-list-group-item):not(.list-group-item), 
 #az-thumbnails a:hover, #az-thumbnails a:focus, 
 #az-form-modal a:hover, #az-form-modal a:focus, 
 #az-exporter-welcome a:hover, #az-exporter-welcome a:focus, 
@@ -699,7 +699,7 @@ div.modal-dialog, div.ax-modal-dialog {
     top: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    background-color: white !important;
+    background: white !important;
     z-index: 10000 !important;
     opacity: 0.9 !important;
     text-align: center !important;
@@ -825,6 +825,12 @@ div.modal-dialog, div.ax-modal-dialog {
 #az-exporter .btn-toolbar .btn-group, #az-exporter .ax-btn-toolbar .ax-btn-group{
     float: none;
     margin-bottom: 5px;
+
+}
+
+#az-exporter .list-group, #az-exporter .ax-list-group{
+  overflow-y: scroll;
+  height: 300px;    
 }
 
 ul.az-browser, .az-messages {
