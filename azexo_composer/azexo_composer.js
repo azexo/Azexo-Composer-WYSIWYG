@@ -2403,13 +2403,13 @@
                         $(document).trigger('azexo_restore', {dom: content});
                         this.attrs['content'] = $(content).html();
                     },
-                    restore: function() {
+                    restore: function(dom) {
                         BaseElement.prototype.restore.apply(this, arguments);
                         for (var id in this.restore_nodes) {
-                            $(this.dom_element).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
+                            $(dom).find('[data-az-restore="' + id + '"]').html(this.restore_nodes[id]);
                         }
-                        $(document).trigger('azexo_restore', {dom: this.dom_element});
-                        $(this.dom_element).find('[data-az-restore]').removeAttr('data-az-restore');
+                        $(document).trigger('azexo_restore', {dom: dom});
+                        $(dom).find('[data-az-restore]').removeAttr('data-az-restore');
                     },
                     showed: function($, p, fp) {
                         BaseElement.prototype.showed.apply(this, arguments);
@@ -3225,13 +3225,13 @@
             else
                 return '';
         },
-        restore: function() {
+        restore: function(dom) {
         },
-        recursive_restore: function() {
+        recursive_restore: function(dom) {
             for (var i = 0; i < this.children.length; i++) {
-                this.children[i].recursive_restore();
+                this.children[i].recursive_restore(dom);
             }
-            this.restore();
+            this.restore(dom);
         },
         showed: function($, p, fp) {
             if ('pos_left' in this.attrs && this.attrs['pos_left'] != '')
@@ -8277,8 +8277,8 @@
         get_html: function() {
             this.recursive_update_data();
             this.recursive_clear_animation();
-            this.recursive_restore();
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
+            this.recursive_restore(dom);
             $(dom).find('.az-element > .controls').remove();
             $(dom).find('> .controls').remove();
             $(dom).find('.az-sortable-controls').remove();
