@@ -1158,6 +1158,61 @@
             return "#" + hex(r) + hex(g) + hex(b);
         });
     }
+    function hslToRgb(h, s, l) {
+        var r, g, b;
+
+        if (s == 0) {
+            r = g = b = l; // achromatic
+        } else {
+            function hue2rgb(p, q, t) {
+                if (t < 0)
+                    t += 1;
+                if (t > 1)
+                    t -= 1;
+                if (t < 1 / 6)
+                    return p + (q - p) * 6 * t;
+                if (t < 1 / 2)
+                    return q;
+                if (t < 2 / 3)
+                    return p + (q - p) * (2 / 3 - t) * 6;
+                return p;
+            }
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+        }
+
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+    function rgbToHsl(r, g, b) {
+        r /= 255, g /= 255, b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, l = (max + min) / 2;
+
+        if (max == min) {
+            h = s = 0; // achromatic
+        } else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h /= 6;
+        }
+
+        return [h, s, l];
+    }    
     function width2span(width, device) {
         var prefix = p + 'col-' + device + '-',
                 numbers = width ? width.split('/') : [1, 1],
@@ -9011,10 +9066,16 @@
                 }
                 if (settings[i].type != 'google_font') {
                     if ('selector' in settings[i] && 'property' in settings[i]) {
+                        var important = '';
                         if ('important' in settings[i] && settings[i].important)
-                            styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ' !important;}';
-                        else
-                            styles += settings[i].selector + '{' + settings[i].property + ': ' + v + ';}';
+                            important = ' !important';
+                        if(_.isArray(settings[i].property)) {
+                            for(var j = 0; j < settings[i].property.length; j++) {
+                                styles += settings[i].selector + '{' + settings[i].property[j] + ': ' + v + important + ';}';
+                            }
+                        } else {
+                            styles += settings[i].selector + '{' + settings[i].property + ': ' + v + important + ';}';
+                        }                        
                     }
                 } else {
                     if (v != '' && v.split('|').length == 3) {
@@ -9031,6 +9092,12 @@
             }
             styles += '</style>';
             return styles;
+        }
+        function enable_theme_styles() {
+            $(theme_styles).detach();
+            $(theme_styles).appendTo('body');
+            $(theme_styles).empty();
+            $(theme_styles).append(make_theme_styles(site_settings.theme));            
         }
         function get_page_html(containers, loader, title) {
             var js = {};
@@ -9066,7 +9133,8 @@
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
             }
-
+            
+            $(dom).append(make_theme_styles(site_settings.theme));
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
@@ -9084,8 +9152,7 @@
                 $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
             }
             $(dom).append("<script type='text/javascript'> window.ajaxurl = '" + toAbsoluteURL(window.ajaxurl) + "'; </script>");
-            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');
-            $(dom).append(make_theme_styles(site_settings.theme));
+            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');            
             var page_head = '<head>' + $(dom).html() + '</head>';
             return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
         }
@@ -9419,8 +9486,6 @@
                     site_containers = {};
                     site_pages = site.pages;
                     site_settings = site.settings;
-                    $(theme_styles).empty();
-                    $(theme_styles).append(make_theme_styles(site_settings.theme));
                     $(pages).empty();
                     for (var page_name in site.pages) {
                         site_containers[page_name] = new Array(azexo_containers.length);
@@ -9446,6 +9511,7 @@
                         add_page(page_name, site.pages[page_name].title);
                     }
                     switch_page(site.current_page);
+                    enable_theme_styles();
                     $(pages).find('a').removeClass(p + 'active');
                     $(pages).find('a:contains("' + site.current_page + '")').addClass(p + 'active');
                     $('#az-template-elements-welcome').remove();
@@ -9507,8 +9573,7 @@
             $('<button class="az-theme-settings ' + p + 'btn ' + p + 'btn-default">' + t('Theme') + '</button>').appendTo(buttons3).click(function() {
                 make_theme_dialog(site_settings.theme, function(new_theme) {
                     site_settings.theme = new_theme;
-                    $(theme_styles).empty();
-                    $(theme_styles).append(make_theme_styles(site_settings.theme));
+                    enable_theme_styles();
                 })
                 return false;
             });
@@ -9518,10 +9583,79 @@
                     loaded: 'JSON' in window,
                     callback: function() {
                         var configuration = JSON.stringify(site_settings.theme, null, "\t");
+                        function get_colors_map() {
+                            var saturation_min = 0.05;
+                            var properties = ['color', 'background-color', 'border-left-color', 'border-right-color', 'border-top-color', 'border-bottom-color', 'outline-color'];
+                            var color_map = {};
+                            for (var i = 0; i < document.styleSheets.length; i++) {
+                                var styleSheet = document.styleSheets[i];
+                                if ('href' in styleSheet && styleSheet.href != null && styleSheet.href.indexOf('azexo_elements') >= 0) {
+                                    for (var j = 0; j < styleSheet.cssRules.length; j++) {
+                                        var cssRule = styleSheet.cssRules[j];
+                                        if (cssRule instanceof CSSStyleRule) {
+                                            for (var name in cssRule.style) {
+                                                if ($.isNumeric(name)) {
+                                                    var property = cssRule.style[name];
+                                                    if(properties.indexOf(property) >= 0) {
+                                                        var color = cssRule.style.getPropertyValue(cssRule.style[name]);
+                                                        var rgb = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                                                        if(rgb != null) {
+                                                            var hsl = rgbToHsl(rgb[1], rgb[2], rgb[3]);               
+                                                            if(hsl[1] > saturation_min) {
+                                                                if(! (color in color_map)) {
+                                                                    color_map[color] = {};
+                                                                }
+                                                                if(! (property in color_map[color])) {
+                                                                    color_map[color][property] = [];
+                                                                }
+                                                                color_map[color][property].push(cssRule.selectorText);
+                                                            }
+                                                        }
+                                                    }                                    
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            return color_map;
+                        }
+                        if(configuration == '[]') {
+                            var colors_map = get_colors_map();
+                            var i = 0;
+                            var params = [];
+                            for(var color in colors_map) {
+                                var selectors_map = {};
+                                for(var property in colors_map[color]) {
+                                    var selectors = [];
+                                    for(var j = 0; j < colors_map[color][property].length; j++) {
+                                        selectors.push(colors_map[color][property][j]);
+                                    }
+                                    selectors = selectors.join(', ');
+                                    if(! (selectors in selectors_map)) {
+                                        selectors_map[selectors] = [];
+                                    }
+                                    selectors_map[selectors].push(property);
+                                }                                                                
+                                for(var selectors in selectors_map) {
+                                    var param = {
+                                        type: 'colorpicker',
+                                        heading: selectors_map[selectors].join('/') + ' ' + i,
+                                        description: selectors,
+                                        param_name: 'color' + i,
+                                        value: color,
+                                        selector: selectors,
+                                        property: selectors_map[selectors]
+                                    };
+                                    params.push(param);
+                                    i++;
+                                }                                
+                            }
+                            configuration = JSON.stringify(params, null, "\t");
+                        }
                         make_theme_configuration_dialog(configuration, function(new_configuration) {
                             site_settings.theme = $.parseJSON(new_configuration);
-                            $(theme_styles).empty();
-                            $(theme_styles).append(make_theme_styles(site_settings.theme));
+                            enable_theme_styles();
                         });
                     }
                 });
