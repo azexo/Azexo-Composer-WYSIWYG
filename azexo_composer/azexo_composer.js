@@ -1158,7 +1158,18 @@
             return "#" + hex(r) + hex(g) + hex(b);
         });
     }
-    function hslToRgb(h, s, l) {
+    function hex2rgb(hex) {
+        if (hex.lastIndexOf('#') > -1) {
+            hex = hex.replace(/#/, '0x');
+        } else {
+            hex = '0x' + hex;
+        }
+        var r = hex >> 16;
+        var g = (hex & 0x00FF00) >> 8;
+        var b = hex & 0x0000FF;
+        return [r, g, b];
+    }
+    function hsl2rgb(h, s, l) {
         var r, g, b;
 
         if (s == 0) {
@@ -1187,7 +1198,7 @@
 
         return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
     }
-    function rgbToHsl(r, g, b) {
+    function rgb2hsl(r, g, b) {
         r /= 255, g /= 255, b /= 255;
         var max = Math.max(r, g, b), min = Math.min(r, g, b);
         var h, s, l = (max + min) / 2;
@@ -1212,7 +1223,7 @@
         }
 
         return [h, s, l];
-    }    
+    }
     function width2span(width, device) {
         var prefix = p + 'col-' + device + '-',
                 numbers = width ? width.split('/') : [1, 1],
@@ -1929,13 +1940,13 @@
                 var template = elements[path].html;
                 var thumbnail = '';
                 if ('thumbnail' in elements[path])
-                    thumbnail = elements[path].thumbnail;                
+                    thumbnail = elements[path].thumbnail;
                 var section = (template.indexOf('az-rootable') >= 0);
 
-                var TemplateElement = function(parent, position) { 
+                var TemplateElement = function(parent, position) {
                     var element = this;
-                    for(var i = 0; i < this.baseclass.prototype.params.length; i++) {
-                        if(this.baseclass.prototype.params[i].param_name == 'content' && this.baseclass.prototype.params[i].value == '') {
+                    for (var i = 0; i < this.baseclass.prototype.params.length; i++) {
+                        if (this.baseclass.prototype.params[i].param_name == 'content' && this.baseclass.prototype.params[i].value == '') {
                             if ('ajaxurl' in window) {
                                 function template_element_urls(dom) {
                                     var folders = element.path.split('|');
@@ -1972,10 +1983,10 @@
                                 template_element_urls(template);
                                 template = $(template).html();
                                 this.baseclass.prototype.params[i].value = template;
-                            }                            
+                            }
                             break;
                         }
-                    }                                        
+                    }
                     BaseElement.apply(this, arguments);
                 }
                 register_element(name, false, TemplateElement);
@@ -9069,13 +9080,13 @@
                         var important = '';
                         if ('important' in settings[i] && settings[i].important)
                             important = ' !important';
-                        if(_.isArray(settings[i].property)) {
-                            for(var j = 0; j < settings[i].property.length; j++) {
+                        if (_.isArray(settings[i].property)) {
+                            for (var j = 0; j < settings[i].property.length; j++) {
                                 styles += settings[i].selector + '{' + settings[i].property[j] + ': ' + v + important + ';}';
                             }
                         } else {
                             styles += settings[i].selector + '{' + settings[i].property + ': ' + v + important + ';}';
-                        }                        
+                        }
                     }
                 } else {
                     if (v != '' && v.split('|').length == 3) {
@@ -9097,7 +9108,7 @@
             $(theme_styles).detach();
             $(theme_styles).appendTo('body');
             $(theme_styles).empty();
-            $(theme_styles).append(make_theme_styles(site_settings.theme));            
+            $(theme_styles).append(make_theme_styles(site_settings.theme));
         }
         function get_page_html(containers, loader, title) {
             var js = {};
@@ -9133,7 +9144,7 @@
             if ('azexo_export_filter' in window) {
                 window.azexo_export_filter(dom);
             }
-            
+
             $(dom).append(make_theme_styles(site_settings.theme));
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
@@ -9152,7 +9163,7 @@
                 $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
             }
             $(dom).append("<script type='text/javascript'> window.ajaxurl = '" + toAbsoluteURL(window.ajaxurl) + "'; </script>");
-            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');            
+            $(dom).append('<script type="text/javascript"> window.azexo_site_name = "' + site_name + '"; </script>');
             var page_head = '<head>' + $(dom).html() + '</head>';
             return '<!DOCTYPE html><html>' + page_head + page_body + '</html>';
         }
@@ -9551,6 +9562,66 @@
                     params.push(make_param_type(settings[i]));
                     values[settings[i].param_name] = settings[i].value;
                 }
+                for (var i = 0; i < params.length; i++) {
+                    if ('group' in params[i] && params[i].type == 'colorpicker') {
+                        params[i].dependency.callback = function(caller_param) {
+                            var param = this;
+                            function get_hsl(value) {
+                                var rgb = value.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                                if (rgb == null) {
+                                    rgb = hex2rgb($.trim(value));
+                                } else {
+                                    rgb.shift();
+                                }
+                                var hsl = rgb2hsl(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+                                return hsl;
+                            }
+                            function hsl_norm(value) {
+                                if (value[0] < 0) {
+                                    value[0] = value[0] + 1;
+                                }
+                                if (value[0] > 1) {
+                                    value[0] = value[0] - 1;
+                                }
+                                if (value[1] < 0) {
+                                    value[1] = 0;
+                                }
+                                if (value[1] > 1) {
+                                    value[1] = 1;
+                                }
+                                if (value[2] < 0) {
+                                    value[2] = 0;
+                                }
+                                if (value[2] > 1) {
+                                    value[2] = 1;
+                                }
+                                return value;
+                            }
+                            var old_v = get_hsl(param.value);
+                            param.value = param.get_value();
+                            var new_v = get_hsl(param.value);                            
+                            var delta = [new_v[0] - old_v[0], new_v[1]/old_v[1], new_v[2]/old_v[2]];
+                            if (delta[0] < 0) {
+                                delta[0] = delta[0] + 1;
+                            }
+                            if (delta[0] > 1) {
+                                delta[0] = delta[0] - 1;
+                            }
+                            for (var i = 0; i < param.group.length; i++) {
+                                var input = $(param.dom_element).closest('#az-editor-modal').find('[name="' + param.group[i] + '"]');
+                                if(input.length > 0) {
+                                    var color = $(input).val();
+                                    var hsl = get_hsl(color);
+                                    var new_v = [hsl[0] + delta[0], hsl[1] * delta[1], hsl[2] * delta[2]];
+                                    new_v = hsl_norm(new_v);
+                                    var rgb = hsl2rgb(new_v[0], new_v[1], new_v[2]);
+                                    $(input).val('rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')');
+                                    $(input).trigger('change');
+                                }
+                            }
+                        };
+                    }
+                }
                 BaseParamType.prototype.show_editor(params, {name: t('Theme'), attrs: values}, function(values) {
                     for (var i = 0; i < settings.length; i++) {
                         settings[i].value = values[settings[i].param_name];
@@ -9596,22 +9667,22 @@
                                             for (var name in cssRule.style) {
                                                 if ($.isNumeric(name)) {
                                                     var property = cssRule.style[name];
-                                                    if(properties.indexOf(property) >= 0) {
+                                                    if (properties.indexOf(property) >= 0) {
                                                         var color = cssRule.style.getPropertyValue(cssRule.style[name]);
-                                                        var rgb = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-                                                        if(rgb != null) {
-                                                            var hsl = rgbToHsl(rgb[1], rgb[2], rgb[3]);               
-                                                            if(hsl[1] > saturation_min) {
-                                                                if(! (color in color_map)) {
+                                                        var rgb = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                                                        if (rgb != null) {
+                                                            var hsl = rgb2hsl(rgb[1], rgb[2], rgb[3]);
+                                                            if (hsl[1] > saturation_min) {
+                                                                if (!(color in color_map)) {
                                                                     color_map[color] = {};
                                                                 }
-                                                                if(! (property in color_map[color])) {
+                                                                if (!(property in color_map[color])) {
                                                                     color_map[color][property] = [];
                                                                 }
                                                                 color_map[color][property].push(cssRule.selectorText);
                                                             }
                                                         }
-                                                    }                                    
+                                                    }
                                                 }
                                             }
                                         }
@@ -9620,26 +9691,27 @@
                             }
                             return color_map;
                         }
-                        if(configuration == '[]') {
+                        if (configuration == '[]') {
                             var colors_map = get_colors_map();
                             var i = 0;
                             var params = [];
-                            for(var color in colors_map) {
+                            for (var color in colors_map) {
                                 var selectors_map = {};
-                                for(var property in colors_map[color]) {
+                                for (var property in colors_map[color]) {
                                     var selectors = [];
-                                    for(var j = 0; j < colors_map[color][property].length; j++) {
+                                    for (var j = 0; j < colors_map[color][property].length; j++) {
                                         selectors.push(colors_map[color][property][j]);
                                     }
                                     selectors = selectors.join(', ');
-                                    if(! (selectors in selectors_map)) {
+                                    if (!(selectors in selectors_map)) {
                                         selectors_map[selectors] = [];
                                     }
                                     selectors_map[selectors].push(property);
-                                }                                                                
-                                for(var selectors in selectors_map) {
+                                }
+                                for (var selectors in selectors_map) {
                                     var param = {
                                         type: 'colorpicker',
+                                        tab: t('Colors'),
                                         heading: selectors_map[selectors].join('/') + ' ' + i,
                                         description: selectors,
                                         param_name: 'color' + i,
@@ -9649,8 +9721,219 @@
                                     };
                                     params.push(param);
                                     i++;
-                                }                                
+                                }
                             }
+                            var hsls = [];
+                            var colors = [];
+                            for (var color in colors_map) {
+                                var rgb = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                                var hsl = rgb2hsl(rgb[1], rgb[2], rgb[3]);
+                                hsls.push(hsl);
+                                colors.push(color);
+                            }
+                            function hue_distance(v1, v2) {
+                                var d1 = Math.abs(v1[0] - v2[0]);
+                                var d2 = Math.abs((1 - v1[0]) - v2[0]);
+                                var d3 = Math.abs(v1[0] - (1 - v2[0]));
+                                return Math.min(d1, d2, d3);
+                            }
+                            var HierarchicalClustering = function(threshold) {
+                                this.linkage = "average";
+                                this.threshold = threshold == undefined ? Infinity : threshold;
+                            }
+                            HierarchicalClustering.prototype = {
+//                                distance: function(v1, v2) {
+//                                    var total = 0;
+//                                    for (var i = 0; i < v1.length; i++)
+//                                        total += Math.pow(v2[i] - v1[i], 2)
+//                                    return Math.sqrt(total);
+//                                },
+                                distance: hue_distance,
+                                merge: function(c1, c2) {
+                                    return c1;
+                                },
+                                cluster: function(items) {
+                                    this.clusters = [];
+                                    this.dists = [];  // distances between each pair of clusters
+                                    this.mins = []; // closest cluster for each cluster
+                                    this.index = []; // keep a hash of all clusters by key
+
+                                    for (var i = 0; i < items.length; i++) {
+                                        var cluster = {
+                                            value: items[i],
+                                            key: i,
+                                            index: i,
+                                            size: 1
+                                        };
+                                        this.clusters[i] = cluster;
+                                        this.index[i] = cluster;
+                                        this.dists[i] = [];
+                                        this.mins[i] = 0;
+                                    }
+
+                                    for (var i = 0; i < this.clusters.length; i++) {
+                                        for (var j = 0; j <= i; j++) {
+                                            var dist = (i == j) ? Infinity :
+                                                    this.distance(this.clusters[i].value, this.clusters[j].value);
+                                            this.dists[i][j] = dist;
+                                            this.dists[j][i] = dist;
+
+                                            if (dist < this.dists[i][this.mins[i]]) {
+                                                this.mins[i] = j;
+                                            }
+                                        }
+                                    }
+
+                                    var merged = this.mergeClosest();
+                                    var i = 0;
+                                    while (merged) {
+                                        merged = this.mergeClosest();
+                                    }
+
+                                    this.clusters.forEach(function(cluster) {
+                                        // clean up metadata used for clustering
+                                        delete cluster.key;
+                                        delete cluster.index;
+                                    });
+
+                                    return this.clusters;
+                                },
+                                mergeClosest: function() {
+                                    // find two closest clusters from cached mins
+                                    var minKey = 0, min = Infinity;
+                                    for (var i = 0; i < this.clusters.length; i++) {
+                                        var key = this.clusters[i].key,
+                                                dist = this.dists[key][this.mins[key]];
+                                        if (dist < min) {
+                                            minKey = key;
+                                            min = dist;
+                                        }
+                                    }
+                                    if (min >= this.threshold) {
+                                        return false;
+                                    }
+
+                                    var c1 = this.index[minKey],
+                                            c2 = this.index[this.mins[minKey]];
+
+                                    // merge two closest clusters
+                                    var merged = {
+                                        left: c1,
+                                        right: c2,
+                                        key: c1.key,
+                                        size: c1.size + c2.size
+                                    };
+
+                                    this.clusters[c1.index] = merged;
+                                    this.clusters.splice(c2.index, 1);
+                                    this.index[c1.key] = merged;
+
+                                    // update distances with new merged cluster
+                                    for (var i = 0; i < this.clusters.length; i++) {
+                                        var ci = this.clusters[i];
+                                        var dist;
+                                        if (c1.key == ci.key) {
+                                            dist = Infinity;
+                                        }
+                                        else if (this.linkage == "single") {
+                                            dist = this.dists[c1.key][ci.key];
+                                            if (this.dists[c1.key][ci.key] > this.dists[c2.key][ci.key]) {
+                                                dist = this.dists[c2.key][ci.key];
+                                            }
+                                        }
+                                        else if (this.linkage == "complete") {
+                                            dist = this.dists[c1.key][ci.key];
+                                            if (this.dists[c1.key][ci.key] < this.dists[c2.key][ci.key]) {
+                                                dist = this.dists[c2.key][ci.key];
+                                            }
+                                        }
+                                        else if (this.linkage == "average") {
+                                            dist = (this.dists[c1.key][ci.key] * c1.size
+                                                    + this.dists[c2.key][ci.key] * c2.size) / (c1.size + c2.size);
+                                        }
+                                        else {
+                                            dist = this.distance(ci.value, c1.value);
+                                        }
+
+                                        this.dists[c1.key][ci.key] = this.dists[ci.key][c1.key] = dist;
+                                    }
+
+
+                                    // update cached mins
+                                    for (var i = 0; i < this.clusters.length; i++) {
+                                        var key1 = this.clusters[i].key;
+                                        if (this.mins[key1] == c1.key || this.mins[key1] == c2.key) {
+                                            var min = key1;
+                                            for (var j = 0; j < this.clusters.length; j++) {
+                                                var key2 = this.clusters[j].key;
+                                                if (this.dists[key1][key2] < this.dists[key1][min]) {
+                                                    min = key2;
+                                                }
+                                            }
+                                            this.mins[key1] = min;
+                                        }
+                                        this.clusters[i].index = i;
+                                    }
+
+                                    // clean up metadata used for clustering
+                                    delete c1.key;
+                                    delete c2.key;
+                                    delete c1.index;
+                                    delete c2.index;
+
+                                    return true;
+                                }
+                            }
+                            var hc = new HierarchicalClustering(0.01);
+                            var clusters = hc.cluster(hsls);
+                            function get_average(cluster) {
+                                if ('value' in cluster) {
+                                    return cluster.value;
+                                } else {
+                                    var vl = get_average(cluster.left);
+                                    var vr = get_average(cluster.right);
+                                    var v = new Array(vl.length);
+                                    for (var i = 0; i < v.length; i++)
+                                        v[i] = (vl[i] * cluster.left.size + vr[i] * cluster.right.size) / (cluster.left.size + cluster.right.size);
+                                    return v;
+                                }
+                            }
+                            var averages = [];
+                            var groups = [];
+                            for (var i = 0; i < clusters.length; i++) {
+                                var c = get_average(clusters[i]);
+                                averages.push(c);
+                                groups.push([]);
+                            }
+                            for (var i = 0; i < hsls.length; i++) {
+                                var min = 0;
+                                var min_d = Infinity;
+                                for (var j = 0; j < averages.length; j++) {
+                                    var d = hue_distance(hsls[i], averages[j]);
+                                    if (min_d > d) {
+                                        min = j;
+                                        min_d = d;
+                                    }
+                                }
+                                for (var j = 0; j < params.length; j++) {
+                                    if (params[j].value == colors[i]) {
+                                        groups[min].push(params[j].param_name);
+                                    }
+                                }
+                            }
+                            for (var i = 0; i < averages.length; i++) {
+                                var rgb = hsl2rgb(averages[i][0], averages[i][1], averages[i][2]);
+                                var param = {
+                                    type: 'colorpicker',
+                                    heading: t('Color group') + ' ' + i,
+                                    param_name: 'color_group_' + i,
+                                    value: 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')',
+                                    group: groups[i],
+                                    dependency: {'element': 'color_group_' + i, 'not_empty': {}},
+                                };
+                                params.unshift(param);
+                            }
+
                             configuration = JSON.stringify(params, null, "\t");
                         }
                         make_theme_configuration_dialog(configuration, function(new_configuration) {

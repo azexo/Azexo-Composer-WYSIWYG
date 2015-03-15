@@ -240,6 +240,13 @@
     function colorpicker(input) {
         if ('wpColorPicker' in $.fn) {
             $(input).wpColorPicker();
+            _.defer(function() {
+                $(input).wpColorPicker({
+                    change: _.throttle(function() {
+                        $(input).trigger('change');
+                    }, 1000)
+                });
+            });
         } else {
             window.wpColorPickerL10n = {
                 "clear": t("Clear"),
@@ -255,6 +262,13 @@
                         callback: function() {
                             azexo_add_css('css/color-picker.min.css', function() {
                                 $(input).wpColorPicker();
+                                _.defer(function() {
+                                    $(input).wpColorPicker({
+                                        change: _.throttle(function() {
+                                            $(input).trigger('change');
+                                        }, 1000)
+                                    });
+                                });
                             });
                         }
                     });
