@@ -2174,8 +2174,11 @@
                             }
                             function make_node_signature(dom) {
                                 var cdom = $(dom).clone();
-                                $(cdom).find('[class]').removeAttr('class');
-                                $(cdom).find('[style]').removeAttr('style');
+                                $(cdom).find('*').each(function(){
+                                    var elem = this;
+                                    while(elem.attributes.length > 0)
+                                        elem.removeAttribute(elem.attributes[0].name);                                    
+                                });
                                 var html = $(cdom).html();
                                 html = html.replace(/\s*/g, '');
                                 return html;
@@ -2469,6 +2472,10 @@
                         $(document).trigger('azexo_restore', {dom: content});
                         this.attrs['content'] = $(content).html();
                     },
+                    get_content: function() {
+                        this.restore_content();
+                        return this.attrs['content'];
+                    },                    
                     restore: function(dom) {
                         BaseElement.prototype.restore.apply(this, arguments);
                         for (var id in this.restore_nodes) {
@@ -9655,7 +9662,7 @@
                     callback: function() {
                         var configuration = JSON.stringify(site_settings.theme, null, "\t");
                         function get_colors_map() {
-                            var saturation_min = 0.05;
+                            var saturation_min = 0;
                             var properties = ['color', 'background-color', 'border-left-color', 'border-right-color', 'border-top-color', 'border-bottom-color', 'outline-color'];
                             var color_map = {};
                             for (var i = 0; i < document.styleSheets.length; i++) {
