@@ -51,6 +51,11 @@
             return 'en';
         }
     }
+    $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+        if ( options.dataType == 'script' || originalOptions.dataType == 'script' ) {
+            options.cache = true;
+        }
+    });    
     function azexo_login(callback) {
         if ('azexo_editor' in window) {
             callback(window.azexo_editor);
