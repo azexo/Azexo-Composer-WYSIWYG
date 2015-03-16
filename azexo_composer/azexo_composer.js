@@ -2144,6 +2144,10 @@
                                 styles = styles.replace('border-top-color', 'border-color');
                                 styles = styles.replace('border-top-left-radius', 'border-radius');
                                 styles = styles.replace('border-top-style', 'border-style');
+                                styles = styles.replace('background-position-x: 50%; background-position-y: 50%;', 'background-position: center;');
+                                styles = styles.replace('background-position-x: 50%; background-position-y: 100%;', 'background-position: center bottom;');
+                                styles = styles.replace('background-repeat-x: no-repeat; background-repeat-y: no-repeat;', 'background-repeat: no-repeat;');
+                                styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
                                 BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
                                     if (edit) {
                                         if (icon != '') {
@@ -2471,10 +2475,10 @@
                         }
                         $(document).trigger('azexo_restore', {dom: content});
                         this.attrs['content'] = $(content).html();
-                    },
+                    },                    
                     get_content: function() {
-                        this.restore_content();
-                        return this.attrs['content'];
+                        this.restore_content();                                                
+                        return BaseElement.prototype.get_content.apply(this, arguments);
                     },                    
                     restore: function(dom) {
                         BaseElement.prototype.restore.apply(this, arguments);
@@ -3456,7 +3460,7 @@
                 var param = this.params[i];
                 if (param.param_name === 'content') {
                     if (param.type == "html") {
-                        value = decodeURIComponent(atob(value.replace(/^#E\-8_/, '')));
+                        value = decodeURIComponent(atob(value.replace(/^#E\-8_/g, '')));
                         this.attrs['content'] = value;
                         return;
                     }
@@ -3470,7 +3474,7 @@
                 if (param.param_name in attrs) {
                     if (!param.safe) {
                         var value = unescapeParam(attrs[param.param_name]);
-                        this.attrs[param.param_name] = decodeURIComponent(atob(value.replace(/^#E\-8_/, '')));
+                        this.attrs[param.param_name] = decodeURIComponent(atob(value.replace(/^#E\-8_/g, '')));
                     } else {
                         this.attrs[param.param_name] = unescapeParam(attrs[param.param_name]);
                     }
