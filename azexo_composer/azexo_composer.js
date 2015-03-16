@@ -3460,7 +3460,7 @@
                 var param = this.params[i];
                 if (param.param_name === 'content') {
                     if (param.type == "html") {
-                        value = decodeURIComponent(atob(value.replace(/^#E\-8_/g, '')));
+                        value = decodeURIComponent(atob(value.replace(/^#E\-8_/, '')));
                         this.attrs['content'] = value;
                         return;
                     }
@@ -3474,7 +3474,7 @@
                 if (param.param_name in attrs) {
                     if (!param.safe) {
                         var value = unescapeParam(attrs[param.param_name]);
-                        this.attrs[param.param_name] = decodeURIComponent(atob(value.replace(/^#E\-8_/g, '')));
+                        this.attrs[param.param_name] = decodeURIComponent(atob(value.replace(/^#E\-8_/, '')));
                     } else {
                         this.attrs[param.param_name] = unescapeParam(attrs[param.param_name]);
                     }
