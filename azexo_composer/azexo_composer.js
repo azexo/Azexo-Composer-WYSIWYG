@@ -1943,6 +1943,12 @@
             for (var path in elements) {
                 var name = elements[path].name;
                 var template = elements[path].html;
+                var folders = path.split('|');
+                folders.pop();
+                folders = folders.join('/')
+                var element_baseurl = window.azexo_baseurl + '../azexo_elements/' + folders + '/';
+                if('baseurl' in elements[path])
+                    element_baseurl = elements[path].baseurl;
                 var thumbnail = '';
                 if ('thumbnail' in elements[path])
                     thumbnail = elements[path].thumbnail;
@@ -1954,15 +1960,12 @@
                         if (this.baseclass.prototype.params[i].param_name == 'content' && this.baseclass.prototype.params[i].value == '') {
                             if ('ajaxurl' in window) {
                                 function template_element_urls(dom) {
-                                    var folders = element.path.split('|');
-                                    folders.pop();
-                                    folders = folders.join('/')
                                     function update_url(url) {
                                         if (url.indexOf("azexo_elements") == 0) {
                                             return window.azexo_baseurl + '../' + url;
                                         } else {
                                             if (url.indexOf("/") != 0 && url.indexOf("http://") != 0 && url.indexOf("https://") != 0) {
-                                                return window.azexo_baseurl + '../azexo_elements/' + folders + '/' + url;
+                                                return element.baseurl + url;
                                             }
                                         }
                                         return url;
@@ -1998,6 +2001,7 @@
                 mixin(TemplateElement.prototype, {
                     baseclass: TemplateElement,
                     template: template,
+                    baseurl: element_baseurl,
                     path: path,
                     name: name,
                     icon: 'fa fa-cube',
