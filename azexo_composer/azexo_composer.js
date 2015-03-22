@@ -51,11 +51,11 @@
             return 'en';
         }
     }
-    $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
-        if ( options.dataType == 'script' || originalOptions.dataType == 'script' ) {
+    $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+        if (options.dataType == 'script' || originalOptions.dataType == 'script') {
             options.cache = true;
         }
-    });    
+    });
     function azexo_login(callback) {
         if ('azexo_editor' in window) {
             callback(window.azexo_editor);
@@ -1950,7 +1950,7 @@
                 folders.pop();
                 folders = folders.join('/')
                 var element_baseurl = window.azexo_baseurl + '../azexo_elements/' + folders + '/';
-                if('baseurl' in elements[path])
+                if ('baseurl' in elements[path])
                     element_baseurl = elements[path].baseurl;
                 var thumbnail = '';
                 if ('thumbnail' in elements[path])
@@ -2119,12 +2119,12 @@
                                         }));
                                     }
                                 }
-                                for(var i=0; i < attrs.length; i++) {
+                                for (var i = 0; i < attrs.length; i++) {
                                     params.push(make_param_type({
                                         type: 'textfield',
                                         heading: attrs[i],
                                         param_name: 'attr_' + attrs[i],
-                                    }));                                        
+                                    }));
                                 }
                                 if (style) {
                                     params.push(make_param_type({
@@ -2169,7 +2169,7 @@
                                 styles = styles.replace('background-repeat-x: no-repeat; background-repeat-y: no-repeat;', 'background-repeat: no-repeat;');
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
                                 var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
-                                for(var i = 0; i < attrs.length; i++) {
+                                for (var i = 0; i < attrs.length; i++) {
                                     attrs_values['attr_' + attrs[i]] = $(node).attr(attrs[i]);
                                 }
                                 BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: attrs_values}, function(values) {
@@ -2193,7 +2193,7 @@
                                         $(node).attr('class', values['el_class']);
                                         $(node).attr('style', values['style']);
                                     }
-                                    for(var i = 0; i < attrs.length; i++) {
+                                    for (var i = 0; i < attrs.length; i++) {
                                         $(node).attr(attrs[i], values['attr_' + attrs[i]])
                                     }
                                     element.attrs['content'] = $(element.dom_content_element).html();
@@ -2205,10 +2205,10 @@
                             }
                             function make_node_signature(dom) {
                                 var cdom = $(dom).clone();
-                                $(cdom).find('*').each(function(){
+                                $(cdom).find('*').each(function() {
                                     var elem = this;
-                                    while(elem.attributes.length > 0)
-                                        elem.removeAttribute(elem.attributes[0].name);                                    
+                                    while (elem.attributes.length > 0)
+                                        elem.removeAttribute(elem.attributes[0].name);
                                 });
                                 var html = $(cdom).html();
                                 html = html.replace(/\s*/g, '');
@@ -2413,7 +2413,7 @@
                                 for (var i = 0; i < element.attr_editable.length; i++) {
                                     var selector = element.attr_editable[i].split('|')[0];
                                     var attr = element.attr_editable[i].split('|')[1];
-                                    if(selector in attr_editable_selectors)
+                                    if (selector in attr_editable_selectors)
                                         attr_editable_selectors[selector].push(attr);
                                     else
                                         attr_editable_selectors[selector] = [attr];
@@ -2429,8 +2429,8 @@
                                         if ($(this).closest('[data-az-restore]').length == 0)
                                             $(this).removeClass('editable-highlight');
                                     });
-                                    $(element.dom_element).find(selector).each(function(){
-                                        if($(this).data('attr-editable')) {
+                                    $(element.dom_element).find(selector).each(function() {
+                                        if ($(this).data('attr-editable')) {
                                             $(this).data('attr-editable', $(this).data('attr-editable').concat(attrs));
                                         } else {
                                             $(this).data('attr-editable', attrs)
@@ -2457,7 +2457,7 @@
                                                 });
                                             }
                                         }
-                                    });                                        
+                                    });
                                 }
                                 var sort_stack = [];
                                 var sorted_node = null;
@@ -2470,6 +2470,8 @@
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).clone().insertAfter(node);
+                                            sort_stack = [];
+                                            sorted_node = null;
                                             element.attrs['content'] = $(element.dom_content_element).html();
                                             element.restore_content();
                                             synchronize();
@@ -2481,6 +2483,8 @@
                                             sortable_disable();
                                             $(node).removeClass('sortable-highlight').find('.az-sortable-controls').remove();
                                             $(node).remove();
+                                            sort_stack = [];
+                                            sorted_node = null;
                                             element.attrs['content'] = $(element.dom_content_element).html();
                                             element.restore_content();
                                             synchronize();
@@ -2503,18 +2507,21 @@
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseenter.az-sortable').on('mouseenter.az-sortable', function() {
                                             if ($(this).closest('[data-az-restore]').length == 0) {
                                                 var node = this;
-                                                $(element.dom_element).find('.az-sortable-controls').remove();
-                                                $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
-                                                if (sorted_node !== null) {
-                                                    clearTimeout(timeoutId);
+                                                var parent = sort_stack[sort_stack.length - 1];
+                                                if ($(parent).has(node).length || sort_stack.length == 0) {
+                                                    $(element.dom_element).find('.az-sortable-controls').remove();
+                                                    $(element.dom_element).find('.sortable-highlight').removeClass('sortable-highlight');
+                                                    if (sorted_node !== null) {
+                                                        clearTimeout(timeoutId);
+                                                    }
+                                                    $(node).addClass('sortable-highlight');
+                                                    sort_stack.push(node);
+                                                    $.unique(sort_stack);
+                                                    sorted_node = node;
+                                                    timeoutId = setTimeout(function() {
+                                                        show_controls(node);
+                                                    }, 1000);
                                                 }
-
-                                                $(node).addClass('sortable-highlight');
-                                                sort_stack.push(node);
-                                                sorted_node = node;
-                                                timeoutId = setTimeout(function() {
-                                                    show_controls(node);
-                                                }, 1000);
                                             }
                                         });
                                         $(element.dom_element).find(element.sortable[i]).find('> *').off('mouseleave.az-sortable').on('mouseleave.az-sortable', function() {
@@ -2528,7 +2535,7 @@
 
                                                 sort_stack.pop();
                                                 if (sort_stack.length > 0) {
-                                                    node = sort_stack[sort_stack.length - 1]
+                                                    node = sort_stack[sort_stack.length - 1];
                                                     $(node).addClass('sortable-highlight');
 
                                                     sorted_node = node;
@@ -2556,11 +2563,11 @@
                         }
                         $(document).trigger('azexo_restore', {dom: content});
                         this.attrs['content'] = $(content).html();
-                    },                    
+                    },
                     get_content: function() {
-                        this.restore_content();                                                
+                        this.restore_content();
                         return BaseElement.prototype.get_content.apply(this, arguments);
-                    },                    
+                    },
                     restore: function(dom) {
                         BaseElement.prototype.restore.apply(this, arguments);
                         for (var id in this.restore_nodes) {
@@ -9691,8 +9698,8 @@
                             }
                             var old_v = get_hsl(param.value);
                             param.value = param.get_value();
-                            var new_v = get_hsl(param.value);                            
-                            var delta = [new_v[0] - old_v[0], new_v[1]/old_v[1], new_v[2]/old_v[2]];
+                            var new_v = get_hsl(param.value);
+                            var delta = [new_v[0] - old_v[0], new_v[1] / old_v[1], new_v[2] / old_v[2]];
                             if (delta[0] < 0) {
                                 delta[0] = delta[0] + 1;
                             }
@@ -9701,7 +9708,7 @@
                             }
                             for (var i = 0; i < param.group.length; i++) {
                                 var input = $(param.dom_element).closest('#az-editor-modal').find('[name="' + param.group[i] + '"]');
-                                if(input.length > 0) {
+                                if (input.length > 0) {
                                     var color = $(input).val();
                                     var hsl = get_hsl(color);
                                     var new_v = [hsl[0] + delta[0], hsl[1] * delta[1], hsl[2] * delta[2]];
