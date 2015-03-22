@@ -2166,6 +2166,8 @@
                                 styles = styles.replace('border-top-style', 'border-style');
                                 styles = styles.replace('background-position-x: 50%; background-position-y: 50%;', 'background-position: center;');
                                 styles = styles.replace('background-position-x: 50%; background-position-y: 100%;', 'background-position: center bottom;');
+                                styles = styles.replace('background-position-x: 0px; background-position-y: 0px;', 'background-position: 0 0;');
+                                styles = styles.replace('background-repeat-x: repeat; background-repeat-y: repeat;', 'background-repeat: repeat;');
                                 styles = styles.replace('background-repeat-x: no-repeat; background-repeat-y: no-repeat;', 'background-repeat: no-repeat;');
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
                                 var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
@@ -2419,6 +2421,12 @@
                                         attr_editable_selectors[selector] = [attr];
                                     $.unique(attr_editable_selectors[selector]);
                                 }
+                                $(element.dom_element).find('[data-az-editable]').each(function(){
+                                    if(!('[data-az-editable]' in attr_editable_selectors))
+                                        attr_editable_selectors['[data-az-editable]'] = [];
+                                    attr_editable_selectors['[data-az-editable]'].concat($(this).attr('data-az-editable').split(','));
+                                    $.unique(attr_editable_selectors['[data-az-editable]']);
+                                });                                
                                 for (var selector in attr_editable_selectors) {
                                     var attrs = attr_editable_selectors[selector];
                                     $(element.dom_element).find(selector).off('mouseenter.az-editable').on('mouseenter.az-editable', function() {
