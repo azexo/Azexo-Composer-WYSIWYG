@@ -1921,6 +1921,9 @@
             var editable = [];
             if ('azexo_editable' in window)
                 editable = window.azexo_editable;
+            var attr_editable = [];
+            if ('azexo_attr_editable' in window)
+                attr_editable = window.azexo_attr_editable;
             var styleable = [];
             if ('azexo_styleable' in window)
                 styleable = window.azexo_styleable;
@@ -2022,6 +2025,7 @@
                     category: t('Template-elements'),
                     is_template_element: true,
                     editable: ['.az-editable'].concat(editable),
+                    attr_editable: [].concat(attr_editable),
                     styleable: ['.az-styleable'].concat(styleable),
                     sortable: ['.az-sortable'].concat(sortable),
                     synchronizable: ['.az-synchronizable'].concat(synchronizable),
@@ -2049,7 +2053,7 @@
                                         $(args.node).css('outline-color', '');
                                         $(args.node).css('outline-width', '');
                                         $(args.node).css('outline-style', '');
-                                        open_editor(args.node, args.edit, args.style, function() {
+                                        open_editor(args.node, args.edit, args.style, args.attrs, function() {
                                             if (azexo_elements.edit_stack.length > 0) {
                                                 var s1 = $(args.node).width() * $(args.node).height();
                                                 var s2 = $(azexo_elements.edit_stack[0].node).width() * $(azexo_elements.edit_stack[0].node).height();
@@ -2063,7 +2067,7 @@
                                     }, 500);
                                 }
                             }
-                            function open_editor(node, edit, style, callback) {
+                            function open_editor(node, edit, style, attrs, callback) {
                                 var params = [];
                                 var image = '';
                                 var link = '';
@@ -2115,6 +2119,13 @@
                                         }));
                                     }
                                 }
+                                for(var i=0; i < attrs.length; i++) {
+                                    params.push(make_param_type({
+                                        type: 'textfield',
+                                        heading: attrs[i],
+                                        param_name: 'attr_' + attrs[i],
+                                    }));                                        
+                                }
                                 if (style) {
                                     params.push(make_param_type({
                                         type: 'textfield',
@@ -2129,7 +2140,7 @@
                                         description: t('Style options.'),
                                         tab: t('Style')
                                     });
-                                    if (edit)
+                                    if (edit || attrs.length > 0)
                                         params.push(param_type);
                                     else
                                         params.unshift(param_type);
@@ -2157,7 +2168,11 @@
                                 styles = styles.replace('background-position-x: 50%; background-position-y: 100%;', 'background-position: center bottom;');
                                 styles = styles.replace('background-repeat-x: no-repeat; background-repeat-y: no-repeat;', 'background-repeat: no-repeat;');
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
-                                BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon}}, function(values) {
+                                var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
+                                for(var i = 0; i < attrs.length; i++) {
+                                    attrs_values['attr_' + attrs[i]] = $(node).attr(attrs[i]);
+                                }
+                                BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: attrs_values}, function(values) {
                                     if (edit) {
                                         if (icon != '') {
                                             $(node).removeClass(icon);
@@ -2177,6 +2192,9 @@
                                     if (style) {
                                         $(node).attr('class', values['el_class']);
                                         $(node).attr('style', values['style']);
+                                    }
+                                    for(var i = 0; i < attrs.length; i++) {
+                                        $(node).attr(attrs[i], values['attr_' + attrs[i]])
                                     }
                                     element.attrs['content'] = $(element.dom_content_element).html();
                                     element.restore_content();
@@ -2345,6 +2363,7 @@
                                                     node: this,
                                                     edit: false,
                                                     style: true,
+                                                    attrs: [],
                                                 });
                                                 editor_opener();
                                                 return false;
@@ -2353,6 +2372,7 @@
                                                     node: this,
                                                     edit: false,
                                                     style: true,
+                                                    attrs: [],
                                                 });
                                             }
                                         }
@@ -2374,6 +2394,7 @@
                                                     node: this,
                                                     edit: true,
                                                     style: true,
+                                                    attrs: [],
                                                 });
                                                 editor_opener();
                                                 return false;
@@ -2382,10 +2403,61 @@
                                                     node: this,
                                                     edit: true,
                                                     style: true,
+                                                    attrs: [],
                                                 });
                                             }
                                         }
                                     });
+                                }
+                                var attr_editable_selectors = {};
+                                for (var i = 0; i < element.attr_editable.length; i++) {
+                                    var selector = element.attr_editable[i].split('|')[0];
+                                    var attr = element.attr_editable[i].split('|')[1];
+                                    if(selector in attr_editable_selectors)
+                                        attr_editable_selectors[selector].push(attr);
+                                    else
+                                        attr_editable_selectors[selector] = [attr];
+                                    $.unique(attr_editable_selectors[selector]);
+                                }
+                                for (var selector in attr_editable_selectors) {
+                                    var attrs = attr_editable_selectors[selector];
+                                    $(element.dom_element).find(selector).off('mouseenter.az-editable').on('mouseenter.az-editable', function() {
+                                        if ($(this).closest('[data-az-restore]').length == 0)
+                                            $(this).addClass('editable-highlight');
+                                    });
+                                    $(element.dom_element).find(selector).off('mouseleave.az-editable').on('mouseleave.az-editable', function() {
+                                        if ($(this).closest('[data-az-restore]').length == 0)
+                                            $(this).removeClass('editable-highlight');
+                                    });
+                                    $(element.dom_element).find(selector).each(function(){
+                                        if($(this).data('attr-editable')) {
+                                            $(this).data('attr-editable', $(this).data('attr-editable').concat(attrs));
+                                        } else {
+                                            $(this).data('attr-editable', attrs)
+                                        }
+                                        $(this).data('attr-editable', $.unique($(this).data('attr-editable')));
+                                    });
+                                    $(element.dom_element).find(selector).off('click.az-editable').on('click.az-editable', function(e) {
+                                        if ($(this).closest('[data-az-restore]').length == 0) {
+                                            if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                                azexo_elements.edit_stack.push({
+                                                    node: this,
+                                                    edit: false,
+                                                    style: true,
+                                                    attrs: $(this).data('attr-editable'),
+                                                });
+                                                editor_opener();
+                                                return false;
+                                            } else {
+                                                azexo_elements.edit_stack.push({
+                                                    node: this,
+                                                    edit: false,
+                                                    style: true,
+                                                    attrs: $(this).data('attr-editable'),
+                                                });
+                                            }
+                                        }
+                                    });                                        
                                 }
                                 var sort_stack = [];
                                 var sorted_node = null;
