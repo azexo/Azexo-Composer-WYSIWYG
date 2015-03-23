@@ -53,6 +53,7 @@
     }
     $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
         if (options.dataType == 'script' || originalOptions.dataType == 'script') {
+            //options.async = true;
             options.cache = true;
         }
     });
@@ -1939,10 +1940,18 @@
             var containable = [];
             if ('azexo_containable' in window)
                 containable = window.azexo_containable;
-            var icons = BaseParamType.prototype.param_types['icon'].prototype.icons.map(function(item, i, arr) {
-                return item.replace(/^/, '.').replace(/ /, '.')
-            });
-            var icon_selector = icons.join(', ');
+            function get_icons() {
+                var icons = BaseParamType.prototype.param_types['icon'].prototype.icons;
+                if('azexo_icons' in window)
+                    icons = icons.concat(window.azexo_icons);
+                $.unique(icons);
+                BaseParamType.prototype.param_types['icon'].prototype.icons = icons;
+                icons = icons.map(function(item, i, arr) {
+                    return item.replace(/^/, '.').replace(/ /, '.')
+                });  
+                return icons;
+            }
+            var icons = get_icons();
             for (var path in elements) {
                 var name = elements[path].name;
                 var template = elements[path].html;
@@ -2037,6 +2046,7 @@
                         if (window.azexo_editor) {
                             var element = this;
                             BaseElement.prototype.show_controls.apply(this, arguments);
+                            var editor_timeout = null;
                             var editor_opener = function() {
                                 if (azexo_elements.edit_stack.length > 0) {
                                     var args = azexo_elements.edit_stack.shift();
@@ -2048,8 +2058,9 @@
                                         else
                                             $(args.node).css('outline-color', 'rgb(255, 255, 255)');
                                     }, 100);
-                                    setTimeout(function() {
+                                    editor_timeout = setTimeout(function() {
                                         clearInterval(interval);
+                                        editor_timeout = null;
                                         $(args.node).css('outline-color', '');
                                         $(args.node).css('outline-width', '');
                                         $(args.node).css('outline-style', '');
@@ -2077,6 +2088,8 @@
                                     content = $(node).html();
                                 }
                                 if (edit) {
+                                    icons = get_icons();
+                                    var icon_selector = icons.join(', ');
                                     if ($(node).is(icon_selector)) {
                                         for (var i = 0; i < icons.length; i++) {
                                             if ($(node).is(icons[i])) {
@@ -2119,12 +2132,30 @@
                                         }));
                                     }
                                 }
-                                for (var i = 0; i < attrs.length; i++) {
-                                    params.push(make_param_type({
-                                        type: 'textfield',
-                                        heading: attrs[i],
-                                        param_name: 'attr_' + attrs[i],
-                                    }));
+                                for (var name in attrs) {
+                                    if(Object.keys(attrs[name]).length > 0) {
+                                        if(name == 'class') {
+                                            params.push(make_param_type({
+                                                type: 'checkbox',
+                                                heading: name,
+                                                param_name: 'attr_' + name,
+                                                value: attrs[name],
+                                            }));                                                                                    
+                                        } else {
+                                            params.push(make_param_type({
+                                                type: 'dropdown',
+                                                heading: name,
+                                                param_name: 'attr_' + name,
+                                                value: attrs[name],
+                                            }));
+                                        }
+                                    } else {
+                                        params.push(make_param_type({
+                                            type: 'textfield',
+                                            heading: name,
+                                            param_name: 'attr_' + name,
+                                        }));                                                                                
+                                    }
                                 }
                                 if (style) {
                                     params.push(make_param_type({
@@ -2140,7 +2171,7 @@
                                         description: t('Style options.'),
                                         tab: t('Style')
                                     });
-                                    if (edit || attrs.length > 0)
+                                    if (edit || Object.keys(attrs).length > 0)
                                         params.push(param_type);
                                     else
                                         params.unshift(param_type);
@@ -2172,8 +2203,25 @@
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
                                 var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
                                 for (var i = 0; i < attrs.length; i++) {
-                                    attrs_values['attr_' + attrs[i]] = $(node).attr(attrs[i]);
+                                    
                                 }
+                                for (var name in attrs) {
+                                    if(Object.keys(attrs[name]).length > 0) {
+                                        if(name == 'class') {
+                                            var value = [];
+                                            var classes = $(node).attr(name).split(' ');
+                                            for(var c in attrs[name]) {
+                                                if(classes.indexOf(c) >= 0)
+                                                    value.push(c);
+                                            }
+                                            attrs_values['attr_' + name] = value.join(',');
+                                        } else {
+                                            attrs_values['attr_' + name] = $(node).attr(name);
+                                        }
+                                    } else {
+                                        attrs_values['attr_' + name] = $(node).attr(name);
+                                    }
+                                }                                    
                                 BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: attrs_values}, function(values) {
                                     if (edit) {
                                         if (icon != '') {
@@ -2195,9 +2243,23 @@
                                         $(node).attr('class', values['el_class']);
                                         $(node).attr('style', values['style']);
                                     }
-                                    for (var i = 0; i < attrs.length; i++) {
-                                        $(node).attr(attrs[i], values['attr_' + attrs[i]])
-                                    }
+                                    for (var name in attrs) {
+                                        if(Object.keys(attrs[name]).length > 0) {
+                                            if(name == 'class') {
+                                                var classes = values['attr_' + name].split(',');
+                                                for(var c in attrs[name]) {
+                                                    if(classes.indexOf(c) >= 0)
+                                                        $(node).addClass(c);
+                                                    else
+                                                        $(node).removeClass(c);
+                                                }
+                                            } else {
+                                                $(node).attr(name, values['attr_' + name]);
+                                            }
+                                        } else {
+                                            $(node).attr(name, values['attr_' + name]);
+                                        }
+                                    }                                    
                                     element.attrs['content'] = $(element.dom_content_element).html();
                                     element.restore_content();
                                     synchronize();
@@ -2365,7 +2427,7 @@
                                                     node: this,
                                                     edit: false,
                                                     style: true,
-                                                    attrs: [],
+                                                    attrs: {},
                                                 });
                                                 editor_opener();
                                                 return false;
@@ -2374,8 +2436,12 @@
                                                     node: this,
                                                     edit: false,
                                                     style: true,
-                                                    attrs: [],
+                                                    attrs: {},
                                                 });
+                                                setTimeout(function(){
+                                                    if(editor_timeout == null && azexo_elements.edit_stack.length > 0)
+                                                        editor_opener();
+                                                }, 0);
                                             }
                                         }
                                     });
@@ -2396,7 +2462,7 @@
                                                     node: this,
                                                     edit: true,
                                                     style: true,
-                                                    attrs: [],
+                                                    attrs: {},
                                                 });
                                                 editor_opener();
                                                 return false;
@@ -2405,28 +2471,42 @@
                                                     node: this,
                                                     edit: true,
                                                     style: true,
-                                                    attrs: [],
+                                                    attrs: {},
                                                 });
+                                                setTimeout(function(){
+                                                    if(editor_timeout == null && azexo_elements.edit_stack.length > 0)
+                                                        editor_opener();
+                                                }, 0);
                                             }
                                         }
                                     });
                                 }
+                                
+                                function get_attrs_options(str) {
+                                    var options = {};
+                                    var attrs = str.split(',');
+                                    for (var i = 0; i < attrs.length; i++) {
+                                        var name = attrs[i].split(':')[0];
+                                        if (!(name in options))
+                                            options[name] = {};
+                                        if (attrs[i].split(':').length == 2) {
+                                            var values = attrs[i].split(':')[1].split('/');
+                                            for (var j = 0; j < values.length; j++) {
+                                                options[name][values[j].split('=')[0]] = values[j].split('=')[1];
+                                            }
+                                        }
+                                    }
+                                    return options;
+                                }
+                                
                                 var attr_editable_selectors = {};
                                 for (var i = 0; i < element.attr_editable.length; i++) {
                                     var selector = element.attr_editable[i].split('|')[0];
                                     var attr = element.attr_editable[i].split('|')[1];
-                                    if (selector in attr_editable_selectors)
-                                        attr_editable_selectors[selector].push(attr);
-                                    else
-                                        attr_editable_selectors[selector] = [attr];
-                                    $.unique(attr_editable_selectors[selector]);
+                                    attr_editable_selectors[selector] = $.extend({}, attr_editable_selectors[selector], get_attrs_options(attr));
                                 }
-                                $(element.dom_element).find('[data-az-editable]').each(function(){
-                                    if(!('[data-az-editable]' in attr_editable_selectors))
-                                        attr_editable_selectors['[data-az-editable]'] = [];
-                                    attr_editable_selectors['[data-az-editable]'].concat($(this).attr('data-az-editable').split(','));
-                                    $.unique(attr_editable_selectors['[data-az-editable]']);
-                                });                                
+                                if($(element.dom_element).find('[data-az-editable]').length > 0)
+                                    attr_editable_selectors['[data-az-editable]'] = {};
                                 for (var selector in attr_editable_selectors) {
                                     var attrs = attr_editable_selectors[selector];
                                     $(element.dom_element).find(selector).off('mouseenter.az-editable').on('mouseenter.az-editable', function() {
@@ -2438,32 +2518,51 @@
                                             $(this).removeClass('editable-highlight');
                                     });
                                     $(element.dom_element).find(selector).each(function() {
-                                        if ($(this).data('attr-editable')) {
-                                            $(this).data('attr-editable', $(this).data('attr-editable').concat(attrs));
+                                        var attr_editable = attrs;
+                                        if(selector == '[data-az-editable]') {
+                                            attr_editable = get_attrs_options($(this).attr('data-az-editable'));
+                                        }
+                                        if ($(this).data('attr-editable')) {                                            
+                                            $(this).data('attr-editable', $.extend({}, $(this).data('attr-editable'), attr_editable));
                                         } else {
                                             $(this).data('attr-editable', attrs)
                                         }
-                                        $(this).data('attr-editable', $.unique($(this).data('attr-editable')));
                                     });
-                                    $(element.dom_element).find(selector).off('click.az-editable').on('click.az-editable', function(e) {
-                                        if ($(this).closest('[data-az-restore]').length == 0) {
-                                            if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
-                                                azexo_elements.edit_stack.push({
-                                                    node: this,
-                                                    edit: false,
-                                                    style: true,
-                                                    attrs: $(this).data('attr-editable'),
-                                                });
-                                                editor_opener();
-                                                return false;
-                                            } else {
-                                                azexo_elements.edit_stack.push({
-                                                    node: this,
-                                                    edit: false,
-                                                    style: true,
-                                                    attrs: $(this).data('attr-editable'),
-                                                });
-                                            }
+                                    $(element.dom_element).find(selector).each(function(){
+                                        var node = this;
+                                        function on_click(e) {
+                                            if ($(node).closest('[data-az-restore]').length == 0) {
+                                                if ($(node).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
+                                                    azexo_elements.edit_stack.push({
+                                                        node: node,
+                                                        edit: false,
+                                                        style: true,
+                                                        attrs: $(node).data('attr-editable'),
+                                                    });
+                                                    editor_opener();
+                                                    return false;
+                                                } else {
+                                                    azexo_elements.edit_stack.push({
+                                                        node: node,
+                                                        edit: false,
+                                                        style: true,
+                                                        attrs: $(node).data('attr-editable'),
+                                                    });
+                                                    setTimeout(function(){
+                                                        if(editor_timeout == null && azexo_elements.edit_stack.length > 0)
+                                                            editor_opener();
+                                                    }, 0);
+                                                }
+                                            }                                            
+                                        }
+                                        if(node.tagName == 'IFRAME') {
+                                            $(window).off('blur.az-attr-editable').on('blur.az-attr-editable',function() {
+                                                if($(node).hasClass('editable-highlight')) {
+                                                    on_click(null);
+                                                }
+                                            });                                                                                        
+                                        } else {
+                                            $(node).off('click.az-attr-editable').on('click.az-attr-editable', on_click);
                                         }
                                     });
                                 }
@@ -2628,17 +2727,28 @@
             this.try_render_unknown_elements();
             $(function() {
                 if (window.azexo_editor && Object.keys(elements).length > 0 && azexo_containers.length > 0) {
-                    var menu = {'_': []};
+                    var menu = {};
                     for (var path in elements) {
+                        var match = /data-az-tags=\"([^"]+)\"/.exec(elements[path].html);
+                        var tags = [];
+                        if (match) {
+                            tags = match[1].split(',');
+                        } else {
+                            tags = [''];
+                        }                        
                         var folders = path.split('|');
                         folders.pop();
                         var current = menu;
                         for (var i = 0; i < folders.length; i++) {
                             if (!(folders[i] in current))
-                                current[folders[i]] = {'_': []};
+                                current[folders[i]] = {};
                             current = current[folders[i]];
                         }
-                        current['_'].push(elements[path]);
+                        for (var i = 0; i < tags.length; i++) {
+                            if(!(('_' + tags[i]) in current))
+                                current['_' + tags[i]] = [];
+                            current['_' + tags[i]].push(elements[path]);
+                        }                        
                     }
                     var panel = $('<div id="az-template-elements" class="az-left-sidebar azexo"></div>').appendTo('body');
                     var welcome = $('<div id="az-template-elements-welcome" class="azexo">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
@@ -2648,7 +2758,7 @@
                     $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
                     $('<hr>').appendTo(panel);
                     function build_menu(item) {
-                        if (Object.keys(item).length === 1 && ('_' in item))
+                        if(_.isArray(item))
                             return null;
                         var m = $('<ul class="' + p + 'nav az-nav-list"></ul>');
                         for (var name in item) {
@@ -2657,21 +2767,25 @@
                                     $(this).find('> .az-nav-list').css('display', 'block');
                                 });
                                 var it = item[name];
+                                var folder_name = name;
+                                if(folder_name.indexOf('_') == 0) {
+                                    folder_name = folder_name.replace('_', '');
+                                }
                                 (function(it) {
-                                    $('<a href="#">' + name + '</a>').appendTo(li).click(function() {
+                                    $('<a href="#">' + folder_name + '</a>').appendTo(li).click(function() {
                                         var menu_item = this;
                                         $(thumbnails).empty();
                                         $(thumbnails).css('display', 'block');
                                         $(panel).addClass('az-thumbnails');
                                         function get_all_thumbnails(item) {
-                                            for (var name in item) {
-                                                if (name == '_') {
-                                                    for (var i = 0; i < item[name].length; i++) {
-                                                        $('<div class="az-thumbnail" data-az-base="' + item[name][i].name + '" style="background-image: url(' + encodeURI(item[name][i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
-                                                    }
-                                                } else {
-                                                    get_all_thumbnails(item[name]);
+                                            if(_.isArray(item)) {
+                                                for (var i = 0; i < item.length; i++) {
+                                                    $('<div class="az-thumbnail" data-az-base="' + item[i].name + '" style="background-image: url(' + encodeURI(item[i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
                                                 }
+                                            } else {
+                                                for (var name in item) {
+                                                    get_all_thumbnails(item[name]);
+                                                }                                                
                                             }
                                         }
                                         get_all_thumbnails(it);
@@ -9163,9 +9277,9 @@
                     }
                     var subset = v.split('|')[1];
                     var variant = v.split('|')[2];
-                    google_fonts[font].subsets.push(subset);
+                    google_fonts[font].subsets = google_fonts[font].subsets.concat(subset.split(','));
                     $.unique(google_fonts[font].subsets);
-                    google_fonts[font].variants.push(variant);
+                    google_fonts[font].variants = google_fonts[font].variants.concat(variant.split(','));
                     $.unique(google_fonts[font].variants);
                 }
             }
@@ -9200,10 +9314,13 @@
                         var font = v.split('|')[0];
                         var variant = v.split('|')[2];
                         if ('selector' in settings[i]) {
+                            var important = '';
                             if ('important' in settings[i] && settings[i].important)
-                                styles += settings[i].selector + '{font-family: ' + font + ' !important;font-weight: ' + variant + ' !important;}';
-                            else
-                                styles += settings[i].selector + '{font-family: ' + font + ';font-weight: ' + variant + ';}';
+                                important = ' !important';
+                            var weight = ''
+                            if(variant.indexOf(',') < 0)
+                                weight = 'font-weight: ' + variant + important + ';';
+                            styles += settings[i].selector + '{font-family: ' + font + important + '; ' + weight + '}';
                         }
                     }
                 }
@@ -10028,17 +10145,50 @@
                                     }
                                 }
                             }
+                            var enabled_color_groups = [];
+                            if('azexo_colors' in window) {
+                                for (var i = 0; i < window.azexo_colors.length; i++) {
+                                    var rgb = hex2rgb(window.azexo_colors[i]);
+                                    var hsl = rgb2hsl(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+                                    var min = 1;
+                                    var min_j = 0;
+                                    for (var j = 0; j < averages.length; j++) {
+                                        var d = hue_distance(hsl, averages[j]);
+                                        if(min > d) {
+                                            min = d;
+                                            min_j = j;
+                                        }
+                                    }
+                                    enabled_color_groups.push(min_j);
+                                }
+                            }
                             for (var i = 0; i < averages.length; i++) {
-                                var rgb = hsl2rgb(averages[i][0], averages[i][1], averages[i][2]);
-                                var param = {
-                                    type: 'colorpicker',
-                                    heading: t('Color group') + ' ' + i,
-                                    param_name: 'color_group_' + i,
-                                    value: 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')',
-                                    group: groups[i],
-                                    dependency: {'element': 'color_group_' + i, 'not_empty': {}},
-                                };
-                                params.unshift(param);
+                                if(enabled_color_groups.indexOf(i) >= 0 || enabled_color_groups.length == 0) {
+                                    var rgb = hsl2rgb(averages[i][0], averages[i][1], averages[i][2]);                                
+                                    var param = {
+                                        type: 'colorpicker',
+                                        heading: t('Color group') + ' ' + i,
+                                        param_name: 'color_group_' + i,
+                                        value: 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')',
+                                        group: groups[i],
+                                        dependency: {'element': 'color_group_' + i, 'not_empty': {}},
+                                    };
+                                    params.unshift(param);
+                                }
+                            }
+                            if('azexo_fonts_selectors' in window) {
+                                $.unique(window.azexo_fonts_selectors);
+                                for (var i = 0; i < window.azexo_fonts_selectors.length; i++) {                                    
+                                    var param = {
+                                        type: 'google_font',
+                                        heading: t('Font') + ' ' + i,
+                                        description: window.azexo_fonts_selectors[i],
+                                        param_name: 'font_' + i,
+                                        value: "Open Sans|latin|400,700",
+                                        selector: window.azexo_fonts_selectors[i],
+                                    };
+                                    params.unshift(param);                                
+                                }
                             }
 
                             configuration = JSON.stringify(params, null, "\t");

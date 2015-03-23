@@ -1,5 +1,5 @@
 #az-ftp-modal *, 
-#az-editor-modal *:not(.fa):not(.glyphicon):not(.ax-glyphicon):not(.mce-ico), 
+#az-editor-modal *:not(.fa):not(.mce-ico):not([class*="icon"]),
 #az-elements-modal *:not(.fa), 
 #az-admin-modal *, 
 #az-js-animation-modal *, 
@@ -596,6 +596,9 @@ div.modal-dialog, div.ax-modal-dialog {
     padding: 0px;
 }
 
+.ax-modal form {
+    display: block;
+}
 
 .azexo .iris-picker, .azexo .iris-picker * {
     -moz-box-sizing: content-box;

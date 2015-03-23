@@ -243,7 +243,9 @@
             _.defer(function() {
                 $(input).wpColorPicker({
                     change: _.throttle(function() {
-                        $(input).trigger('change');
+                        _.defer(function() {
+                            $(input).trigger('change');
+                        });                                            
                     }, 1000)
                 });
             });
@@ -265,7 +267,9 @@
                                 _.defer(function() {
                                     $(input).wpColorPicker({
                                         change: _.throttle(function() {
-                                            $(input).trigger('change');
+                                            _.defer(function() {
+                                                $(input).trigger('change');
+                                            });                                            
                                         }, 1000)
                                     });
                                 });
@@ -990,10 +994,10 @@
                     }
 
                     $(subset_select).parent().find('.direct-input').click();
-                    subset_select = chosen_select(subsets, $(element.dom_element).find('input[name="' + element.param_name + '_subset"]'));
+                    subset_select = multiple_chosen_select(subsets, $(element.dom_element).find('input[name="' + element.param_name + '_subset"]'), ',');
 
                     $(variant_select).parent().find('.direct-input').click();
-                    variant_select = chosen_select(variants, $(element.dom_element).find('input[name="' + element.param_name + '_variant"]'));
+                    variant_select = multiple_chosen_select(variants, $(element.dom_element).find('input[name="' + element.param_name + '_variant"]'), ',');
                 });
                 $(font_select).chosen().trigger('change');
             },
