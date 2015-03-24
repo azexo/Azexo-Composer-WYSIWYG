@@ -515,7 +515,6 @@
                         name: name,
                         values: values,
                     },
-                    dataType: "json",
                     cache: false,
                     context: this
                 }).done(function(data) {
@@ -530,7 +529,6 @@
                         name: name,
                         values: values,
                     },
-                    dataType: "json",
                     cache: false,
                     context: this
                 }).done(function(data) {
