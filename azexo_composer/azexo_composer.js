@@ -1940,13 +1940,13 @@
                 containable = window.azexo_containable;
             function get_icons() {
                 var icons = BaseParamType.prototype.param_types['icon'].prototype.icons;
-                if('azexo_icons' in window)
+                if ('azexo_icons' in window)
                     icons = icons.concat(window.azexo_icons);
                 $.unique(icons);
                 BaseParamType.prototype.param_types['icon'].prototype.icons = icons;
                 icons = icons.map(function(item, i, arr) {
                     return item.replace(/^/, '.').replace(/ /, '.')
-                });  
+                });
                 return icons;
             }
             var icons = get_icons();
@@ -2044,36 +2044,68 @@
                         if (window.azexo_editor) {
                             var element = this;
                             BaseElement.prototype.show_controls.apply(this, arguments);
-                            var editor_timeout = null;
-                            var editor_opener = function() {
+                            function edit_stack_push(args) {
                                 if (azexo_elements.edit_stack.length > 0) {
-                                    var args = azexo_elements.edit_stack.shift();
-                                    $(args.node).css('outline-width', '2px');
-                                    $(args.node).css('outline-style', 'dashed');
-                                    var interval = setInterval(function() {
-                                        if ($(args.node).css('outline-color') != 'rgb(255, 0, 0)')
-                                            $(args.node).css('outline-color', 'rgb(255, 0, 0)');
+                                    var l = azexo_elements.edit_stack.length - 1;
+                                    var s1 = $(args.node).width() * $(args.node).height();
+                                    var s2 = $(azexo_elements.edit_stack[l].node).width() * $(azexo_elements.edit_stack[l].node).height();
+                                    if (s1 / s2 < 2) {
+                                        azexo_elements.edit_stack.push(args);
+                                    }
+                                } else {
+                                    azexo_elements.edit_stack.push(args);
+                                }
+                            }
+                            var editor_timeout = null;
+                            function editor_animation(args) {
+                                $(args.node).css('outline-width', '2px');
+                                $(args.node).css('outline-style', 'dashed');
+                                var interval = setInterval(function() {
+                                    if ($(args.node).css('outline-color') != 'rgb(255, 0, 0)')
+                                        $(args.node).css('outline-color', 'rgb(255, 0, 0)');
+                                    else
+                                        $(args.node).css('outline-color', 'rgb(255, 255, 255)');
+                                }, 100);
+                                editor_timeout = setTimeout(function() {
+                                    clearInterval(interval);
+                                    editor_timeout = null;
+                                    $(args.node).css('outline-color', '');
+                                    $(args.node).css('outline-width', '');
+                                    $(args.node).css('outline-style', '');
+                                    open_editor(args.node, args.edit, args.style, args.attrs, function() {
+                                        editor_opener();
+                                    });
+                                }, 500);
+                            }
+                            var editor_opener = function(e) {
+                                $('.az-edit-select').remove();
+                                if (azexo_elements.edit_stack.length > 1) {
+                                    var select = $('<div class="az-edit-select ' + p + 'btn-group-vertical"></div>').appendTo('body');
+                                    for (var i = 0; i < azexo_elements.edit_stack.length; i++) {
+                                        var args = azexo_elements.edit_stack[i];
+                                        var title = '';
+                                        if (args.edit)
+                                            title = 'Edit';
+                                        else if (Object.keys(args.attrs).length == 0)
+                                            title = 'Style';
                                         else
-                                            $(args.node).css('outline-color', 'rgb(255, 255, 255)');
-                                    }, 100);
-                                    editor_timeout = setTimeout(function() {
-                                        clearInterval(interval);
-                                        editor_timeout = null;
-                                        $(args.node).css('outline-color', '');
-                                        $(args.node).css('outline-width', '');
-                                        $(args.node).css('outline-style', '');
-                                        open_editor(args.node, args.edit, args.style, args.attrs, function() {
-                                            if (azexo_elements.edit_stack.length > 0) {
-                                                var s1 = $(args.node).width() * $(args.node).height();
-                                                var s2 = $(azexo_elements.edit_stack[0].node).width() * $(azexo_elements.edit_stack[0].node).height();
-                                                if (s2 / s1 < 2) {
-                                                    editor_opener();
-                                                } else {
-                                                    azexo_elements.edit_stack = [];
-                                                }
-                                            }
-                                        });
-                                    }, 500);
+                                            title = 'Settings';  
+                                        (function(args){
+                                            $('<button title="' + t(title) + '" class="select ' + p + 'btn ' + p + 'btn-default">' + t(title) + '</button>').appendTo(select).click(function(e) {
+                                                $(select).remove();
+                                                editor_animation(args);
+                                                return false;
+                                            });                                            
+                                        })(args);
+                                    }
+                                    $(select).css('left', e.clientX + 'px');
+                                    $(select).css('top', e.clientY + 'px');
+                                    azexo_elements.edit_stack = [];
+                                } else {
+                                    if (azexo_elements.edit_stack.length == 1) {
+                                        var args = azexo_elements.edit_stack.shift();
+                                        editor_animation(args);
+                                    }
                                 }
                             }
                             function open_editor(node, edit, style, attrs, callback) {
@@ -2131,14 +2163,14 @@
                                     }
                                 }
                                 for (var name in attrs) {
-                                    if(Object.keys(attrs[name]).length > 0) {
-                                        if(name == 'class') {
+                                    if (Object.keys(attrs[name]).length > 0) {
+                                        if (name == 'class') {
                                             params.push(make_param_type({
                                                 type: 'checkbox',
                                                 heading: name,
                                                 param_name: 'attr_' + name,
                                                 value: attrs[name],
-                                            }));                                                                                    
+                                            }));
                                         } else {
                                             params.push(make_param_type({
                                                 type: 'dropdown',
@@ -2152,7 +2184,7 @@
                                             type: 'textfield',
                                             heading: name,
                                             param_name: 'attr_' + name,
-                                        }));                                                                                
+                                        }));
                                     }
                                 }
                                 if (style) {
@@ -2201,15 +2233,15 @@
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
                                 var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
                                 for (var i = 0; i < attrs.length; i++) {
-                                    
+
                                 }
                                 for (var name in attrs) {
-                                    if(Object.keys(attrs[name]).length > 0) {
-                                        if(name == 'class') {
+                                    if (Object.keys(attrs[name]).length > 0) {
+                                        if (name == 'class') {
                                             var value = [];
                                             var classes = $(node).attr(name).split(' ');
-                                            for(var c in attrs[name]) {
-                                                if(classes.indexOf(c) >= 0)
+                                            for (var c in attrs[name]) {
+                                                if (classes.indexOf(c) >= 0)
                                                     value.push(c);
                                             }
                                             attrs_values['attr_' + name] = value.join(',');
@@ -2219,7 +2251,7 @@
                                     } else {
                                         attrs_values['attr_' + name] = $(node).attr(name);
                                     }
-                                }                                    
+                                }
                                 BaseParamType.prototype.show_editor(params, {name: t('Content'), attrs: attrs_values}, function(values) {
                                     if (edit) {
                                         if (icon != '') {
@@ -2242,11 +2274,11 @@
                                         $(node).attr('style', values['style']);
                                     }
                                     for (var name in attrs) {
-                                        if(Object.keys(attrs[name]).length > 0) {
-                                            if(name == 'class') {
+                                        if (Object.keys(attrs[name]).length > 0) {
+                                            if (name == 'class') {
                                                 var classes = values['attr_' + name].split(',');
-                                                for(var c in attrs[name]) {
-                                                    if(classes.indexOf(c) >= 0)
+                                                for (var c in attrs[name]) {
+                                                    if (classes.indexOf(c) >= 0)
                                                         $(node).addClass(c);
                                                     else
                                                         $(node).removeClass(c);
@@ -2257,7 +2289,7 @@
                                         } else {
                                             $(node).attr(name, values['attr_' + name]);
                                         }
-                                    }                                    
+                                    }
                                     element.attrs['content'] = $(element.dom_content_element).html();
                                     element.restore_content();
                                     synchronize();
@@ -2421,24 +2453,24 @@
                                     $(element.dom_element).find(element.styleable[i]).off('click.az-styleable').on('click.az-styleable', function(e) {
                                         if ($(this).closest('[data-az-restore]').length == 0) {
                                             if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
-                                                azexo_elements.edit_stack.push({
+                                                edit_stack_push({
                                                     node: this,
                                                     edit: false,
                                                     style: true,
                                                     attrs: {},
                                                 });
-                                                editor_opener();
+                                                editor_opener(e);
                                                 return false;
                                             } else {
-                                                azexo_elements.edit_stack.push({
+                                                edit_stack_push({
                                                     node: this,
                                                     edit: false,
                                                     style: true,
                                                     attrs: {},
                                                 });
-                                                setTimeout(function(){
-                                                    if(editor_timeout == null && azexo_elements.edit_stack.length > 0)
-                                                        editor_opener();
+                                                setTimeout(function() {
+                                                    if (editor_timeout == null && azexo_elements.edit_stack.length > 0)
+                                                        editor_opener(e);
                                                 }, 0);
                                             }
                                         }
@@ -2456,30 +2488,30 @@
                                     $(element.dom_element).find(element.editable[i]).off('click.az-editable').on('click.az-editable', function(e) {
                                         if ($(this).closest('[data-az-restore]').length == 0) {
                                             if ($(this).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
-                                                azexo_elements.edit_stack.push({
+                                                edit_stack_push({
                                                     node: this,
                                                     edit: true,
                                                     style: true,
                                                     attrs: {},
                                                 });
-                                                editor_opener();
+                                                editor_opener(e);
                                                 return false;
                                             } else {
-                                                azexo_elements.edit_stack.push({
+                                                edit_stack_push({
                                                     node: this,
                                                     edit: true,
                                                     style: true,
                                                     attrs: {},
                                                 });
-                                                setTimeout(function(){
-                                                    if(editor_timeout == null && azexo_elements.edit_stack.length > 0)
-                                                        editor_opener();
+                                                setTimeout(function() {
+                                                    if (editor_timeout == null && azexo_elements.edit_stack.length > 0)
+                                                        editor_opener(e);
                                                 }, 0);
                                             }
                                         }
                                     });
                                 }
-                                
+
                                 function get_attrs_options(str) {
                                     var options = {};
                                     var attrs = str.split(',');
@@ -2496,14 +2528,14 @@
                                     }
                                     return options;
                                 }
-                                
+
                                 var attr_editable_selectors = {};
                                 for (var i = 0; i < element.attr_editable.length; i++) {
                                     var selector = element.attr_editable[i].split('|')[0];
                                     var attr = element.attr_editable[i].split('|')[1];
                                     attr_editable_selectors[selector] = $.extend({}, attr_editable_selectors[selector], get_attrs_options(attr));
                                 }
-                                if($(element.dom_element).find('[data-az-editable]').length > 0)
+                                if ($(element.dom_element).find('[data-az-editable]').length > 0)
                                     attr_editable_selectors['[data-az-editable]'] = {};
                                 for (var selector in attr_editable_selectors) {
                                     var attrs = attr_editable_selectors[selector];
@@ -2517,48 +2549,48 @@
                                     });
                                     $(element.dom_element).find(selector).each(function() {
                                         var attr_editable = attrs;
-                                        if(selector == '[data-az-editable]') {
+                                        if (selector == '[data-az-editable]') {
                                             attr_editable = get_attrs_options($(this).attr('data-az-editable'));
                                         }
-                                        if ($(this).data('attr-editable')) {                                            
+                                        if ($(this).data('attr-editable')) {
                                             $(this).data('attr-editable', $.extend({}, $(this).data('attr-editable'), attr_editable));
                                         } else {
                                             $(this).data('attr-editable', attrs)
                                         }
                                     });
-                                    $(element.dom_element).find(selector).each(function(){
+                                    $(element.dom_element).find(selector).each(function() {
                                         var node = this;
                                         function on_click(e) {
                                             if ($(node).closest('[data-az-restore]').length == 0) {
                                                 if ($(node).parent().closest('.styleable-highlight, .editable-highlight').length == 0) {
-                                                    azexo_elements.edit_stack.push({
+                                                    edit_stack_push({
                                                         node: node,
                                                         edit: false,
-                                                        style: true,
+                                                        style: false,
                                                         attrs: $(node).data('attr-editable'),
                                                     });
-                                                    editor_opener();
+                                                    editor_opener(e);
                                                     return false;
                                                 } else {
-                                                    azexo_elements.edit_stack.push({
+                                                    edit_stack_push({
                                                         node: node,
                                                         edit: false,
-                                                        style: true,
+                                                        style: false,
                                                         attrs: $(node).data('attr-editable'),
                                                     });
-                                                    setTimeout(function(){
-                                                        if(editor_timeout == null && azexo_elements.edit_stack.length > 0)
-                                                            editor_opener();
+                                                    setTimeout(function() {
+                                                        if (editor_timeout == null && azexo_elements.edit_stack.length > 0)
+                                                            editor_opener(e);
                                                     }, 0);
                                                 }
-                                            }                                            
+                                            }
                                         }
-                                        if(node.tagName == 'IFRAME') {
-                                            $(window).off('blur.az-attr-editable').on('blur.az-attr-editable',function() {
-                                                if($(node).hasClass('editable-highlight')) {
+                                        if (node.tagName == 'IFRAME') {
+                                            $(window).off('blur.az-attr-editable').on('blur.az-attr-editable', function() {
+                                                if ($(node).hasClass('editable-highlight')) {
                                                     on_click(null);
                                                 }
-                                            });                                                                                        
+                                            });
                                         } else {
                                             $(node).off('click.az-attr-editable').on('click.az-attr-editable', on_click);
                                         }
@@ -2733,7 +2765,7 @@
                             tags = match[1].split(',');
                         } else {
                             tags = [''];
-                        }                        
+                        }
                         var folders = path.split('|');
                         folders.pop();
                         var current = menu;
@@ -2743,10 +2775,10 @@
                             current = current[folders[i]];
                         }
                         for (var i = 0; i < tags.length; i++) {
-                            if(!(('_' + tags[i]) in current))
+                            if (!(('_' + tags[i]) in current))
                                 current['_' + tags[i]] = [];
                             current['_' + tags[i]].push(elements[path]);
-                        }                        
+                        }
                     }
                     var panel = $('<div id="az-template-elements" class="az-left-sidebar azexo"></div>').appendTo('body');
                     var welcome = $('<div id="az-template-elements-welcome" class="azexo">' + t('For adding elements: click on plus-buttons or drag and drop elements from left panel.') + '</div>').appendTo(panel);
@@ -2756,7 +2788,7 @@
                     $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
                     $('<hr>').appendTo(panel);
                     function build_menu(item) {
-                        if(_.isArray(item))
+                        if (_.isArray(item))
                             return null;
                         var m = $('<ul class="' + p + 'nav az-nav-list"></ul>');
                         for (var name in item) {
@@ -2766,7 +2798,7 @@
                                 });
                                 var it = item[name];
                                 var folder_name = name;
-                                if(folder_name.indexOf('_') == 0) {
+                                if (folder_name.indexOf('_') == 0) {
                                     folder_name = folder_name.replace('_', '');
                                 }
                                 (function(it) {
@@ -2776,14 +2808,14 @@
                                         $(thumbnails).css('display', 'block');
                                         $(panel).addClass('az-thumbnails');
                                         function get_all_thumbnails(item) {
-                                            if(_.isArray(item)) {
+                                            if (_.isArray(item)) {
                                                 for (var i = 0; i < item.length; i++) {
                                                     $('<div class="az-thumbnail" data-az-base="' + item[i].name + '" style="background-image: url(' + encodeURI(item[i].thumbnail) + '); background-position: center center; background-size: cover;"></div>').appendTo(thumbnails);
                                                 }
                                             } else {
                                                 for (var name in item) {
                                                     get_all_thumbnails(item[name]);
-                                                }                                                
+                                                }
                                             }
                                         }
                                         get_all_thumbnails(it);
@@ -9316,7 +9348,7 @@
                             if ('important' in settings[i] && settings[i].important)
                                 important = ' !important';
                             var weight = ''
-                            if(variant.indexOf(',') < 0)
+                            if (variant.indexOf(',') < 0)
                                 weight = 'font-weight: ' + variant + important + ';';
                             styles += settings[i].selector + '{font-family: ' + font + important + '; ' + weight + '}';
                         }
@@ -10144,7 +10176,7 @@
                                 }
                             }
                             var enabled_color_groups = [];
-                            if('azexo_colors' in window) {
+                            if ('azexo_colors' in window) {
                                 for (var i = 0; i < window.azexo_colors.length; i++) {
                                     var rgb = hex2rgb(window.azexo_colors[i]);
                                     var hsl = rgb2hsl(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
@@ -10152,7 +10184,7 @@
                                     var min_j = 0;
                                     for (var j = 0; j < averages.length; j++) {
                                         var d = hue_distance(hsl, averages[j]);
-                                        if(min > d) {
+                                        if (min > d) {
                                             min = d;
                                             min_j = j;
                                         }
@@ -10161,8 +10193,8 @@
                                 }
                             }
                             for (var i = 0; i < averages.length; i++) {
-                                if(enabled_color_groups.indexOf(i) >= 0 || enabled_color_groups.length == 0) {
-                                    var rgb = hsl2rgb(averages[i][0], averages[i][1], averages[i][2]);                                
+                                if (enabled_color_groups.indexOf(i) >= 0 || enabled_color_groups.length == 0) {
+                                    var rgb = hsl2rgb(averages[i][0], averages[i][1], averages[i][2]);
                                     var param = {
                                         type: 'colorpicker',
                                         heading: t('Color group') + ' ' + i,
@@ -10174,9 +10206,9 @@
                                     params.unshift(param);
                                 }
                             }
-                            if('azexo_fonts_selectors' in window) {
+                            if ('azexo_fonts_selectors' in window) {
                                 $.unique(window.azexo_fonts_selectors);
-                                for (var i = 0; i < window.azexo_fonts_selectors.length; i++) {                                    
+                                for (var i = 0; i < window.azexo_fonts_selectors.length; i++) {
                                     var param = {
                                         type: 'google_font',
                                         heading: t('Font') + ' ' + i,
@@ -10185,7 +10217,7 @@
                                         value: "Open Sans|latin|400,700",
                                         selector: window.azexo_fonts_selectors[i],
                                     };
-                                    params.unshift(param);                                
+                                    params.unshift(param);
                                 }
                             }
 

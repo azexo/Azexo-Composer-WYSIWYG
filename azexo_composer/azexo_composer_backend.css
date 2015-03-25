@@ -862,3 +862,8 @@ ul.az-browser li::before {
     margin-bottom: 2px;
     font-size: 10px;    
 }
+
+.az-edit-select {
+    position: fixed;
+    z-index: 100;
+}
