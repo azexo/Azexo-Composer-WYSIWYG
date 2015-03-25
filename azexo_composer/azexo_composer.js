@@ -2089,13 +2089,13 @@
                                         else if (Object.keys(args.attrs).length == 0)
                                             title = 'Style';
                                         else
-                                            title = 'Settings';  
-                                        (function(args){
+                                            title = 'Settings';
+                                        (function(args) {
                                             $('<button title="' + t(title) + '" class="select ' + p + 'btn ' + p + 'btn-default">' + t(title) + '</button>').appendTo(select).click(function(e) {
                                                 $(select).remove();
                                                 editor_animation(args);
                                                 return false;
-                                            });                                            
+                                            });
                                         })(args);
                                     }
                                     $(select).css('left', e.clientX + 'px');
@@ -2785,6 +2785,65 @@
                     $(panel).hover(function() {
                         $(welcome).remove();
                     });
+                    var root_sections = $('<ul class="az-root-sections"></ul>').appendTo(panel);
+                    function update_root_sections() {
+                        $(root_sections).empty();
+                        if (azexo_containers.length == 1) {
+                            for(var i=0; i<azexo_containers[0].children.length; i++) {
+                                var el = azexo_containers[0].children[i];
+                                $('<li class="' + p + 'glyphicon ' + p + 'glyphicon-move" data-section-id="' + el.id + '">' + el.base + '</li>').appendTo(root_sections).click(function(e){
+                                    var id = $(this).attr('data-section-id');
+                                    var el = azexo_elements.get_element(id);
+                                    el.remove();
+                                    update_root_sections();
+                                    return false;
+                                });
+                            }
+                            $(root_sections).sortable({
+                                items: 'li',
+                                placeholder: 'az-sortable-placeholder',
+                                forcePlaceholderSize: true,
+                                update: function(event, ui) {
+                                    var id = $(ui.item).attr('data-section-id');
+                                    var el = azexo_elements.get_element(id);
+                                    $(el.dom_element).detach();
+                                    if($(ui.item).prev().length > 0) {
+                                        var prev_id = $(ui.item).prev().attr('data-section-id');
+                                        $(azexo_containers[0].dom_content_element).find('[data-az-id="' + prev_id + '"]').after(el.dom_element);                                        
+                                    } else {                                        
+                                        var next_id = $(ui.item).next().attr('data-section-id');
+                                        $(azexo_containers[0].dom_content_element).find('[data-az-id="' + next_id + '"]').before(el.dom_element);                                        
+                                    }
+                                    azexo_containers[0].update_sorting_children();                                    
+                                },
+                                over: function(event, ui) {
+                                    ui.placeholder.attr('class', ui.helper.attr('class'));
+                                    ui.placeholder.removeClass('ui-sortable-helper');
+                                    ui.placeholder.addClass('az-sortable-placeholder');
+                                }
+                            });                            
+                        }
+                    }
+                    $(document).on("azexo_add_element", function(sender, data) {
+                        var el = azexo_elements.get_element(data.id);
+                        if (el.parent != null && el.parent.parent == null) {
+                            update_root_sections();
+                        }
+                    });
+                    $(document).on("azexo_update_sorting", function(sender, ui) {
+                        var id = $(ui.item).closest('[data-az-id]').attr('data-az-id');
+                        var el = azexo_elements.get_element(id);
+                        if (el.parent != null && el.parent.parent == null) {
+                            update_root_sections();
+                        }
+                    });
+                    $(document).on("azexo_delete_element", function(sender, id) {
+                        $(root_sections).find('li[data-section-id="' + id + '"]').remove();
+                    });
+                    $(document).on("azexo_containers_update", function(sender, data) {
+                        update_root_sections();
+                    });                    
+                    $('<hr>').appendTo(panel);
                     $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
                     $('<hr>').appendTo(panel);
                     function build_menu(item) {
@@ -2829,6 +2888,13 @@
                                         });
                                         var dnd = false;
                                         var scrollTop = 0;
+                                        $(thumbnails).find('.az-thumbnail').click(function(e) {
+                                            if (azexo_containers.length == 1) {
+                                                var element = azexo_elements.create_element(azexo_containers[0], $(this).attr('data-az-base'), true, function() {
+                                                });
+                                            }
+                                            return false;
+                                        });
                                         $(thumbnails).sortable({
                                             items: '.az-thumbnail',
                                             connectWith: '.az-ctnr',
@@ -8694,6 +8760,7 @@
                         }
                     }
                     azexo_elements.try_render_unknown_elements();
+                    $(document).trigger('azexo_containers_update');
                 });
             }
         },
@@ -9333,10 +9400,21 @@
                             important = ' !important';
                         if (_.isArray(settings[i].property)) {
                             for (var j = 0; j < settings[i].property.length; j++) {
-                                styles += settings[i].selector + '{' + settings[i].property[j] + ': ' + v + important + ';}';
+                                var property = settings[i].property[j];
+                                var imp = important;
+                                if(property.indexOf('!important') >= 0) {
+                                    property = property.replace('!important', '');
+                                    imp = ' !important';                                
+                                }
+                                styles += settings[i].selector + '{' + property + ': ' + v + imp + ';}';
                             }
                         } else {
-                            styles += settings[i].selector + '{' + settings[i].property + ': ' + v + important + ';}';
+                            var property = settings[i].property;
+                            if(property.indexOf('!important') >= 0) {
+                                property = property.replace('!important', '');
+                                important = ' !important';                                
+                            }
+                            styles += settings[i].selector + '{' + property + ': ' + v + important + ';}';
                         }
                     }
                 } else {
@@ -9465,6 +9543,7 @@
                 }
                 $(name_input).val(name);
                 $(title_input).val(site_pages[name].title);
+                $(document).trigger('azexo_containers_update');
             }
             function create_container(type_name) {
                 var container = new ContainerElement(null, false);
@@ -9923,10 +10002,14 @@
                                                     var property = cssRule.style[name];
                                                     if (properties.indexOf(property) >= 0) {
                                                         var color = cssRule.style.getPropertyValue(cssRule.style[name]);
+                                                        var priority = cssRule.style.getPropertyPriority(cssRule.style[name]);
+                                                        if(priority != '') {
+                                                            property = property + '!' + priority;
+                                                        }
                                                         var rgb = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
                                                         if (rgb != null) {
                                                             var hsl = rgb2hsl(rgb[1], rgb[2], rgb[3]);
-                                                            if (hsl[1] > saturation_min) {
+                                                            if (hsl[1] >= saturation_min) {
                                                                 if (!(color in color_map)) {
                                                                     color_map[color] = {};
                                                                 }
@@ -9971,7 +10054,7 @@
                                         param_name: 'color' + i,
                                         value: color,
                                         selector: selectors,
-                                        property: selectors_map[selectors]
+                                        property: selectors_map[selectors],
                                     };
                                     params.push(param);
                                     i++;
