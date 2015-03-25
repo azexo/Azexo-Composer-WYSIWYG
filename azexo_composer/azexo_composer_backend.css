@@ -867,3 +867,15 @@ ul.az-browser li::before {
     position: fixed;
     z-index: 100;
 }
+
+ul.az-root-sections {
+    padding-left: 0;
+}    
+
+ul.az-root-sections li {
+    cursor: move;
+    display: block;
+}
+ul.az-root-sections li::before {
+    margin-right: 5px;
+}
