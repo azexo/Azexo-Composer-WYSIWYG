@@ -464,6 +464,7 @@ div.controls > .control {
     width: 5%;
     font-size: 2em;
     cursor: pointer;
+    display: inline-block;
 }
 #az-editor-tabs .icons .ui-selected {
     color: green; 
