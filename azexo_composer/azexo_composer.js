@@ -2791,7 +2791,7 @@
                         if (azexo_containers.length == 1) {
                             for(var i=0; i<azexo_containers[0].children.length; i++) {
                                 var el = azexo_containers[0].children[i];
-                                $('<li class="' + p + 'glyphicon ' + p + 'glyphicon-move" data-section-id="' + el.id + '">' + el.base + '</li>').appendTo(root_sections).click(function(e){
+                                $('<li class="' + p + 'glyphicon ' + p + 'glyphicon-move" data-section-id="' + el.id + '">' + el.base + '(' + el.id + ')' + '</li>').appendTo(root_sections).click(function(e){
                                     var id = $(this).attr('data-section-id');
                                     var el = azexo_elements.get_element(id);
                                     el.remove();
@@ -8653,7 +8653,7 @@
             }
             var javascript = '';
             if (check_dinamic(element) || 'an_start' in attributes || 'an_scenes' in attributes) {
-                javascript = "<script type=\"text/javascript\">\n//<![CDATA[\n" + get_javascript() + "//]]>\n</script>\n";
+                javascript = '<script type="text/javascript">//<![CDATA[' + get_javascript() + '//]]></script>';
             }
             return javascript;
         },
@@ -9380,7 +9380,7 @@
                     $.unique(google_fonts[font].variants);
                 }
             }
-            var styles = '<style>';
+            var styles = '<style class="az-theme-styles">';
             for (var font in google_fonts) {
                 var url = encodeURI('http://fonts.googleapis.com/css?family=' + font + ':' + google_fonts[font].variants.join(',') + '&subset=' + google_fonts[font].subsets.join(','));
                 styles += '@import url(' + url + ');';

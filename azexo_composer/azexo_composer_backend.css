@@ -754,11 +754,13 @@ div.modal-dialog, div.ax-modal-dialog {
     display: block;
 }
 
-
 #az-template-elements {
     width: 200px;
     left: -200px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
+
 #az-template-elements:hover {
     left: 0px;
 }
