@@ -9428,7 +9428,7 @@
                             var weight = ''
                             if (variant.indexOf(',') < 0)
                                 weight = 'font-weight: ' + variant + important + ';';
-                            styles += settings[i].selector + '{font-family: ' + font + important + '; ' + weight + '}';
+                            styles += settings[i].selector + '{font-family: "' + font + '" ' + important + '; ' + weight + '}';
                         }
                     }
                 }
@@ -9441,6 +9441,14 @@
             $(theme_styles).appendTo('body');
             $(theme_styles).empty();
             $(theme_styles).append(make_theme_styles(site_settings.theme));
+        }
+        function extract_elements(dom, selector, attribute) {
+            var data = {};
+            $(dom).find(selector).each(function(){
+                data[$(this).attr(attribute)] = true;
+                $(this).remove();
+            });
+            return data;
         }
         function get_page_html(containers, loader, title) {
             var js = {};
@@ -9467,24 +9475,22 @@
             $.each(original_body_attributes, function() {
                 attributes = attributes + this.name + '"' + this.value + '" ';
             });
+            css = $.extend(css, extract_elements(dom, '.az-container link[href]', 'href'));
+            js = $.extend(js, extract_elements(dom, '.az-container script[src]', 'src'));
             make_absolute_urls(dom);
             $(dom).find('.azexo-backend').remove();
             $(dom).find('.azexo-editor').removeClass('azexo-editor');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
 
-
-            if ('azexo_export_filter' in window) {
-                window.azexo_export_filter(dom);
-            }
+            $(document).trigger('azexo_export_filter', {dom: dom});
 
             $(dom).append(make_theme_styles(site_settings.theme));
             var page_body = '<body ' + attributes + '>' + $(dom).html() + '</body>';
 
             var dom = $('<div>' + original_head + '</div>');
             $(dom).find('.azexo-backend').remove();
-            if ('azexo_export_filter' in window) {
-                window.azexo_export_filter(dom);
-            }
+            
+            $(document).trigger('azexo_export_filter', {dom: dom});
 
             $(dom).find('title').text(title);
             make_absolute_urls(dom);
@@ -9988,7 +9994,7 @@
                     callback: function() {
                         var configuration = JSON.stringify(site_settings.theme, null, "\t");
                         function get_colors_map() {
-                            var saturation_min = 0;
+                            var saturation_min = 0.05;
                             var properties = ['color', 'background-color', 'border-left-color', 'border-right-color', 'border-top-color', 'border-bottom-color', 'outline-color'];
                             var color_map = {};
                             for (var i = 0; i < document.styleSheets.length; i++) {
@@ -9996,7 +10002,7 @@
                                 if ('href' in styleSheet && styleSheet.href != null && styleSheet.href.indexOf('azexo_elements') >= 0) {
                                     for (var j = 0; j < styleSheet.cssRules.length; j++) {
                                         var cssRule = styleSheet.cssRules[j];
-                                        if (cssRule instanceof CSSStyleRule) {
+                                        if (cssRule instanceof CSSStyleRule && cssRule.selectorText != '::selection' && cssRule.selectorText != '::-moz-selection') {
                                             for (var name in cssRule.style) {
                                                 if ($.isNumeric(name)) {
                                                     var property = cssRule.style[name];
