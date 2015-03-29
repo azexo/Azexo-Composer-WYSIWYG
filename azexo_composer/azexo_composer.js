@@ -10045,6 +10045,7 @@
                                     for (var j = 0; j < colors_map[color][property].length; j++) {
                                         selectors.push(colors_map[color][property][j]);
                                     }
+                                    $.unique(selectors);
                                     selectors = selectors.join(', ');
                                     if (!(selectors in selectors_map)) {
                                         selectors_map[selectors] = [];
