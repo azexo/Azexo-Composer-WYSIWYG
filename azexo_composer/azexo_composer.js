@@ -2846,6 +2846,8 @@
                     $('<hr>').appendTo(panel);
                     $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
                     $('<hr>').appendTo(panel);
+                    if(Object.keys(menu).length == 1)
+                        menu = menu[Object.keys(menu)[0]];
                     function build_menu(item) {
                         if (_.isArray(item))
                             return null;
