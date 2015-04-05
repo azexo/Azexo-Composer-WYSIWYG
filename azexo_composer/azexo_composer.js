@@ -8658,6 +8658,15 @@
             return javascript;
         },
         get_html: function() {
+            function extract_nodes(dom, selector, attribute) {
+                var data = {};
+                $(dom).find(selector).each(function(){
+                    data[$(this).attr(attribute)] = true;
+                    $(this).remove();
+                });
+                return data;
+            }
+            
             this.recursive_update_data();
             this.recursive_clear_animation();
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
@@ -8666,7 +8675,8 @@
             $(dom).find('> .controls').remove();
             $(dom).find('.az-sortable-controls').remove();
             $(dom).find('.az-step-controls').remove();
-            $(dom).find('.az-empty').remove();
+            $(dom).find('.az-empty').remove();            
+            $(dom).find('.ui-resizable-e').remove();
             $(dom).find('.ui-resizable-e').remove();
             $(dom).find('.ui-resizable-s').remove();
             $(dom).find('.ui-resizable-se').remove();
@@ -8676,10 +8686,15 @@
             $(dom).find('.ui-draggable').removeClass('ui-draggable');
             $(dom).find('.ui-resizable').removeClass('ui-resizable');
             $(dom).find('.ui-sortable').removeClass('ui-sortable');
+            $(dom).find('.ui-sortable-handle').removeClass('ui-sortable-handle');
             $(dom).find('.az-element.az-container > .az-ctnr').empty();
             $(dom).find('.az-element.az-cms-element').empty();
             $(dom).find('.g-recaptcha').empty();
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
+            
+            this.css = $.extend(this.css, extract_nodes(dom, '.az-container link[href]', 'href'));
+            this.js = $.extend(this.js, extract_nodes(dom, '.az-container script[src]', 'src'));
+            
             return $(dom).html();
         },
         get_container_html: function() {
@@ -9442,14 +9457,6 @@
             $(theme_styles).empty();
             $(theme_styles).append(make_theme_styles(site_settings.theme));
         }
-        function extract_elements(dom, selector, attribute) {
-            var data = {};
-            $(dom).find(selector).each(function(){
-                data[$(this).attr(attribute)] = true;
-                $(this).remove();
-            });
-            return data;
-        }
         function get_page_html(containers, loader, title) {
             var js = {};
             var css = {};
@@ -9475,8 +9482,6 @@
             $.each(original_body_attributes, function() {
                 attributes = attributes + this.name + '"' + this.value + '" ';
             });
-            css = $.extend(css, extract_elements(dom, '.az-container link[href]', 'href'));
-            js = $.extend(js, extract_elements(dom, '.az-container script[src]', 'src'));
             make_absolute_urls(dom);
             $(dom).find('.azexo-backend').remove();
             $(dom).find('.azexo-editor').removeClass('azexo-editor');
