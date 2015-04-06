@@ -2163,60 +2163,43 @@
                                     }
                                 }
                                 for (var name in attrs) {
-                                    if (Object.keys(attrs[name]).length > 0) {
+                                    var label = name;
+                                    var options = _.clone(attrs[name]);
+                                    if('' in attrs[name]) {
+                                        label = attrs[name][''];
+                                        delete options[''];
+                                    }
+                                    if (Object.keys(options).length > 0) {
                                         if (name == 'class') {
                                             params.push(make_param_type({
                                                 type: 'checkbox',
-                                                heading: name,
+                                                heading: label,
                                                 param_name: 'attr_' + name,
-                                                value: attrs[name],
+                                                value: options,
                                             }));
                                         } else {
                                             params.push(make_param_type({
                                                 type: 'dropdown',
-                                                heading: name,
+                                                heading: label,
                                                 param_name: 'attr_' + name,
-                                                value: attrs[name],
+                                                value: options,
                                             }));
                                         }
                                     } else {
                                         params.push(make_param_type({
                                             type: 'textfield',
-                                            heading: name,
+                                            heading: label,
                                             param_name: 'attr_' + name,
                                         }));
                                     }
                                 }
-                                if (style) {
-                                    params.push(make_param_type({
-                                        type: 'textfield',
-                                        heading: t('Content classes'),
-                                        param_name: 'el_class',
-                                        description: t('If you wish to style particular content element differently, then use this field to add a class name and then refer to it in your css file.')
-                                    }));
-                                    var param_type = make_param_type({
-                                        type: 'style',
-                                        heading: t('Content style'),
-                                        param_name: 'style',
-                                        description: t('Style options.'),
-                                        tab: t('Style')
-                                    });
-                                    if (edit || Object.keys(attrs).length > 0)
-                                        params.push(param_type);
-                                    else
-                                        params.unshift(param_type);
-                                }
-                                $(node).removeClass('editable-highlight');
-                                $(node).removeClass('styleable-highlight');
-                                $(node).removeClass(icon);
-                                var classes = $(node).attr('class');
-                                $(node).addClass(icon);
-                                if (typeof classes === typeof undefined || classes === false) {
-                                    classes = '';
-                                }
                                 var styles = '';
+                                var only_background = true;
                                 for (var name in node.style) {
                                     if ($.isNumeric(name)) {
+                                        if(node.style[name].indexOf('background') != 0) {
+                                            only_background = false;
+                                        }
                                         styles = styles + node.style[name] + ': ' + node.style.getPropertyValue(node.style[name]) + '; ';
                                     }
                                 }
@@ -2231,17 +2214,65 @@
                                 styles = styles.replace('background-repeat-x: repeat; background-repeat-y: repeat;', 'background-repeat: repeat;');
                                 styles = styles.replace('background-repeat-x: no-repeat; background-repeat-y: no-repeat;', 'background-repeat: no-repeat;');
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
-                                var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
-                                for (var i = 0; i < attrs.length; i++) {
-
+                                if(only_background) {
+                                    if(node.style.getPropertyValue('background-image') != '') {
+                                        styles = node.style.getPropertyValue('background-image');
+                                        var match = styles.match(/url\([\'\" ]*([^\)\'\"]*)[\'\" ]*/);
+                                        if(match)
+                                            styles = match[1];
+                                    } else {
+                                        only_background = false;
+                                    }
                                 }
+                                if (style) {
+                                    if(only_background) {                                        
+                                        params.push(make_param_type({
+                                            type: 'image',
+                                            heading: t('Image'),
+                                            param_name: 'style',
+                                            description: t('Select image from media library.'),
+                                        }));                                        
+                                    } else {
+                                        var param_type = make_param_type({
+                                            type: 'style',
+                                            heading: t('Content style'),
+                                            param_name: 'style',
+                                            description: t('Style options.'),
+                                            tab: t('Style')
+                                        });
+                                        if (edit || Object.keys(attrs).length > 0)
+                                            params.push(param_type);
+                                        else
+                                            params.unshift(param_type);                                        
+                                    }
+                                    params.push(make_param_type({
+                                        type: 'textfield',
+                                        heading: t('Content classes'),
+                                        param_name: 'el_class',
+                                        description: t('If you wish to style particular content element differently, then use this field to add a class name and then refer to it in your css file.')
+                                    }));
+                                }
+                                $(node).removeClass('editable-highlight');
+                                $(node).removeClass('styleable-highlight');
+                                $(node).removeClass(icon);
+                                var classes = $(node).attr('class');
+                                $(node).addClass(icon);
+                                if (typeof classes === typeof undefined || classes === false) {
+                                    classes = '';
+                                }
+                                var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
                                 for (var name in attrs) {
-                                    if (Object.keys(attrs[name]).length > 0) {
+                                    var options = _.clone(attrs[name]);
+                                    if('' in attrs[name]) {
+                                        label = attrs[name][''];
+                                        delete options[''];
+                                    }                                    
+                                    if (Object.keys(options).length > 0) {
                                         if (name == 'class') {
                                             var value = [];
                                             var classes = $(node).attr(name).split(' ');
                                             for (var c in attrs[name]) {
-                                                if (classes.indexOf(c) >= 0)
+                                                if (c != '' && classes.indexOf(c) >= 0)
                                                     value.push(c);
                                             }
                                             attrs_values['attr_' + name] = value.join(',');
@@ -2271,17 +2302,28 @@
                                     }
                                     if (style) {
                                         $(node).attr('class', values['el_class']);
-                                        $(node).attr('style', values['style']);
+                                        if(only_background) {
+                                            $(node).attr('style', 'background-image: url(' + encodeURI(values['style']) + ');');
+                                        } else {
+                                            $(node).attr('style', values['style']);
+                                        }                                        
                                     }
                                     for (var name in attrs) {
-                                        if (Object.keys(attrs[name]).length > 0) {
+                                        var options = _.clone(attrs[name]);
+                                        if('' in attrs[name]) {
+                                            label = attrs[name][''];
+                                            delete options[''];
+                                        }                                    
+                                        if (Object.keys(options).length > 0) {
                                             if (name == 'class') {
                                                 var classes = values['attr_' + name].split(',');
                                                 for (var c in attrs[name]) {
-                                                    if (classes.indexOf(c) >= 0)
-                                                        $(node).addClass(c);
-                                                    else
-                                                        $(node).removeClass(c);
+                                                    if(c != '') {
+                                                        if (classes.indexOf(c) >= 0)
+                                                            $(node).addClass(c);
+                                                        else
+                                                            $(node).removeClass(c);
+                                                    }
                                                 }
                                             } else {
                                                 $(node).attr(name, values['attr_' + name]);
@@ -2517,8 +2559,15 @@
                                     var attrs = str.split(',');
                                     for (var i = 0; i < attrs.length; i++) {
                                         var name = attrs[i].split(':')[0];
+                                        var match = /(.+)\((.+)\)/.exec(name);
+                                        if(match) {
+                                            name = match[1];
+                                        }
                                         if (!(name in options))
-                                            options[name] = {};
+                                            options[name] = {};                                        
+                                        if(match) {
+                                            options[name][''] = match[2];
+                                        }
                                         if (attrs[i].split(':').length == 2) {
                                             var values = attrs[i].split(':')[1].split('/');
                                             for (var j = 0; j < values.length; j++) {
@@ -9374,7 +9423,7 @@
                 $(this).attr('src', toAbsoluteURL($(this).attr('src')));
             });
             $(dom).find('[style*="background-image"]').each(function() {
-                var style = $(this).attr('style').replace(/background-image[: ]*url\(([^\)]+)\) *;/, function(match, url) {
+                var style = $(this).attr('style').replace(/background-image[: ]*url\([\'\" ]*([^\)\'\"]*)[\'\" ]*\) *;/, function(match, url) {
                     return match.replace(url, encodeURI(toAbsoluteURL(decodeURI(url))));
                 });
                 $(this).attr('style', style);

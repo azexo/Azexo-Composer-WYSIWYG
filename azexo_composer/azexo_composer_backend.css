@@ -882,3 +882,11 @@ ul.az-root-sections li {
 ul.az-root-sections li::before {
     margin-right: 5px;
 }
+
+.az-events-off {
+    pointer-events: none;
+}
+
+.az-events-on {
+    pointer-events: auto;
+}
