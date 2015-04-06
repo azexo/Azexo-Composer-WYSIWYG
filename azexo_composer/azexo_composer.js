@@ -2217,9 +2217,14 @@
                                 if(only_background) {
                                     if(node.style.getPropertyValue('background-image') != '') {
                                         styles = node.style.getPropertyValue('background-image');
-                                        var match = styles.match(/url\([\'\" ]*([^\)\'\"]*)[\'\" ]*/);
-                                        if(match)
-                                            styles = match[1];
+                                        if(styles) {
+                                            var match = styles.match(/url\([\'\" ]*([^\)\'\"]*)[\'\" ]*/);
+                                            if(match)
+                                                styles = match[1];
+                                        } else {
+                                            styles = '';
+                                            only_background = false;
+                                        }
                                     } else {
                                         only_background = false;
                                     }
