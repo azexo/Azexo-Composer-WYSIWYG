@@ -2896,7 +2896,7 @@
                     });
                     $(document).on("azexo_containers_update", function(sender, data) {
                         update_root_sections();
-                    });                    
+                    });
                     $('<hr>').appendTo(panel);
                     $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
                     $('<hr>').appendTo(panel);
@@ -2946,9 +2946,11 @@
                                         var scrollTop = 0;
                                         $(thumbnails).find('.az-thumbnail').click(function(e) {
                                             if (azexo_containers.length == 1) {
-                                                var element = azexo_elements.create_element(azexo_containers[0], $(this).attr('data-az-base'), true, function() {
+                                                scrollTop = $(window).scrollTop();
+                                                var element = azexo_elements.create_element(azexo_containers[0], $(this).attr('data-az-base'), true, function() {                                                    
                                                 });
-                                            }
+                                                $(window).scrollTop(scrollTop);
+                                            }                                            
                                             return false;
                                         });
                                         $(thumbnails).sortable({
@@ -4083,6 +4085,7 @@
                 this.update_empty();
                 this.update_sortable();
                 this.recursive_showed();
+                $(document).trigger('azexo_containers_update');
             }
         },
         click_save_template: function(e) {
