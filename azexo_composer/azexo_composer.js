@@ -1910,6 +1910,18 @@
             }
         },
         create_template_elements: function(elements) {
+            $(document).on('azexo_export_filter', function(sender, data) {
+                $(data.dom).find('.az-editable').removeClass('az-editable');
+                $(data.dom).find('.az-styleable').removeClass('az-styleable');
+                $(data.dom).find('.az-sortable').removeClass('az-sortable');
+                $(data.dom).find('.az-synchronizable').removeClass('az-synchronizable');
+                $(data.dom).find('.az-restoreable').removeClass('az-restoreable');
+                $(data.dom).find('.az-containable').removeClass('az-containable');
+                $(data.dom).find('.az-rootable').removeClass('az-rootable');
+                $(data.dom).find('[data-az-editable]').removeAttr('data-az-editable');
+                $(data.dom).find('[data-az-tags]').removeAttr('data-az-tags');
+                $(data.dom).find('[data-az-url]').removeAttr('data-az-url');
+            });
             var urls_to_update = {
                 'link[href]': 'href',
                 'script[src]': 'src',
@@ -2165,7 +2177,7 @@
                                 for (var name in attrs) {
                                     var label = name;
                                     var options = _.clone(attrs[name]);
-                                    if('' in attrs[name]) {
+                                    if ('' in attrs[name]) {
                                         label = attrs[name][''];
                                         delete options[''];
                                     }
@@ -2197,7 +2209,7 @@
                                 var only_background = true;
                                 for (var name in node.style) {
                                     if ($.isNumeric(name)) {
-                                        if(node.style[name].indexOf('background') != 0) {
+                                        if (node.style[name].indexOf('background') != 0) {
                                             only_background = false;
                                         }
                                         styles = styles + node.style[name] + ': ' + node.style.getPropertyValue(node.style[name]) + '; ';
@@ -2214,12 +2226,12 @@
                                 styles = styles.replace('background-repeat-x: repeat; background-repeat-y: repeat;', 'background-repeat: repeat;');
                                 styles = styles.replace('background-repeat-x: no-repeat; background-repeat-y: no-repeat;', 'background-repeat: no-repeat;');
                                 styles = styles.replace('background-repeat-x: repeat;', 'background-repeat: repeat-x;');
-                                if(only_background) {
-                                    if(node.style.getPropertyValue('background-image') != '') {
+                                if (only_background) {
+                                    if (node.style.getPropertyValue('background-image') != '') {
                                         styles = node.style.getPropertyValue('background-image');
-                                        if(styles) {
+                                        if (styles) {
                                             var match = styles.match(/url\([\'\" ]*([^\)\'\"]*)[\'\" ]*/);
-                                            if(match)
+                                            if (match)
                                                 styles = match[1];
                                         } else {
                                             styles = '';
@@ -2230,13 +2242,13 @@
                                     }
                                 }
                                 if (style) {
-                                    if(only_background) {                                        
+                                    if (only_background) {
                                         params.push(make_param_type({
                                             type: 'image',
                                             heading: t('Image'),
                                             param_name: 'style',
                                             description: t('Select image from media library.'),
-                                        }));                                        
+                                        }));
                                     } else {
                                         var param_type = make_param_type({
                                             type: 'style',
@@ -2248,7 +2260,7 @@
                                         if (edit || Object.keys(attrs).length > 0)
                                             params.push(param_type);
                                         else
-                                            params.unshift(param_type);                                        
+                                            params.unshift(param_type);
                                     }
                                     params.push(make_param_type({
                                         type: 'textfield',
@@ -2268,10 +2280,10 @@
                                 var attrs_values = {'content': content, 'link': link, 'image': image, 'el_class': classes, 'style': styles, 'icon': icon};
                                 for (var name in attrs) {
                                     var options = _.clone(attrs[name]);
-                                    if('' in attrs[name]) {
+                                    if ('' in attrs[name]) {
                                         label = attrs[name][''];
                                         delete options[''];
-                                    }                                    
+                                    }
                                     if (Object.keys(options).length > 0) {
                                         if (name == 'class') {
                                             var value = [];
@@ -2307,23 +2319,23 @@
                                     }
                                     if (style) {
                                         $(node).attr('class', values['el_class']);
-                                        if(only_background) {
+                                        if (only_background) {
                                             $(node).attr('style', 'background-image: url(' + encodeURI(values['style']) + ');');
                                         } else {
                                             $(node).attr('style', values['style']);
-                                        }                                        
+                                        }
                                     }
                                     for (var name in attrs) {
                                         var options = _.clone(attrs[name]);
-                                        if('' in attrs[name]) {
+                                        if ('' in attrs[name]) {
                                             label = attrs[name][''];
                                             delete options[''];
-                                        }                                    
+                                        }
                                         if (Object.keys(options).length > 0) {
                                             if (name == 'class') {
                                                 var classes = values['attr_' + name].split(',');
                                                 for (var c in attrs[name]) {
-                                                    if(c != '') {
+                                                    if (c != '') {
                                                         if (classes.indexOf(c) >= 0)
                                                             $(node).addClass(c);
                                                         else
@@ -2565,12 +2577,12 @@
                                     for (var i = 0; i < attrs.length; i++) {
                                         var name = attrs[i].split(':')[0];
                                         var match = /(.+)\((.+)\)/.exec(name);
-                                        if(match) {
+                                        if (match) {
                                             name = match[1];
                                         }
                                         if (!(name in options))
-                                            options[name] = {};                                        
-                                        if(match) {
+                                            options[name] = {};
+                                        if (match) {
                                             options[name][''] = match[2];
                                         }
                                         if (attrs[i].split(':').length == 2) {
@@ -2843,9 +2855,9 @@
                     function update_root_sections() {
                         $(root_sections).empty();
                         if (azexo_containers.length == 1) {
-                            for(var i=0; i<azexo_containers[0].children.length; i++) {
+                            for (var i = 0; i < azexo_containers[0].children.length; i++) {
                                 var el = azexo_containers[0].children[i];
-                                $('<li class="' + p + 'glyphicon ' + p + 'glyphicon-move" data-section-id="' + el.id + '">' + el.base + '(' + el.id + ')' + '</li>').appendTo(root_sections).click(function(e){
+                                $('<li class="' + p + 'glyphicon ' + p + 'glyphicon-move" data-section-id="' + el.id + '">' + el.base + '(' + el.id + ')' + '</li>').appendTo(root_sections).click(function(e) {
                                     var id = $(this).attr('data-section-id');
                                     var el = azexo_elements.get_element(id);
                                     el.remove();
@@ -2861,21 +2873,21 @@
                                     var id = $(ui.item).attr('data-section-id');
                                     var el = azexo_elements.get_element(id);
                                     $(el.dom_element).detach();
-                                    if($(ui.item).prev().length > 0) {
+                                    if ($(ui.item).prev().length > 0) {
                                         var prev_id = $(ui.item).prev().attr('data-section-id');
-                                        $(azexo_containers[0].dom_content_element).find('[data-az-id="' + prev_id + '"]').after(el.dom_element);                                        
-                                    } else {                                        
+                                        $(azexo_containers[0].dom_content_element).find('[data-az-id="' + prev_id + '"]').after(el.dom_element);
+                                    } else {
                                         var next_id = $(ui.item).next().attr('data-section-id');
-                                        $(azexo_containers[0].dom_content_element).find('[data-az-id="' + next_id + '"]').before(el.dom_element);                                        
+                                        $(azexo_containers[0].dom_content_element).find('[data-az-id="' + next_id + '"]').before(el.dom_element);
                                     }
-                                    azexo_containers[0].update_sorting_children();                                    
+                                    azexo_containers[0].update_sorting_children();
                                 },
                                 over: function(event, ui) {
                                     ui.placeholder.attr('class', ui.helper.attr('class'));
                                     ui.placeholder.removeClass('ui-sortable-helper');
                                     ui.placeholder.addClass('az-sortable-placeholder');
                                 }
-                            });                            
+                            });
                         }
                     }
                     $(document).on("azexo_add_element", function(sender, data) {
@@ -2900,7 +2912,7 @@
                     $('<hr>').appendTo(panel);
                     $('<h3>' + t('Elements') + '</h3>').appendTo(panel);
                     $('<hr>').appendTo(panel);
-                    if(Object.keys(menu).length == 1)
+                    if (Object.keys(menu).length == 1)
                         menu = menu[Object.keys(menu)[0]];
                     function build_menu(item) {
                         if (_.isArray(item))
@@ -2947,10 +2959,10 @@
                                         $(thumbnails).find('.az-thumbnail').click(function(e) {
                                             if (azexo_containers.length == 1) {
                                                 scrollTop = $(window).scrollTop();
-                                                var element = azexo_elements.create_element(azexo_containers[0], $(this).attr('data-az-base'), true, function() {                                                    
+                                                var element = azexo_elements.create_element(azexo_containers[0], $(this).attr('data-az-base'), true, function() {
                                                 });
                                                 $(window).scrollTop(scrollTop);
-                                            }                                            
+                                            }
                                             return false;
                                         });
                                         $(thumbnails).sortable({
@@ -8717,15 +8729,6 @@
             return javascript;
         },
         get_html: function() {
-            function extract_nodes(dom, selector, attribute) {
-                var data = {};
-                $(dom).find(selector).each(function(){
-                    data[$(this).attr(attribute)] = true;
-                    $(this).remove();
-                });
-                return data;
-            }
-            
             this.recursive_update_data();
             this.recursive_clear_animation();
             var dom = $('<div>' + $(this.dom_content_element).html() + '</div>');
@@ -8734,7 +8737,7 @@
             $(dom).find('> .controls').remove();
             $(dom).find('.az-sortable-controls').remove();
             $(dom).find('.az-step-controls').remove();
-            $(dom).find('.az-empty').remove();            
+            $(dom).find('.az-empty').remove();
             $(dom).find('.ui-resizable-e').remove();
             $(dom).find('.ui-resizable-e').remove();
             $(dom).find('.ui-resizable-s').remove();
@@ -8750,10 +8753,23 @@
             $(dom).find('.az-element.az-cms-element').empty();
             $(dom).find('.g-recaptcha').empty();
             //$(dom).find('[data-az-id]').removeAttr('data-az-id'); 
-            
-            this.css = $.extend(this.css, extract_nodes(dom, '.az-container link[href]', 'href'));
-            this.js = $.extend(this.js, extract_nodes(dom, '.az-container script[src]', 'src'));
-            
+
+
+            function extract_nodes(dom, selector, attribute) {
+                var data = {};
+                var i = 1;
+                $(dom).find(selector).each(function() {
+                    if (!($(this).attr(attribute) in data)) {
+                        data[$(this).attr(attribute)] = i;
+                        i++;
+                    }
+                    $(this).remove();
+                });
+                return data;
+            }
+            this.css = $.extend(this.css, extract_nodes(dom, 'link[href]', 'href'));
+            this.js = $.extend(this.js, extract_nodes(dom, 'script[src]', 'src'));
+
             return $(dom).html();
         },
         get_container_html: function() {
@@ -9476,17 +9492,17 @@
                             for (var j = 0; j < settings[i].property.length; j++) {
                                 var property = settings[i].property[j];
                                 var imp = important;
-                                if(property.indexOf('!important') >= 0) {
+                                if (property.indexOf('!important') >= 0) {
                                     property = property.replace('!important', '');
-                                    imp = ' !important';                                
+                                    imp = ' !important';
                                 }
                                 styles += settings[i].selector + '{' + property + ': ' + v + imp + ';}';
                             }
                         } else {
                             var property = settings[i].property;
-                            if(property.indexOf('!important') >= 0) {
+                            if (property.indexOf('!important') >= 0) {
                                 property = property.replace('!important', '');
-                                important = ' !important';                                
+                                important = ' !important';
                             }
                             styles += settings[i].selector + '{' + property + ': ' + v + important + ';}';
                         }
@@ -9534,8 +9550,8 @@
                     window.azexo_online = azexo_online;
                 }
                 $(element).append(container.get_html());
-                js = $.extend(js, containers[i].js);
-                css = $.extend(css, containers[i].css);
+                js = $.extend(containers[i].js, js);
+                css = $.extend(containers[i].css, css);
             }
             var attributes = '';
             $.each(original_body_attributes, function() {
@@ -9553,13 +9569,24 @@
 
             var dom = $('<div>' + original_head + '</div>');
             $(dom).find('.azexo-backend').remove();
-            
+
             $(document).trigger('azexo_export_filter', {dom: dom});
 
             $(dom).find('title').text(title);
             make_absolute_urls(dom);
+            var ordered_js = [];
             for (var url in js) {
-                $(dom).append('<script src="' + toAbsoluteURL(url) + '"></script>');
+                if ($.isNumeric(js[url])) {
+                    ordered_js.push([url, js[url]]);
+                } else {
+                    ordered_js.push([url, 0]);
+                }
+            }
+            ordered_js.sort(function(a, b) {
+                return a[1] - b[1]
+            })
+            for (var i = 0; i < ordered_js.length; i++) {
+                $(dom).append('<script src="' + toAbsoluteURL(ordered_js[i][0]) + '"></script>');
             }
             for (var url in css) {
                 $(dom).append('<link rel="stylesheet" type="text/css" href="' + toAbsoluteURL(url) + '">');
@@ -10073,7 +10100,7 @@
                                                     if (properties.indexOf(property) >= 0) {
                                                         var color = cssRule.style.getPropertyValue(cssRule.style[name]);
                                                         var priority = cssRule.style.getPropertyPriority(cssRule.style[name]);
-                                                        if(priority != '') {
+                                                        if (priority != '') {
                                                             property = property + '!' + priority;
                                                         }
                                                         var rgb = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
