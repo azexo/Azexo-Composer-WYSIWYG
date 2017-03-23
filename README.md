@@ -1,6 +1,4 @@
-[Medical WordPress Theme](http://themeforest.net/item/medical-wordpress-theme-bookings-marketplace-group-buying-vouchers-events-medican/13129821?ref=azexo)
-
-[Sport WordPress Theme](http://themeforest.net/item/sport-wordpress-theme-for-football-hockey-basketball-club-sportak/13467671?ref=azexo)
+[AZEXO HTML Library - Ready-Made Niche-Designs](https://codecanyon.net/item/azexo-html-library/19482775?ref=azexo)
 
 Azexo-Composer-WYSIWYG
 ======================
