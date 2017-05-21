@@ -1,4 +1,4 @@
-[AZEXO HTML Library - Ready-Made Niche-Designs](https://codecanyon.net/item/azexo-html-library/19482775?ref=azexo)
+[WordPress Page Builder](https://codecanyon.net/item/azexo-html-library/19482775?ref=azexo)
 
 Azexo-Composer-WYSIWYG
 ======================
