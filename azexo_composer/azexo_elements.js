@@ -89,10 +89,40 @@
                     param_name: 'icon',
                 },
                 {
-                    type: 'integer_slider',
-                    heading: t('Icon size'),
+                    type: 'dropdown',
+                    heading: t('Icon Size'),
                     param_name: 'size',
-                    description: t('Font size of icon in px.'),
+                    value: _.object(['', p + 'fa-lg', p + 'fa-2x', p + 'fa-3x', p + 'fa-4x', p + 'fa-5x'], [t('Normal'), t('Large'), t('2x'), t('3x'), t('4x'), t('5x')]),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Fixed Width'),
+                    param_name: 'fw',
+                    value: _.object(['', p + 'fa-fw'], [t('Normal'), t('Fixed width')]),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Pulled Icons'),
+                    param_name: 'pull',
+                    value: _.object(['', p + 'fa-pull-left', p + 'fa-pull-right'], [t('Normal'), t('Pull left'), t('Pull right')]),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Icon Style'),
+                    param_name: 'style',
+                    value: _.object(['', p + 'fa-border'], [t('Normal'), t('Border')]),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Icon Animation'),
+                    param_name: 'animation',
+                    value: _.object(['', p + 'fa-spin', p + 'fa-pulse'], [t('No'), t('Spin'), t('Pulse')]),
+                },
+                {
+                    type: 'dropdown',
+                    heading: t('Icon Orientation'),
+                    param_name: 'orientation',
+                    value: _.object(['', p + 'fa-rotate-90', p + 'fa-rotate-180', p + 'fa-rotate-270', p + 'fa-flip-horizontal', p + 'fa-flip-vertical'], [t('Normal'), t('Rotate 90'), t('Rotate 180'), t('Rotate 270'), t('Flip Horizontal'), t('Flip Vertical')]),
                 },
                 {
                     type: 'link',
@@ -113,7 +143,7 @@
             render: function($, p, fp) {
 
                 if (this.attrs['link'] == '') {
-                    this.dom_element = $('<div class="az-element az-icon ' + this.attrs['el_class'] + '"><span class="' + this.attrs['icon'] + '" style="' + this.attrs['style'] + '"></span></div>');
+                    this.dom_element = $('<div class="az-element az-icon ' + this.attrs['el_class'] + '"><span class="' + this.attrs['icon'] + ' ' + this.attrs['size'] + ' ' + this.attrs['fw'] + ' ' + this.attrs['pull'] + ' ' + this.attrs['style'] + ' ' + this.attrs['animation'] + ' ' + this.attrs['orientation'] + '" style="' + this.attrs['style'] + '"></span></div>');
                 } else {
                     this.dom_element = $('<a href="' + this.attrs['link'] + '" class="az-element az-icon ' + this.attrs['el_class'] + '" target="' + this.attrs['link_target'] + '"><span class="' + this.attrs['icon'] + '" style="' + this.attrs['style'] + '"></span></a>');
                 }
